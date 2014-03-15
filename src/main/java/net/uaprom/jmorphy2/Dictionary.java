@@ -25,6 +25,7 @@ public class Dictionary {
     private ArrayList<DAWG.Paradigm> paradigms;
     private String[] suffixes;
     private String[] paradigmPrefixes;
+    private ArrayList<Tag> gramtab;
     private HashMap<Character,String> replaceChars;
 
     // TODO: load metadata
@@ -43,15 +44,17 @@ public class Dictionary {
              new FileInputStream(path + "/" + PARADIGMS_FILENAME),
              new FileInputStream(path + "/" + SUFFIXES_FILENAME),
              new FileInputStream(path + "/" + PARADIGM_PREFIXES_FILENAME),
+             new FileInputStream(path + "/" + "gramtab-opencorpora-int.json"),
              null);
     }
 
-    public Dictionary(InputStream dawgStream, InputStream paradigmsStream, InputStream suffixesStream, InputStream paradigmPrefixesStream, InputStream replacesStream) throws IOException {
+    public Dictionary(InputStream dawgStream, InputStream paradigmsStream, InputStream suffixesStream, InputStream paradigmPrefixesStream, InputStream gramtabStream, InputStream replacesStream) throws IOException {
         dawg = new DAWG(dawgStream);
 
         loadParadigms(paradigmsStream);
         loadSuffixes(suffixesStream);
         loadParadigmPrefixes(paradigmPrefixesStream);
+        loadGramtab(gramtabStream);
 
         if (replacesStream != null) {
             loadReplaceChars(replacesStream);
@@ -91,6 +94,13 @@ public class Dictionary {
         paradigmPrefixes = readJsonStrings(stream);
     }
 
+    private void loadGramtab(InputStream stream) throws IOException {
+        gramtab = new ArrayList<Tag>();
+        for (String tagInfo : readJsonStrings(stream)) {
+            gramtab.add(new Tag(tagInfo));
+        }
+    }
+
     private void loadReplaceChars(InputStream stream) throws IOException {
         int i = 0;
         Character c = null;
@@ -113,28 +123,32 @@ public class Dictionary {
         }
     }
 
-    public ArrayList<String> getNormalForms(String word) throws IOException {
-        return getNormalForms(word.toCharArray(), 0, word.length());
+    public ArrayList<Parsed> parse(char[] word, int offset, int count) throws IOException {
+        return parse(new String(word, offset, count));
     }
 
-    public ArrayList<String> getNormalForms(char[] word, int offset, int count) throws IOException {
+    public ArrayList<Parsed> parse(String word) throws IOException {
         ArrayList<String> normalForms = new ArrayList<String>();
-        String w = new String(word, offset, count);
 
-        ArrayList<DAWG.FoundParadigm> foundParadigms = dawg.similarItems(w, replaceChars);;
+        ArrayList<DAWG.FoundParadigm> foundParadigms = dawg.similarItems(word, replaceChars);;
+        ArrayList<Parsed> parseds = new ArrayList<Parsed>();
 
-        HashSet<String> uniqueNormalForms = new HashSet<String>();
         for (DAWG.FoundParadigm foundParadigm : foundParadigms) {
             String nf = buildNormalForm(foundParadigm.paradigmId,
                                         foundParadigm.idx,
                                         foundParadigm.key);
-            if (!uniqueNormalForms.contains(nf)) {
-                normalForms.add(nf.toLowerCase());
-                uniqueNormalForms.add(nf);
-            }
+            Tag tag = buildTag(foundParadigm.paradigmId, foundParadigm.idx);
+            parseds.add(new Parsed(word, tag, nf, 1.0f));
         }
         
-        return normalForms;
+        return parseds;
+    }
+
+    protected Tag buildTag(short paradigmId, short idx) {
+        DAWG.Paradigm paradigm = paradigms.get(paradigmId);
+        int offset = paradigm.paradigm.length / 3;
+        int tagId = paradigm.paradigm[offset + idx];
+        return gramtab.get(tagId);
     }
 
     protected String buildNormalForm(short paradigmId, short idx, String word) {

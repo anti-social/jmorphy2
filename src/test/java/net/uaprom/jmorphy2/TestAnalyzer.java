@@ -18,6 +18,12 @@ public class TestAnalyzer {
     @Test
     public void test() throws IOException {
         MorphAnalyzer analyzer = new MorphAnalyzer();
+        List<Parsed> expected =
+            Arrays.asList(new Parsed("красивого", new Tag("ADJF,masc,gent"), "красивый", 1.0f),
+                          new Parsed("красивого", new Tag("ADJF,masc,accs"), "красивый", 1.0f),
+                          new Parsed("красивого", new Tag("ADJF,neut,gent"), "красивый", 1.0f));
+        assertEquals(expected, analyzer.parse("красивого"));
+
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
     }
