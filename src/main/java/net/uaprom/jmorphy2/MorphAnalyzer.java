@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -24,5 +25,9 @@ public class MorphAnalyzer {
             path = System.getProperty(DICT_PATH_VAR);
         }
         dict = new Dictionary(path);
+    }
+
+    public List<String> getNormalForms(String word) throws IOException {
+        return dict.getNormalForms(word);
     }
 }

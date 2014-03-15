@@ -113,6 +113,10 @@ public class Dictionary {
         }
     }
 
+    public ArrayList<String> getNormalForms(String word) throws IOException {
+        return getNormalForms(word.toCharArray(), 0, word.length());
+    }
+
     public ArrayList<String> getNormalForms(char[] word, int offset, int count) throws IOException {
         ArrayList<String> normalForms = new ArrayList<String>();
         String w = new String(word, offset, count);

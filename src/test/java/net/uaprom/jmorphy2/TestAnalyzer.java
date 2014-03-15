@@ -8,8 +8,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 
 @RunWith(JUnit4.class)
@@ -17,6 +18,8 @@ public class TestAnalyzer {
     @Test
     public void test() throws IOException {
         MorphAnalyzer analyzer = new MorphAnalyzer();
+        assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
+        assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
     }
 
     // @Test(expected=IllegalArgumentException.class)
