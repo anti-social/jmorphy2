@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -19,14 +20,26 @@ public class MorphAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(MorphAnalyzer.class);
 
     public MorphAnalyzer() throws IOException {
-        this(null);
+        this(null, null);
     }
 
     public MorphAnalyzer(String path) throws IOException {
+        this(path, null);
+    }
+
+    public MorphAnalyzer(Map<Character,String> replaceChars) throws IOException {
+        this(null, replaceChars);
+    }
+
+    public MorphAnalyzer(String path, Map<Character,String> replaceChars) throws IOException {
         if (path == null) {
             path = System.getProperty(DICT_PATH_VAR);
         }
-        dict = new Dictionary(path);
+        dict = new Dictionary(path, replaceChars);
+    }
+    
+    public Grammeme getGrammeme(String value) {
+        return dict.getGrammeme(value);
     }
 
     public List<Parsed> parse(String word) throws IOException {

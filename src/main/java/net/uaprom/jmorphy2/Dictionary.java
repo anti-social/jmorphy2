@@ -6,9 +6,13 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,55 +23,156 @@ import org.apache.commons.io.input.SwappedDataInputStream;
 
 
 public class Dictionary {
-    // private static final Logger logger = LoggerFactory.getLogger(Pymorphy2Dictionary.class);
-    
+    private Map<String, Object> meta;
     private DAWG dawg;
-    private ArrayList<DAWG.Paradigm> paradigms;
+    private Map<String,Grammeme> grammemes;
+    private DAWG.Paradigm[] paradigms;
     private String[] suffixes;
     private String[] paradigmPrefixes;
-    private ArrayList<Tag> gramtab;
-    private HashMap<Character,String> replaceChars;
+    private List<Tag> gramtab;
+    private Map<Character,String> replaceChars;
 
     // TODO: load metadata
-    private static final String META_FILENAME = "meta.json";
-    private static final String WORDS_FILENAME = "words.dawg";
-    private static final String PARADIGMS_FILENAME = "paradigms.array";
-    private static final String SUFFIXES_FILENAME = "suffixes.json";
-    private static final String PARADIGM_PREFIXES_FILENAME = "paradigm-prefixes.json";
+    public static final String META_FILENAME = "meta.json";
+    public static final String WORDS_FILENAME = "words.dawg";
+    public static final String GRAMMEMES_FILENAME = "grammemes.json";
+    public static final String PARADIGMS_FILENAME = "paradigms.array";
+    public static final String SUFFIXES_FILENAME = "suffixes.json";
+    public static final String PARADIGM_PREFIXES_FILENAME = "paradigm-prefixes.json";
+    public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
 
     private static final Logger logger = LoggerFactory.getLogger(Dictionary.class);
 
-    public Dictionary(String path) throws IOException {
-        // logger.info(path);
-        // logger.info(path + "/" + WORDS_FILENAME);
-        this(new FileInputStream(path + "/" + WORDS_FILENAME),
-             new FileInputStream(path + "/" + PARADIGMS_FILENAME),
-             new FileInputStream(path + "/" + SUFFIXES_FILENAME),
-             new FileInputStream(path + "/" + PARADIGM_PREFIXES_FILENAME),
-             new FileInputStream(path + "/" + "gramtab-opencorpora-int.json"),
-             null);
+    public static abstract class Loader {
+        public abstract InputStream getStream(String filename) throws IOException;
     }
 
-    public Dictionary(InputStream dawgStream, InputStream paradigmsStream, InputStream suffixesStream, InputStream paradigmPrefixesStream, InputStream gramtabStream, InputStream replacesStream) throws IOException {
-        dawg = new DAWG(dawgStream);
+    public static class FileSystemLoader extends Loader {
+        private String path;
 
+        public FileSystemLoader(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public InputStream getStream(String filename) throws IOException {
+            return new FileInputStream(path + "/" + filename);
+        }
+    }
+
+    public Dictionary(Loader loader, Map<Character,String> replaceChars) throws IOException {
+        this(loader.getStream(META_FILENAME),
+             loader.getStream(WORDS_FILENAME),
+             loader.getStream(GRAMMEMES_FILENAME),
+             loader.getStream(PARADIGMS_FILENAME),
+             loader.getStream(SUFFIXES_FILENAME),
+             loader.getStream(PARADIGM_PREFIXES_FILENAME),
+             loader.getStream(GRAMTAB_OPENCORPORA_FILENAME),
+             replaceChars);
+    }
+
+    public Dictionary(String path, Map<Character,String> replaceChars) throws IOException {
+        this(new FileSystemLoader(path), replaceChars);
+    }
+
+    protected Dictionary(InputStream metaStream,
+                         InputStream dawgStream,
+                         InputStream grammemesStream,
+                         InputStream paradigmsStream,
+                         InputStream suffixesStream,
+                         InputStream paradigmPrefixesStream,
+                         InputStream gramtabStream,
+                         Map<Character,String> replaceChars) throws IOException {
+        loadMeta(metaStream);
+        dawg = new DAWG(dawgStream);
+        loadGrammemes(grammemesStream);
         loadParadigms(paradigmsStream);
         loadSuffixes(suffixesStream);
         loadParadigmPrefixes(paradigmPrefixesStream);
         loadGramtab(gramtabStream);
+        this.replaceChars = replaceChars;
+    }
 
-        if (replacesStream != null) {
-            loadReplaceChars(replacesStream);
+    private void loadMeta(InputStream stream) throws IOException {
+        meta = new HashMap<String,Object>();
+        List<List<Object>> parsed = (List<List<Object>>) parseJson(stream);
+        for (List<Object> pair : parsed) {
+            meta.put((String) pair.get(0), pair.get(1));
         }
     }
 
-    private void loadParadigms(InputStream stream) throws IOException {
-        DataInput paradigmsStream = new SwappedDataInputStream(stream);
-        short paradigmsCount = paradigmsStream.readShort();
-        paradigms = new ArrayList<DAWG.Paradigm>(paradigmsCount);
-        for (int paraId = 0; paraId < paradigmsCount; paraId++) {
-            paradigms.add(new DAWG.Paradigm(paradigmsStream));
+    private void loadGrammemes(InputStream stream) throws IOException {
+        grammemes = new HashMap<String,Grammeme>();
+        for (List<String> grammemeInfo : (List<List<String>>) parseJson(stream)) {
+            Grammeme grammeme = new Grammeme(grammemeInfo.get(0),
+                                             grammemeInfo.get(1),
+                                             grammemeInfo.get(2),
+                                             grammemeInfo.get(3),
+                                             this);
+            grammemes.put(grammeme.value, grammeme);
         }
+    }
+
+    public Grammeme getGrammeme(String value) {
+        return grammemes.get(value);
+    }
+
+    private Object parseJson(InputStream stream) throws IOException {
+        JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream)));
+        Deque<Object> stack = new LinkedList<Object>();
+        Object obj = null, prevObj = null, container = null;
+        int event;
+        
+        while ((event = parser.nextEvent()) != JSONParser.EOF) {
+            switch (event) {
+            case JSONParser.ARRAY_START:
+                obj = new ArrayList<Object>();
+                stack.addFirst(obj);
+                continue;
+            case JSONParser.OBJECT_START:
+                obj = new HashMap<Object, Object>();
+                stack.addFirst(obj);
+                continue;
+            case JSONParser.STRING:
+                obj = parser.getString();
+                break;
+            case JSONParser.LONG:
+                obj = parser.getLong();
+                break;
+            case JSONParser.NUMBER:
+                obj = parser.getDouble();
+                break;
+            case JSONParser.BOOLEAN:
+                obj = parser.getBoolean();
+                break;
+            case JSONParser.NULL:
+                parser.getNull();
+                obj = null;
+                break;
+            case JSONParser.ARRAY_END:
+            case JSONParser.OBJECT_END:
+                obj = stack.removeFirst();
+                if (stack.isEmpty()) {
+                    return obj;
+                }
+                break;
+            }
+
+            container = stack.peekFirst();
+            if (container instanceof List) {
+                ((List<Object>) container).add(obj);
+            }
+            else if (container instanceof Map) {
+                if (obj != null && prevObj != null) {
+                    ((Map<Object,Object>) container).put(obj, prevObj);
+                }
+                else {
+                    prevObj = obj;
+                    obj = null;
+                }
+            }
+        }
+        return obj;
     }
 
     private String[] readJsonStrings(InputStream stream) throws IOException {
@@ -86,6 +191,15 @@ public class Dictionary {
         return stringList.toArray(stringArray);
     }
 
+    private void loadParadigms(InputStream stream) throws IOException {
+        DataInput paradigmsStream = new SwappedDataInputStream(stream);
+        short paradigmCount = paradigmsStream.readShort();
+        paradigms = new DAWG.Paradigm[paradigmCount];
+        for (int paraId = 0; paraId < paradigmCount; paraId++) {
+            paradigms[paraId] = new DAWG.Paradigm(paradigmsStream);
+        }
+    }
+
     private void loadSuffixes(InputStream stream) throws IOException {
         suffixes = readJsonStrings(stream);
     }
@@ -101,27 +215,27 @@ public class Dictionary {
         }
     }
 
-    private void loadReplaceChars(InputStream stream) throws IOException {
-        int i = 0;
-        Character c = null;
-        for (String letter : readJsonStrings(stream)) {
-            if (i % 2 == 0) {
-                if (letter.length() != 1) {
-                    throw new IOException(String.format("Replaceable string must contain only one character: '%s'", letter));
-                }
+    // private void loadReplaceChars(InputStream stream) throws IOException {
+    //     int i = 0;
+    //     Character c = null;
+    //     for (String letter : readJsonStrings(stream)) {
+    //         if (i % 2 == 0) {
+    //             if (letter.length() != 1) {
+    //                 throw new IOException(String.format("Replaceable string must contain only one character: '%s'", letter));
+    //             }
 
-                c = letter.charAt(0);
-            }
-            else {
-                if (replaceChars == null) {
-                    replaceChars = new HashMap<Character,String>();
-                }
-                replaceChars.put(c, letter);
-            }
+    //             c = letter.charAt(0);
+    //         }
+    //         else {
+    //             if (replaceChars == null) {
+    //                 replaceChars = new HashMap<Character,String>();
+    //             }
+    //             replaceChars.put(c, letter);
+    //         }
 
-            i++;
-        }
-    }
+    //         i++;
+    //     }
+    // }
 
     public ArrayList<Parsed> parse(char[] word, int offset, int count) throws IOException {
         return parse(new String(word, offset, count));
@@ -145,14 +259,14 @@ public class Dictionary {
     }
 
     protected Tag buildTag(short paradigmId, short idx) {
-        DAWG.Paradigm paradigm = paradigms.get(paradigmId);
+        DAWG.Paradigm paradigm = paradigms[paradigmId];
         int offset = paradigm.paradigm.length / 3;
         int tagId = paradigm.paradigm[offset + idx];
         return gramtab.get(tagId);
     }
 
     protected String buildNormalForm(short paradigmId, short idx, String word) {
-        DAWG.Paradigm paradigm = paradigms.get(paradigmId);
+        DAWG.Paradigm paradigm = paradigms[paradigmId];
         int paradigmLength = paradigm.paradigm.length / 3;
         String stem = buildStem(paradigm.paradigm, idx, word);
 

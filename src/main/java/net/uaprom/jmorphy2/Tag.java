@@ -11,8 +11,6 @@ import java.util.Collection;
 
 
 public class Tag {
-    public static Set<String> knownGrammemes = new HashSet<String>();
-
     public static Set<String> PARTS_OF_SPEECH =
         new HashSet(Arrays.asList(
                                   "NOUN", // имя существительное
@@ -113,14 +111,8 @@ public class Tag {
                                   "excl" // говорящий не включён в действие
                                   ));
 
-    static {
-        fillKnownGrammemes(PARTS_OF_SPEECH);
-        fillKnownGrammemes(CASES);
-        fillKnownGrammemes(GENDERS);
-    }
-
-    public Set<String> grammemes = new HashSet<String>();
     public final String originalTagString;
+    public Set<String> grammemes = new HashSet<String>();
     public final String POS;
     public final String anymacy;
     public final String aspect;
@@ -137,9 +129,9 @@ public class Tag {
     public Tag(String tagString) {
         originalTagString = tagString;
         String[] grammemeStrings = tagString.replace(" ", ",").split(",");
-        for (String grammeme : grammemeStrings) {
-            if (grammeme != null) {
-                grammemes.add(grammeme);
+        for (String grammemeValue : grammemeStrings) {
+            if (grammemeValue != null) {
+                grammemes.add(grammemeValue);
             }
         }
         POS = getGrammemeFor(PARTS_OF_SPEECH);
@@ -171,12 +163,6 @@ public class Tag {
 
     public boolean containsAll(Collection<String> grammemes) {
         return this.grammemes.containsAll(grammemes);
-    }
-
-    private static void fillKnownGrammemes(Set<String> grammemes) {
-        for (String grammeme : grammemes) {
-            knownGrammemes.add(grammeme);
-        }
     }
 
     @Override
