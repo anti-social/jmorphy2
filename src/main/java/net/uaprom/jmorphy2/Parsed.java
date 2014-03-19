@@ -2,10 +2,10 @@ package net.uaprom.jmorphy2;
 
 
 class Parsed {
-    public String word;
-    public Tag tag;
-    public String normalForm;
-    public float score;
+    public final String word;
+    public final Tag tag;
+    public final String normalForm;
+    public final float score;
 
     public Parsed(String word, Tag tag, String normalForm, float score) {
         this.word = word;
@@ -29,6 +29,6 @@ class Parsed {
 
     @Override
     public String toString() {
-        return String.format("<Tag: %s, %s, %s, %.2f>", word, tag, normalForm, score);
+        return String.format("<Parsed: %s, %s, %s, %.2f>", word, tag, normalForm, score);
     }
 }

@@ -8,161 +8,103 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.Collections;
 
 
 public class Tag {
-    public static Set<String> PARTS_OF_SPEECH =
-        new HashSet(Arrays.asList(
-                                  "NOUN", // имя существительное
-                                  "ADJF", // имя прилагательное (полное)
-                                  "ADJS", // имя прилагательное (краткое)
-                                  "COMP", // компаратив
-                                  "VERB", // глагол (личная форма)
-                                  "INFN", // глагол (инфинитив)
-                                  "PRTF", // причастие (полное)
-                                  "PRTS", // причастие (краткое)
-                                  "GRND", // деепричастие
-                                  "NUMR", // числительное
-                                  "ADVB", // наречие
-                                  "NPRO", // местоимение-существительное
-                                  "PRED", // предикатив
-                                  "PREP", // предлог
-                                  "CONJ", // союз
-                                  "PRCL", // частица
-                                  "INTJ"  // междометие
-                                  ));
+    public static final String PART_OF_SPEECH = "POST";
+    public static final String ANIMACY = "ANim";
+    public static final String GENDER = "GNdr";
+    public static final String NUMBER = "NMbr";
+    public static final String CASE = "CAse";
+    public static final String ASPECT = "ASpc";
+    public static final String TRANSITIVITY = "TRns";
+    public static final String PERSON = "PErs";
+    public static final String TENSE = "TEns";
+    public static final String MOOD = "MOod";
+    public static final String VOICE = "VOic";
+    public static final String INVOLVEMENT = "INvl";
 
-    public static Set<String> ANIMACY =
-        new HashSet(Arrays.asList(
-                                  "anim", // одушевлённое
-                                  "inan" // неодушевлённое
-                                  ));
+    private final String originalTagString;
+    private final Dictionary dict;
 
-    public static Set<String> GENDERS =
-        new HashSet(Arrays.asList(
-                                  "masc", // мужской род
-                                  "femn", // женский род
-                                  "neut"  // средний род
-                                  ));
+    public final Set<Grammeme> grammemes;
+    public final Grammeme POS;
+    public final Grammeme anymacy;
+    public final Grammeme aspect;
+    public final Grammeme Case;
+    public final Grammeme gender;
+    public final Grammeme involvement;
+    public final Grammeme mood;
+    public final Grammeme number;
+    public final Grammeme person;
+    public final Grammeme tense;
+    public final Grammeme transitivity;
+    public final Grammeme voice;
 
-    public static Set<String> NUMBERS =
-        new HashSet(Arrays.asList(
-                                  "sing", // единственное число
-                                  "plur"  // множественное число
-                                  ));
-
-    public static Set<String> CASES =
-        new HashSet(Arrays.asList(
-                                  "nomn", // именительный падеж
-                                  "gent", // родительный падеж
-                                  "datv", // дательный падеж
-                                  "accs", // винительный падеж
-                                  "ablt", // творительный падеж
-                                  "loct", // предложный падеж
-                                  "voct", // звательный падеж
-                                  "gen1", // первый родительный падеж
-                                  "gen2", // второй родительный (частичный) падеж
-                                  "acc2", // второй винительный падеж
-                                  "loc1", // первый предложный падеж
-                                  "loc2"  // второй предложный (местный) падеж
-                                  ));
-
-    public static Set<String> ASPECTS =
-        new HashSet(Arrays.asList(
-                                  "perf", // совершенный вид
-                                  "impf" // несовершенный вид
-                                  ));
-
-    public static Set<String> TRANSITIVITY =
-        new HashSet(Arrays.asList(
-                                  "tran", // переходный
-                                  "intr" // непереходный
-                                  ));
-
-    public static Set<String> PERSONS =
-        new HashSet(Arrays.asList(
-                                  "1per", // 1 лицо
-                                  "2per", // 2 лицо
-                                  "3per" // 3 лицо
-                                  ));
-
-    public static Set<String> TENSES =
-        new HashSet(Arrays.asList(
-                                  "pres", // настоящее время
-                                  "past", // прошедшее время
-                                  "futr" // будущее время
-                                  ));
-
-    public static Set<String> MOODS =
-        new HashSet(Arrays.asList(
-                                  "indc", // изъявительное наклонение
-                                  "impr" // повелительное наклонение
-                                  ));
-
-    public static Set<String> VOICES =
-        new HashSet(Arrays.asList(
-                                  "actv", // действительный залог
-                                  "pssv" // страдательный залог
-                                  ));
-
-    public static Set<String> INVOLVEMENT =
-        new HashSet(Arrays.asList(
-                                  "incl", // говорящий включён в действие
-                                  "excl" // говорящий не включён в действие
-                                  ));
-
-    public final String originalTagString;
-    public Set<String> grammemes = new HashSet<String>();
-    public final String POS;
-    public final String anymacy;
-    public final String aspect;
-    public final String Case;
-    public final String gender;
-    public final String involvement;
-    public final String mood;
-    public final String number;
-    public final String person;
-    public final String tense;
-    public final String transitivity;
-    public final String voice;
-    
     public Tag(String tagString) {
-        originalTagString = tagString;
+        this(tagString, null);
+    }
+    
+    public Tag(String tagString, Dictionary dict) {
+        this.originalTagString = tagString;
+        this.dict = dict;
+
+        Set<Grammeme> grammemes = new HashSet<Grammeme>();
         String[] grammemeStrings = tagString.replace(" ", ",").split(",");
         for (String grammemeValue : grammemeStrings) {
             if (grammemeValue != null) {
-                grammemes.add(grammemeValue);
+                grammemes.add(dict.getGrammeme(grammemeValue));
             }
         }
-        POS = getGrammemeFor(PARTS_OF_SPEECH);
+        this.grammemes = Collections.unmodifiableSet(grammemes);
+
+        POS = getGrammemeFor(PART_OF_SPEECH);
         anymacy = getGrammemeFor(ANIMACY);
-        aspect = getGrammemeFor(ASPECTS);
-        Case = getGrammemeFor(CASES);
-        gender = getGrammemeFor(GENDERS);
+        aspect = getGrammemeFor(ASPECT);
+        Case = getGrammemeFor(CASE);
+        gender = getGrammemeFor(GENDER);
         involvement = getGrammemeFor(INVOLVEMENT);
-        mood = getGrammemeFor(MOODS);
-        number = getGrammemeFor(NUMBERS);
-        person = getGrammemeFor(PERSONS);
-        tense = getGrammemeFor(TENSES);
+        mood = getGrammemeFor(MOOD);
+        number = getGrammemeFor(NUMBER);
+        person = getGrammemeFor(PERSON);
+        tense = getGrammemeFor(TENSE);
         transitivity = getGrammemeFor(TRANSITIVITY);
-        voice = getGrammemeFor(VOICES);
+        voice = getGrammemeFor(VOICE);
     }
 
-    private String getGrammemeFor(Set<String> grammemes) {
-        for (String grammeme : this.grammemes) {
-            if (grammemes.contains(grammeme)) {
-                return grammeme;
+    private Grammeme getGrammemeFor(String parentValue) {
+        for (Grammeme grammeme : this.grammemes) {
+            while (grammeme.parentValue != null) {
+                Grammeme parentGrammeme = grammeme.getParent();
+                if (parentValue.equals(parentGrammeme.value)) {
+                    return grammeme;
+                }
+                grammeme = parentGrammeme;
             }
         }
         return null;
     }
 
-    public boolean contains(String grammeme) {
+    public boolean contains(String grammemeValue) {
+        return grammemes.contains(dict.getGrammeme(grammemeValue));
+    }
+
+    public boolean contains(Grammeme grammeme) {
         return grammemes.contains(grammeme);
     }
 
-    public boolean containsAll(Collection<String> grammemes) {
+    public boolean containsAll(Collection<Grammeme> grammemes) {
         return this.grammemes.containsAll(grammemes);
+    }
+
+    public boolean containsAllValues(Collection<String> grammemeValues) {
+        for (String grammemeValue : grammemeValues) {
+            if (!grammemes.contains(dict.getGrammeme(grammemeValue))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -178,6 +120,5 @@ public class Tag {
     @Override
     public String toString() {
         return "\"" + originalTagString + "\"";
-        // return grammemes.toString();
     }
 }

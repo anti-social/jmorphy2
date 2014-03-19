@@ -17,41 +17,57 @@ import java.util.ArrayList;
 
 @RunWith(JUnit4.class)
 public class TestAnalyzer {
-    @Test
-    public void test() throws IOException {
+    private MorphAnalyzer analyzer;
+
+    public TestAnalyzer() throws IOException {
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
-        MorphAnalyzer analyzer = new MorphAnalyzer(replaceChars);
+        analyzer = new MorphAnalyzer(replaceChars);
+    }
 
+    @Test
+    public void test() throws IOException {
         List<Parsed> parseds = analyzer.parse("красивого");
         Tag tag = parseds.get(0).tag;
         assertParseds("красивого:ADJF,Qual masc,sing,gent:красивый:1.0\n"
                       + "красивого:ADJF,Qual anim,masc,sing,accs:красивый:1.0\n"
                       + "красивого:ADJF,Qual neut,sing,gent:красивый:1.0",
                       parseds);
-        assertEquals("ADJF", tag.POS);
-        assertEquals("gent", tag.Case);
-        assertEquals("sing", tag.number);
-        assertEquals("masc", tag.gender);
+        assertEquals(analyzer.getGrammeme("ADJF"), tag.POS);
+        assertEquals(analyzer.getGrammeme("gent"), tag.Case);
+        assertEquals(analyzer.getGrammeme("sing"), tag.number);
+        assertEquals(analyzer.getGrammeme("masc"), tag.gender);
         assertTrue(tag.contains("ADJF"));
-        assertTrue(tag.containsAll(Arrays.asList("ADJF", "gent")));
+        assertTrue(tag.containsAllValues(Arrays.asList("ADJF", "gent")));
         assertFalse(tag.contains("NOUN"));
-        assertFalse(tag.containsAll(Arrays.asList("ADJF", "nomn")));
+        assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
+        // unknown word
+        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:1.0\n"
+                      + "лошарики:NOUN,inan,masc plur,accs:лошарик:1.0",
+                      analyzer.parse("лошарики"));
+
+        // gen2, loct, loc2
+        assertParseds("снеге:NOUN,inan,masc sing,loct:снег:1.0", analyzer.parse("снеге"));
+        assertParseds("снегу:NOUN,inan,masc sing,gen2:снег:1.0\n"
+                      + "снегу:NOUN,inan,masc sing,datv:снег:1.0\n"
+                      + "снегу:NOUN,inan,masc sing,loc2:снег:1.0\n",
+                      analyzer.parse("снегу"));
+
+        // е, ё
         assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:1.0", analyzer.parse("ёжик"));
         assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:1.0", analyzer.parse("ежик"));
 
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
-
-        // MorphAnalyzer analyzer2 = new MorphAnalyzer();
+        assertEquals(Arrays.asList("лошарик"), analyzer.getNormalForms("лошарикам"));
     }
 
     private void assertParseds(String expectedString, List<Parsed> parseds) throws IOException {
         List<Parsed> expected = new ArrayList<Parsed>();
         for (String s : expectedString.split("\n")) {
             String[] parts = s.split(":");
-            expected.add(new Parsed(parts[0], new Tag(parts[1]), parts[2], Float.parseFloat(parts[3])));
+            expected.add(new Parsed(parts[0], analyzer.getTag(parts[1]), parts[2], Float.parseFloat(parts[3])));
         }
         assertEquals(expected, parseds);
     }

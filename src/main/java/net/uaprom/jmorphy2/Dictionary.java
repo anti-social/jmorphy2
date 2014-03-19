@@ -104,11 +104,7 @@ public class Dictionary {
     private void loadGrammemes(InputStream stream) throws IOException {
         grammemes = new HashMap<String,Grammeme>();
         for (List<String> grammemeInfo : (List<List<String>>) parseJson(stream)) {
-            Grammeme grammeme = new Grammeme(grammemeInfo.get(0),
-                                             grammemeInfo.get(1),
-                                             grammemeInfo.get(2),
-                                             grammemeInfo.get(3),
-                                             this);
+            Grammeme grammeme = new Grammeme(grammemeInfo, this);
             grammemes.put(grammeme.value, grammeme);
         }
     }
@@ -211,8 +207,12 @@ public class Dictionary {
     private void loadGramtab(InputStream stream) throws IOException {
         gramtab = new ArrayList<Tag>();
         for (String tagInfo : readJsonStrings(stream)) {
-            gramtab.add(new Tag(tagInfo));
+            gramtab.add(new Tag(tagInfo, this));
         }
+    }
+
+    public Tag getTag(String tagString) {
+        return new Tag(tagString, this);
     }
 
     // private void loadReplaceChars(InputStream stream) throws IOException {

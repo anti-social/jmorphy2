@@ -13,12 +13,27 @@ public class Grammeme {
 
     private final Dictionary dict;
 
-    protected Grammeme(String value, String parentValue, String russianValue, String description, Dictionary dict) {
+    public Grammeme(List<String> grammemeInfo, Dictionary dict) {
+        this(grammemeInfo.get(0),
+             grammemeInfo.get(1),
+             grammemeInfo.get(2),
+             grammemeInfo.get(3),
+             dict);
+    }
+
+    public Grammeme(String value, String parentValue, String russianValue, String description, Dictionary dict) {
         this.value = value;
-        this.parentValue = parentValue;
+        this.parentValue = stringOrNull(parentValue);
         this.russianValue = russianValue;
         this.description = description;
         this.dict = dict;
+    }
+
+    private String stringOrNull(String s) {
+        if (s == null || s.equals("")) {
+            return null;
+        }
+        return s;
     }
 
     public Grammeme getParent() {
@@ -36,5 +51,14 @@ public class Grammeme {
         }
 
         return value.equals(((Grammeme) obj).value);
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
+    public String info() {
+        return String.format("<%s, %s, %s, %s>", value, parentValue, russianValue, description);
     }
 }
