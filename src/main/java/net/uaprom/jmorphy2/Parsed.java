@@ -1,7 +1,7 @@
 package net.uaprom.jmorphy2;
 
 
-class Parsed {
+public class Parsed {
     public final String word;
     public final Tag tag;
     public final String normalForm;

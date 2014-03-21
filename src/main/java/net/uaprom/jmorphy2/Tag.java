@@ -86,6 +86,14 @@ public class Tag {
         return null;
     }
 
+    public Set<String> getGrammemeValues() {
+        Set<String> grammemeValues = new HashSet<String>();
+        for (Grammeme grammeme : grammemes) {
+            grammemeValues.add(grammeme.value);
+        }
+        return grammemeValues;
+    }
+
     public boolean contains(String grammemeValue) {
         return grammemes.contains(dict.getGrammeme(grammemeValue));
     }
