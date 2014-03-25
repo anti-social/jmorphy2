@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +112,10 @@ public class Dictionary {
 
     public Grammeme getGrammeme(String value) {
         return grammemes.get(value);
+    }
+
+    public Collection<Grammeme> getAllGrammemes() {
+        return grammemes.values();
     }
 
     private Object parseJson(InputStream stream) throws IOException {

@@ -40,6 +40,16 @@ public class Grammeme {
         return dict.getGrammeme(parentValue);
     }
 
+    public Grammeme getRoot() {
+        Grammeme grammeme = this;
+        Grammeme parentGrammeme = grammeme.getParent();
+        while (parentGrammeme != null) {
+            grammeme = parentGrammeme;
+            parentGrammeme = grammeme.getParent();
+        }
+        return grammeme;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof String) {

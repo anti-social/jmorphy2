@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,10 @@ public class MorphAnalyzer {
 
     public Grammeme getGrammeme(String value) {
         return dict.getGrammeme(value);
+    }
+
+    public Collection<Grammeme> getAllGrammemes() {
+        return dict.getAllGrammemes();
     }
 
     public List<Parsed> parse(String word) throws IOException {

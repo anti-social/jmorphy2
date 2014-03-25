@@ -11,16 +11,23 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
+import com.google.common.base.Function;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 
-import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.Tag;
 import net.uaprom.jmorphy2.Parsed;
+import net.uaprom.jmorphy2.Grammeme;
+import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
 class Phrase {
     public final String originalPhrase;
     protected final MorphAnalyzer analyzer;
     protected final Rules rules;
+    protected final Set<String> partsOfSpeech;
 
     public List<Node> nodes;
     
@@ -32,7 +39,19 @@ class Phrase {
         this.originalPhrase = phrase;
         this.analyzer = analyzer;
         this.rules = rules;
+        this.partsOfSpeech = getPartsOfSpeech(this.analyzer);
+        System.out.println(partsOfSpeech);
         parse();
+    }
+
+    private Set<String> getPartsOfSpeech(MorphAnalyzer analyzer) {
+        Set<String> partsOfSpeech = new HashSet<String>();
+        for (Grammeme grammeme : analyzer.getAllGrammemes()) {
+            if (grammeme.getRoot().equals(Tag.PART_OF_SPEECH)) {
+                partsOfSpeech.add(grammeme.value);
+            }
+        }
+        return partsOfSpeech;
     }
 
     private void parse() throws IOException {
@@ -49,11 +68,14 @@ class Phrase {
             MatchedRule bestMatchedRule = null;
             for (int offset = 0; offset <= nodesLength - count; offset++) {
                 for (List<Set<String>> candidate : Sets.cartesianProduct(getCandidates(nodes, offset, count))) {
+                    // System.out.println(candidate);
                     Rule rule = rules.match(candidate);
                     if (rule != null) {
-                        // Set<String> commonGrammemes = getCommonGrammemes(candidate);
-                        // commonGrammemes = Sets.union(commonGrammemes, rule.left);
-                        Set<String> commonGrammemes = rule.left;
+                        Set<String> commonGrammemes = getCommonGrammemes(candidate);
+                        commonGrammemes = Sets.difference(commonGrammemes, partsOfSpeech);
+                        commonGrammemes = Sets.union(commonGrammemes, rule.left);
+                        // Set<String> commonGrammemes = rule.left;
+
                         float weight = rule.weight * commonGrammemes.size();
                         if (bestMatchedRule == null || weight > bestMatchedRule.weight) {
                             bestMatchedRule = new MatchedRule(rule, offset, count, commonGrammemes, weight);
@@ -62,6 +84,7 @@ class Phrase {
                 }
             }
 
+            // System.out.println(bestMatchedRule);
             if (bestMatchedRule == null) {
                 count--;
             }
@@ -75,8 +98,10 @@ class Phrase {
                 parentNode.setChildren(children);
                 parentNode.setGrammemes(bestMatchedRule.commonGrammemes);
                 nodes.add(bestMatchedRule.offset, parentNode);
+                count = Math.min(rules.getLongestRuleCount(), nodes.size());
+                System.out.println(nodes);
+                System.out.println("================");
             }
-            System.out.println(nodes);
         }
     }
 
@@ -194,16 +219,20 @@ class Phrase {
 
     public static final Rules defaultRules = new Rules();
     static {
-        defaultRules.add("NP", "NP CONJ NP", 10000);
+        // NP - noun phrase
+        defaultRules.add("NP", "NP @CONJ NP", 100000);
+        defaultRules.add("NP", "NP,nomn NP,gent ", 5000);
         defaultRules.add("NP", "ADJF NP", 1000);
         defaultRules.add("NP", "NP ADJF", 900);
         defaultRules.add("NP", "ADJF,nomn NOUN,nomn", 5000);
         defaultRules.add("NP", "ADJF NOUN", 1000);
+        // defaultRules.add("NP", "NP,nomn NOUN,gent", 4000);
         defaultRules.add("NP", "NOUN,nomn ADJF,nomn", 4000);
         defaultRules.add("NP", "NOUN ADJF", 400);
-        defaultRules.add("NP", "NOUN,nomn NOUN,gent", 100);
         defaultRules.add("NP", "NOUN,nomn", 50);
         defaultRules.add("NP", "ADJF,nomn", 40);
+        defaultRules.add("NP", "NOUN", 10);
+        defaultRules.add("NP", "ADJF", 9);
     };
 
     // public static class Rules {
@@ -289,7 +318,27 @@ class Phrase {
 
         @Override
         public String toString() {
-            return String.format("{Node: %s, %s}", children, grammemes);
+            // return String.format("{Node: %s, %s}",
+            //                      grammemes,
+            //                      children);
+            return toString(0);
+        }
+
+        public String toString(final int level) {
+            String childNodes;
+            if (children != null) {
+                childNodes = Joiner.on(", ").join(Iterables.transform(children, new Function<Node,String>() {
+                            public String apply(Node node) {
+                                return node.toString(level + 1);
+                            }
+                        }));
+            } else {
+                childNodes = "";
+            }
+            return String.format("\n%s{Node: %s, %s}",
+                                 Strings.repeat(" ", level * 2),
+                                 grammemes,
+                                 childNodes);
         }
     }
     
@@ -323,7 +372,14 @@ class Phrase {
         
         @Override
         public String toString() {
-            return String.format("{Word: %s}", word);
+            return toString(0);
+        }
+
+        @Override
+        public String toString(final int level) {
+            return String.format("\n%s{Word: %s}",
+                                 Strings.repeat(" ", 2 * level),
+                                 word);
         }
     };
 }

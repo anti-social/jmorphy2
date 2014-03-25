@@ -33,6 +33,7 @@ public class TestAnalyzer {
                       + "красивого:ADJF,Qual anim,masc,sing,accs:красивый:1.0\n"
                       + "красивого:ADJF,Qual neut,sing,gent:красивый:1.0",
                       parseds);
+        assertEquals(analyzer.getGrammeme("POST"), analyzer.getGrammeme("ADJF").getRoot());
         assertEquals(analyzer.getGrammeme("ADJF"), tag.POS);
         assertEquals(analyzer.getGrammeme("gent"), tag.Case);
         assertEquals(analyzer.getGrammeme("sing"), tag.number);

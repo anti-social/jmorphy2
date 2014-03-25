@@ -73,14 +73,11 @@ public class Tag {
         voice = getGrammemeFor(VOICE);
     }
 
-    private Grammeme getGrammemeFor(String parentValue) {
+    private Grammeme getGrammemeFor(String rootValue) {
         for (Grammeme grammeme : this.grammemes) {
-            while (grammeme.parentValue != null) {
-                Grammeme parentGrammeme = grammeme.getParent();
-                if (parentValue.equals(parentGrammeme.value)) {
-                    return grammeme;
-                }
-                grammeme = parentGrammeme;
+            Grammeme rootGrammeme = grammeme.getRoot();
+            if (rootGrammeme != null && rootGrammeme.equals(rootValue)) {
+                return grammeme;
             }
         }
         return null;
