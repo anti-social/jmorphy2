@@ -27,9 +27,12 @@ public class TestPhrase {
 
     @Test
     public void testParse() throws IOException {
-        Phrase phrase = new Phrase("женские сапоги", analyzer);
-        // assertEquals(Arrays.asList(new Phrase.Word("женские", Phrase.Grammar.SUBJECT),
-        //                            new Phrase.Word("сапоги", Phrase.Grammar.SUBJECT)),
-        //              phrase.parsedWords);
+        Phrase phrase;
+        phrase = new Phrase("женские сапоги", analyzer);
+        System.out.println(phrase.nodes);
+        phrase = new Phrase("женские сапоги коричневые", analyzer);
+        System.out.println(phrase.nodes);
+        phrase = new Phrase("уборка и вывоз снега и льда", analyzer);
+        System.out.println(phrase.nodes);
     }
 }

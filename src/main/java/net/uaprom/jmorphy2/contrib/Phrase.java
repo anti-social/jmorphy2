@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.Math;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -35,32 +36,47 @@ class Phrase {
     }
 
     private void parse() throws IOException {
-        nodes = new ArrayList<Node>();
+        nodes = new LinkedList<Node>();
         for (String w : originalPhrase.split(" ")) {
             nodes.add(new Word(w, analyzer.parse(w)));
         }
+        System.out.println(nodes);
 
-        int nodesLength = nodes.size();
-        int n = Math.min(rules.getLongestRuleCount(), nodesLength);
-        for (int i = n; i > 0; i--) {
-            for (int offset = 0; offset <= nodesLength - i; offset++) {
-                System.out.println(i);
-                System.out.println(offset);
-                for (List<Set<String>> candidate : Sets.cartesianProduct(getCandidates(nodes, offset, i))) {
-                    System.out.println(candidate);
+        int count = Math.min(rules.getLongestRuleCount(), nodes.size());
+        while (count > 0) {
+            System.out.println(count);
+            int nodesLength = nodes.size();
+            MatchedRule bestMatchedRule = null;
+            for (int offset = 0; offset <= nodesLength - count; offset++) {
+                for (List<Set<String>> candidate : Sets.cartesianProduct(getCandidates(nodes, offset, count))) {
                     Rule rule = rules.match(candidate);
                     if (rule != null) {
-                        // now reduce and next loop
-                        Set<String> commonGrammemes = getCommonGrammemes(candidate);
-                        // Node parentNode = new Node();
-                        // parentNode.setChildren();
-                        // parentNode.setGrammemes(commonGrammemes);
-                        System.out.println(rule);
-                        System.out.println(commonGrammemes);
-                        System.out.println(rule.weight * commonGrammemes.size());
+                        // Set<String> commonGrammemes = getCommonGrammemes(candidate);
+                        // commonGrammemes = Sets.union(commonGrammemes, rule.left);
+                        Set<String> commonGrammemes = rule.left;
+                        float weight = rule.weight * commonGrammemes.size();
+                        if (bestMatchedRule == null || weight > bestMatchedRule.weight) {
+                            bestMatchedRule = new MatchedRule(rule, offset, count, commonGrammemes, weight);
+                        }
                     }
                 }
             }
+
+            if (bestMatchedRule == null) {
+                count--;
+            }
+            else {
+                System.out.println(bestMatchedRule.rule);
+                List<Node> children = new ArrayList<Node>();
+                for (int i = 0; i < bestMatchedRule.count; i++) {
+                    children.add(nodes.remove(bestMatchedRule.offset));
+                }
+                Node parentNode = new Node();
+                parentNode.setChildren(children);
+                parentNode.setGrammemes(bestMatchedRule.commonGrammemes);
+                nodes.add(bestMatchedRule.offset, parentNode);
+            }
+            System.out.println(nodes);
         }
     }
 
@@ -87,6 +103,22 @@ class Phrase {
             return Collections.EMPTY_SET;
         }
     }
+
+    class MatchedRule {
+        public final Rule rule;
+        public final int offset;
+        public final int count;
+        public final Set<String> commonGrammemes;
+        public final float weight;
+
+        public MatchedRule(Rule rule, int offset, int count, Set<String> commonGrammemes, float weight) {
+            this.rule = rule;
+            this.offset = offset;
+            this.count = count;
+            this.commonGrammemes = commonGrammemes;
+            this.weight = weight;
+        }
+    };
 
     public static class Rule {
         public final String origLeft;
@@ -162,7 +194,7 @@ class Phrase {
 
     public static final Rules defaultRules = new Rules();
     static {
-        defaultRules.add("NP", "NP CONJ NP", 1000);
+        defaultRules.add("NP", "NP CONJ NP", 10000);
         defaultRules.add("NP", "ADJF NP", 1000);
         defaultRules.add("NP", "NP ADJF", 900);
         defaultRules.add("NP", "ADJF,nomn NOUN,nomn", 5000);
@@ -255,9 +287,10 @@ class Phrase {
             return allGrammemes;
         }
 
-        // public setGrammar(Grammar grammar) {
-        //     this.grammar = grammar;
-        // }
+        @Override
+        public String toString() {
+            return String.format("{Node: %s, %s}", children, grammemes);
+        }
     }
     
     public static class Word extends Node {
