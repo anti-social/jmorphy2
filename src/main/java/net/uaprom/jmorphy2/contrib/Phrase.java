@@ -14,6 +14,7 @@ import java.util.Collections;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.base.Function;
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Iterables;
 
@@ -69,17 +70,10 @@ class Phrase {
             for (int offset = 0; offset <= nodesLength - count; offset++) {
                 for (List<Set<String>> candidate : Sets.cartesianProduct(getCandidates(nodes, offset, count))) {
                     // System.out.println(candidate);
-                    Rule rule = rules.match(candidate);
-                    if (rule != null) {
-                        Set<String> commonGrammemes = getCommonGrammemes(candidate);
-                        commonGrammemes = Sets.difference(commonGrammemes, partsOfSpeech);
-                        commonGrammemes = Sets.union(commonGrammemes, rule.left);
-                        // Set<String> commonGrammemes = rule.left;
-
-                        float weight = rule.weight * commonGrammemes.size();
-                        if (bestMatchedRule == null || weight > bestMatchedRule.weight) {
-                            bestMatchedRule = new MatchedRule(rule, offset, count, commonGrammemes, weight);
-                        }
+                    MatchedRule rule = rules.match(candidate, new MatchedMeta(offset, count));
+                    System.out.println(rule);
+                    if (rule != null && (bestMatchedRule == null || rule.weight > bestMatchedRule.weight)) {
+                        bestMatchedRule = rule;
                     }
                 }
             }
@@ -91,13 +85,13 @@ class Phrase {
             else {
                 System.out.println(bestMatchedRule.rule);
                 List<Node> children = new ArrayList<Node>();
-                for (int i = 0; i < bestMatchedRule.count; i++) {
-                    children.add(nodes.remove(bestMatchedRule.offset));
+                for (int i = 0; i < bestMatchedRule.meta.count; i++) {
+                    children.add(nodes.remove(bestMatchedRule.meta.offset));
                 }
                 Node parentNode = new Node();
                 parentNode.setChildren(children);
-                parentNode.setGrammemes(bestMatchedRule.commonGrammemes);
-                nodes.add(bestMatchedRule.offset, parentNode);
+                parentNode.setGrammemes(Sets.difference(bestMatchedRule.common, partsOfSpeech));
+                nodes.add(bestMatchedRule.meta.offset, parentNode);
                 count = Math.min(rules.getLongestRuleCount(), nodes.size());
                 System.out.println(nodes);
                 System.out.println("================");
@@ -113,35 +107,32 @@ class Phrase {
         return candidates;
     }
 
-    private Set<String> getCommonGrammemes(List<Set<String>> candidate) {
-        if (candidate.size() >= 2) {
-            Set<String> grammemes = Sets.intersection(candidate.get(0), candidate.get(1));
-            for (int i = 2; i < candidate.size(); i++) {
-                grammemes = Sets.intersection(grammemes, candidate.get(i));
-            }
-            return grammemes;
-        }
-        else if (candidate.size() == 1) {
-            return candidate.get(0);
-        }
-        else {
-            return Collections.EMPTY_SET;
-        }
-    }
-
-    class MatchedRule {
-        public final Rule rule;
+    static class MatchedMeta {
         public final int offset;
         public final int count;
-        public final Set<String> commonGrammemes;
-        public final float weight;
 
-        public MatchedRule(Rule rule, int offset, int count, Set<String> commonGrammemes, float weight) {
-            this.rule = rule;
+        public MatchedMeta(int offset, int count) {
             this.offset = offset;
             this.count = count;
-            this.commonGrammemes = commonGrammemes;
+        }
+    };
+
+    static class MatchedRule {
+        public final Rule rule;
+        public final MatchedMeta meta;
+        public final Set<String> common;
+        public final float weight;
+
+        public MatchedRule(Rule rule, MatchedMeta meta, Set<String> common, float weight) {
+            this.rule = rule;
+            this.meta = meta;
+            this.common = common;
             this.weight = weight;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s, %s, %s", rule, common, weight);
         }
     };
 
@@ -151,6 +142,9 @@ class Phrase {
         public final Set<String> left;
         public final List<Set<String>> right;
         public final float weight;
+
+        private final int[] flags;
+        private static final int NO_COMMON = 0x01;
 
         public Rule(String left, String right, float weight) {
             this.origLeft = left;
@@ -163,28 +157,65 @@ class Phrase {
             }
 
             this.right = new ArrayList<Set<String>>();
-            for (String part : right.split(" ")) {
+            String[] parts = right.split(" ");
+            this.flags = new int[parts.length];
+            int i = 0;
+            for (String part : parts) {
                 Set<String> clauses = new HashSet<String>();
                 this.right.add(clauses);
+
+                CharMatcher matcher = CharMatcher.is('@');
+                if (matcher.matchesAnyOf(part)) {
+                    part = matcher.removeFrom(part);
+                    flags[i] |= NO_COMMON;
+                }
+                
                 for (String value : part.split(",")) {
                     clauses.add(value);
                 }
+
+                i++;
             }
         }
 
-        public boolean match(List<Set<String>> candidates) {
+        public MatchedRule match(List<Set<String>> candidate) {
+            return match(candidate, null);
+        }
+
+        public MatchedRule match(List<Set<String>> candidate, MatchedMeta meta) {
             int n = right.size();
-            if (candidates.size() != n) {
-                return false;
+            if (candidate.size() != n) {
+                return null;
             }
 
             for (int i = 0; i < n; i++) {
-                if (!candidates.get(i).containsAll(right.get(i))) {
-                    return false;
+                if (!candidate.get(i).containsAll(right.get(i))) {
+                    return null;
                 }
             }
 
-            return true;
+            Set<String> common = calculateCommon(candidate);
+            common = Sets.union(common, left);
+            return new MatchedRule(this, meta, common, weight + common.size());
+        }
+
+        private Set<String> calculateCommon(List<Set<String>> candidate) {
+            Set<String> common = null;
+            for (int i = 0; i < right.size(); i++) {
+                if ((flags[i] & NO_COMMON) != 0) {
+                    continue;
+                }
+                if (common == null) {
+                    common = candidate.get(i);
+                }
+                else {
+                    common = Sets.intersection(common, candidate.get(i));
+                }
+            }
+            if (common == null) {
+                return Collections.EMPTY_SET;
+            }
+            return common;
         }
 
         @Override
@@ -207,10 +238,15 @@ class Phrase {
             return longestRuleCount;
         }
 
-        public Rule match(List<Set<String>> candidates) {
+        public MatchedRule match(List<Set<String>> candidate) {
+            return match(candidate, null);
+        }
+
+        public MatchedRule match(List<Set<String>> candidate, MatchedMeta meta) {
             for (Rule rule : rules) {
-                if (rule.match(candidates)) {
-                    return rule;
+                MatchedRule matchedRule = rule.match(candidate, meta);
+                if (matchedRule != null) {
+                    return matchedRule;
                 }
             }
             return null;
@@ -221,6 +257,9 @@ class Phrase {
     static {
         // NP - noun phrase
         defaultRules.add("NP", "NP @CONJ NP", 100000);
+        defaultRules.add("NP", "NP @CONJ NOUN", 90000);
+        defaultRules.add("NP", "NOUN @CONJ NP", 90000);
+        defaultRules.add("NP", "NOUN @CONJ NOUN", 80000);
         defaultRules.add("NP", "NP,nomn NP,gent ", 5000);
         defaultRules.add("NP", "ADJF NP", 1000);
         defaultRules.add("NP", "NP ADJF", 900);
