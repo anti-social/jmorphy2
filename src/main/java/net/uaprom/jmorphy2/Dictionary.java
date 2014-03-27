@@ -253,29 +253,30 @@ public class Dictionary {
 
     public List<Parsed> parse(String word) throws IOException {
         List<String> normalForms = new ArrayList<String>();
-        List<FoundParadigm> paradigms = words.similarParadigms(word, replaceChars);;
+        List<PayloadsDAWG.Payload> items = words.similarItems(word, replaceChars);;
         List<Parsed> parseds = new ArrayList<Parsed>();
 
-        for (FoundParadigm paradigm : paradigms) {
-            String nf = buildNormalForm(paradigm.paradigmId,
+        for (PayloadsDAWG.Payload item : items) {
+            WordsDAWG.FoundParadigm paradigm = (WordsDAWG.FoundParadigm) item;
+            String nf = buildNormalForm(paradigm.paraId,
                                         paradigm.idx,
                                         paradigm.key);
-            Tag tag = buildTag(paradigm.paradigmId, paradigm.idx);
+            Tag tag = buildTag(paradigm.paraId, paradigm.idx);
             parseds.add(new Parsed(word, tag, nf, 1.0f));
         }
         
         return parseds;
     }
 
-    protected Tag buildTag(short paradigmId, short idx) {
-        Paradigm paradigm = paradigms[paradigmId];
+    protected Tag buildTag(short paraId, short idx) {
+        Paradigm paradigm = paradigms[paraId];
         int offset = paradigm.paradigm.length / 3;
         int tagId = paradigm.paradigm[offset + idx];
         return gramtab.get(tagId);
     }
 
-    protected String buildNormalForm(short paradigmId, short idx, String word) {
-        Paradigm paradigm = paradigms[paradigmId];
+    protected String buildNormalForm(short paraId, short idx, String word) {
+        Paradigm paradigm = paradigms[paraId];
         int paradigmLength = paradigm.paradigm.length / 3;
         String stem = buildStem(paradigm.paradigm, idx, word);
 
@@ -312,20 +313,38 @@ public class Dictionary {
             super(stream);
         }
 
-        public List<FoundParadigm> similarParadigms(String key) throws IOException {
-            return similarParadigms(key, null);
+        @Override
+        protected Payload newPayload(String key, byte[] value) throws IOException {
+            return new FoundParadigm(key, value);
         }
 
-        public List<FoundParadigm> similarParadigms(String key, Map<Character,String> replaceChars) throws IOException {
-            List<FoundParadigm> paradigms = new ArrayList<FoundParadigm>();
-            for (PayloadsDAWG.Payload item : similarItems(key, replaceChars)) {
-                DataInput stream = new DataInputStream(new ByteArrayInputStream(item.value));
-                short paradigmId = stream.readShort();
-                short idx = stream.readShort();
-                paradigms.add(new FoundParadigm(paradigmId, idx, item.key));
+        // public List<FoundParadigm> similarParadigms(String key) throws IOException {
+        //     return similarParadigms(key, null);
+        // }
+
+        // public List<FoundParadigm> similarParadigms(String key, Map<Character,String> replaceChars) throws IOException {
+        //     List<FoundParadigm> paradigms = new ArrayList<FoundParadigm>();
+        //     for (PayloadsDAWG.Payload item : similarItems(key, replaceChars)) {
+        //         DataInput stream = new DataInputStream(new ByteArrayInputStream(item.value));
+        //         short paradigmId = stream.readShort();
+        //         short idx = stream.readShort();
+        //         paradigms.add(new FoundParadigm(paradigmId, idx, item.key));
+        //     }
+        //     return paradigms;
+        // }
+
+        public class FoundParadigm extends PayloadsDAWG.Payload {
+            public final short paraId;
+            public final short idx;
+
+            public FoundParadigm(String key, byte[] value) throws IOException {
+                super(key, value);
+
+                DataInput stream = new DataInputStream(new ByteArrayInputStream(this.value));
+                this.paraId = stream.readShort();
+                this.idx = stream.readShort();
             }
-            return paradigms;
-        }
+        };
     };
 
     public static class Paradigm {
@@ -341,18 +360,6 @@ public class Dictionary {
 
         public short[] getParadigm() {
             return paradigm;
-        }
-    };
-
-    public class FoundParadigm {
-        public final short paradigmId;
-        public final short idx;
-        public final String key;
-
-        public FoundParadigm(short paradigmId, short idx, String key) {
-            this.paradigmId = paradigmId;
-            this.idx = idx;
-            this.key = key;
         }
     };
 }
