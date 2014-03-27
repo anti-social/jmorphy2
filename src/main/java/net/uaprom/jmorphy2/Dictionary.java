@@ -1,9 +1,12 @@
 package net.uaprom.jmorphy2;
 
+import java.io.File;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
@@ -22,12 +25,14 @@ import org.noggit.JSONParser;
 
 import org.apache.commons.io.input.SwappedDataInputStream;
 
+import net.uaprom.jmorphy2.dawg.PayloadsDAWG;
+
 
 public class Dictionary {
     private Map<String, Object> meta;
-    private DAWG dawg;
+    private WordsDAWG words;
     private Map<String,Grammeme> grammemes;
-    private DAWG.Paradigm[] paradigms;
+    private Paradigm[] paradigms;
     private String[] suffixes;
     private String[] paradigmPrefixes;
     private List<Tag> gramtab;
@@ -77,7 +82,7 @@ public class Dictionary {
     }
 
     protected Dictionary(InputStream metaStream,
-                         InputStream dawgStream,
+                         InputStream wordsStream,
                          InputStream grammemesStream,
                          InputStream paradigmsStream,
                          InputStream suffixesStream,
@@ -85,7 +90,7 @@ public class Dictionary {
                          InputStream gramtabStream,
                          Map<Character,String> replaceChars) throws IOException {
         loadMeta(metaStream);
-        dawg = new DAWG(dawgStream);
+        words = new WordsDAWG(wordsStream);
         loadGrammemes(grammemesStream);
         loadParadigms(paradigmsStream);
         loadSuffixes(suffixesStream);
@@ -195,9 +200,9 @@ public class Dictionary {
     private void loadParadigms(InputStream stream) throws IOException {
         DataInput paradigmsStream = new SwappedDataInputStream(stream);
         short paradigmCount = paradigmsStream.readShort();
-        paradigms = new DAWG.Paradigm[paradigmCount];
+        paradigms = new Paradigm[paradigmCount];
         for (int paraId = 0; paraId < paradigmCount; paraId++) {
-            paradigms[paraId] = new DAWG.Paradigm(paradigmsStream);
+            paradigms[paraId] = new Paradigm(paradigmsStream);
         }
     }
 
@@ -242,21 +247,20 @@ public class Dictionary {
     //     }
     // }
 
-    public ArrayList<Parsed> parse(char[] word, int offset, int count) throws IOException {
+    public List<Parsed> parse(char[] word, int offset, int count) throws IOException {
         return parse(new String(word, offset, count));
     }
 
-    public ArrayList<Parsed> parse(String word) throws IOException {
-        ArrayList<String> normalForms = new ArrayList<String>();
+    public List<Parsed> parse(String word) throws IOException {
+        List<String> normalForms = new ArrayList<String>();
+        List<FoundParadigm> paradigms = words.similarParadigms(word, replaceChars);;
+        List<Parsed> parseds = new ArrayList<Parsed>();
 
-        ArrayList<DAWG.FoundParadigm> foundParadigms = dawg.similarItems(word, replaceChars);;
-        ArrayList<Parsed> parseds = new ArrayList<Parsed>();
-
-        for (DAWG.FoundParadigm foundParadigm : foundParadigms) {
-            String nf = buildNormalForm(foundParadigm.paradigmId,
-                                        foundParadigm.idx,
-                                        foundParadigm.key);
-            Tag tag = buildTag(foundParadigm.paradigmId, foundParadigm.idx);
+        for (FoundParadigm paradigm : paradigms) {
+            String nf = buildNormalForm(paradigm.paradigmId,
+                                        paradigm.idx,
+                                        paradigm.key);
+            Tag tag = buildTag(paradigm.paradigmId, paradigm.idx);
             parseds.add(new Parsed(word, tag, nf, 1.0f));
         }
         
@@ -264,14 +268,14 @@ public class Dictionary {
     }
 
     protected Tag buildTag(short paradigmId, short idx) {
-        DAWG.Paradigm paradigm = paradigms[paradigmId];
+        Paradigm paradigm = paradigms[paradigmId];
         int offset = paradigm.paradigm.length / 3;
         int tagId = paradigm.paradigm[offset + idx];
         return gramtab.get(tagId);
     }
 
     protected String buildNormalForm(short paradigmId, short idx, String word) {
-        DAWG.Paradigm paradigm = paradigms[paradigmId];
+        Paradigm paradigm = paradigms[paradigmId];
         int paradigmLength = paradigm.paradigm.length / 3;
         String stem = buildStem(paradigm.paradigm, idx, word);
 
@@ -298,4 +302,57 @@ public class Dictionary {
             return word.substring(prefix.length());
         }
     }
+
+    public class WordsDAWG extends PayloadsDAWG {
+        public WordsDAWG(File file) throws IOException {
+            super(file);
+        }
+
+        public WordsDAWG(InputStream stream) throws IOException {
+            super(stream);
+        }
+
+        public List<FoundParadigm> similarParadigms(String key) throws IOException {
+            return similarParadigms(key, null);
+        }
+
+        public List<FoundParadigm> similarParadigms(String key, Map<Character,String> replaceChars) throws IOException {
+            List<FoundParadigm> paradigms = new ArrayList<FoundParadigm>();
+            for (PayloadsDAWG.Payload item : similarItems(key, replaceChars)) {
+                DataInput stream = new DataInputStream(new ByteArrayInputStream(item.value));
+                short paradigmId = stream.readShort();
+                short idx = stream.readShort();
+                paradigms.add(new FoundParadigm(paradigmId, idx, item.key));
+            }
+            return paradigms;
+        }
+    };
+
+    public static class Paradigm {
+        public short[] paradigm;
+
+        public Paradigm(DataInput input) throws IOException {
+            short length = input.readShort();
+            paradigm = new short[length];
+            for (int i = 0; i < length; i++) {
+                paradigm[i] = input.readShort();
+            }
+        }
+
+        public short[] getParadigm() {
+            return paradigm;
+        }
+    };
+
+    public class FoundParadigm {
+        public final short paradigmId;
+        public final short idx;
+        public final String key;
+
+        public FoundParadigm(short paradigmId, short idx, String key) {
+            this.paradigmId = paradigmId;
+            this.idx = idx;
+            this.key = key;
+        }
+    };
 }
