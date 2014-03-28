@@ -29,30 +29,35 @@ public class TestAnalyzer {
     public void test() throws IOException {
         List<Parsed> parseds = analyzer.parse("красивого");
         Tag tag = parseds.get(0).tag;
-        assertParseds("красивого:ADJF,Qual masc,sing,gent:красивый:1.0\n"
-                      + "красивого:ADJF,Qual anim,masc,sing,accs:красивый:1.0\n"
-                      + "красивого:ADJF,Qual neut,sing,gent:красивый:1.0",
+        assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:0.5\n"
+                      + "красивого:ADJF,Qual masc,sing,gent:красивый:0.25\n"
+                      + "красивого:ADJF,Qual anim,masc,sing,accs:красивый:0.25",
                       parseds);
         assertEquals(analyzer.getGrammeme("POST"), analyzer.getGrammeme("ADJF").getRoot());
         assertEquals(analyzer.getGrammeme("ADJF"), tag.POS);
         assertEquals(analyzer.getGrammeme("gent"), tag.Case);
         assertEquals(analyzer.getGrammeme("sing"), tag.number);
-        assertEquals(analyzer.getGrammeme("masc"), tag.gender);
+        assertEquals(analyzer.getGrammeme("neut"), tag.gender);
         assertTrue(tag.contains("ADJF"));
         assertTrue(tag.containsAllValues(Arrays.asList("ADJF", "gent")));
         assertFalse(tag.contains("NOUN"));
         assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
         // unknown word
-        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:1.0\n"
-                      + "лошарики:NOUN,inan,masc plur,accs:лошарик:1.0",
+        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:0.5\n"
+                      + "лошарики:NOUN,inan,masc plur,accs:лошарик:0.5",
                       analyzer.parse("лошарики"));
+
+        assertParseds("снега:NOUN,inan,masc sing,gent:снег:0.777777\n"
+                      + "снега:NOUN,inan,masc plur,nomn:снег:0.111111\n"
+                      + "снега:NOUN,inan,masc plur,accs:снег:0.111111\n",
+                      analyzer.parse("снега"));
 
         // gen2, loct, loc2
         assertParseds("снеге:NOUN,inan,masc sing,loct:снег:1.0", analyzer.parse("снеге"));
-        assertParseds("снегу:NOUN,inan,masc sing,gen2:снег:1.0\n"
-                      + "снегу:NOUN,inan,masc sing,datv:снег:1.0\n"
-                      + "снегу:NOUN,inan,masc sing,loc2:снег:1.0\n",
+        assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:0.5\n"
+                      + "снегу:NOUN,inan,masc sing,datv:снег:0.375\n"
+                      + "снегу:NOUN,inan,masc sing,gen2:снег:0.125\n",
                       analyzer.parse("снегу"));
 
         // е, ё
@@ -72,14 +77,4 @@ public class TestAnalyzer {
         }
         assertEquals(expected, parseds);
     }
-
-    // @Test(expected=IllegalArgumentException.class)
-    // public void testDummyKey() {
-    //     testHashTable(new int[] {Integer.MIN_VALUE}, new float[] {1.1f}, 8);
-    // }
-
-    // @Test(expected=IllegalArgumentException.class)
-    // public void testDummyKey2() {
-    //     testHashTable(new int[] {Integer.MIN_VALUE, 0, 1}, new float[] {-1.1f, 0.0f, 1.1f}, 36);
-    // }
 }

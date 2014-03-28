@@ -73,16 +73,18 @@ public class DAWGDict {
         return hasLeaf(units[index]);
     }
 
+    public int value(int index) {
+        int o = offset(units[index]);
+        int valueIndex = (index ^ o) & PRECISION_MASK;
+        return units[valueIndex] & ~IS_LEAF_BIT & PRECISION_MASK;
+    }
+
     protected int offset(int base) {
         return ((base >> 10) << ((base & EXTENSION_BIT) >> 6)) & PRECISION_MASK;
     }
 
     protected int label(int base) {
         return base & (IS_LEAF_BIT | 0xFF) & PRECISION_MASK;
-    }
-
-    protected int value(int base) {
-        return base & ~IS_LEAF_BIT & PRECISION_MASK;
     }
 
     protected boolean hasLeaf(int base) {

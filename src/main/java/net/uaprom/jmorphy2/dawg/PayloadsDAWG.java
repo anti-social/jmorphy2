@@ -1,10 +1,8 @@
 package net.uaprom.jmorphy2.dawg;
 
-import java.io.File;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -16,10 +14,6 @@ public class PayloadsDAWG extends DAWG {
     private static final byte PAYLOAD_SEPARATOR = 0x01;
 
     private final Guide guide;
-
-    public PayloadsDAWG(File file) throws IOException {
-        this(new FileInputStream(file));
-    }
 
     public PayloadsDAWG(InputStream stream) throws IOException {
         super(stream);

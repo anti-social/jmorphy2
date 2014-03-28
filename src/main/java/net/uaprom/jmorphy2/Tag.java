@@ -124,6 +124,6 @@ public class Tag {
 
     @Override
     public String toString() {
-        return "\"" + originalTagString + "\"";
+        return originalTagString;
     }
 }

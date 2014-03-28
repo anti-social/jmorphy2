@@ -1,5 +1,8 @@
 package net.uaprom.jmorphy2;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.List;
@@ -7,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class MorphAnalyzer {
     private Dictionary dict;
+    private ProbabilityEstimator prob;
 
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
@@ -23,8 +28,25 @@ public class MorphAnalyzer {
 
     private static final Logger logger = LoggerFactory.getLogger(MorphAnalyzer.class);
 
+    public static abstract class Loader {
+        public abstract InputStream getStream(String filename) throws IOException;
+    }
+
+    public static class FileSystemLoader extends Loader {
+        private String path;
+
+        public FileSystemLoader(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public InputStream getStream(String filename) throws IOException {
+            return new FileInputStream(new File(path, filename));
+        }
+    }
+
     public MorphAnalyzer() throws IOException {
-        this(null, null);
+        this(System.getProperty(DICT_PATH_VAR), null);
     }
 
     public MorphAnalyzer(String path) throws IOException {
@@ -32,14 +54,16 @@ public class MorphAnalyzer {
     }
 
     public MorphAnalyzer(Map<Character,String> replaceChars) throws IOException {
-        this(null, replaceChars);
+        this(System.getProperty(DICT_PATH_VAR), replaceChars);
     }
 
     public MorphAnalyzer(String path, Map<Character,String> replaceChars) throws IOException {
-        if (path == null) {
-            path = System.getProperty(DICT_PATH_VAR);
-        }
-        dict = new Dictionary(path, replaceChars);
+        this(new FileSystemLoader(path), replaceChars);
+    }
+
+    public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars) throws IOException {
+        dict = new Dictionary(loader, replaceChars);
+        prob = new ProbabilityEstimator(loader);
     }
 
     public Tag getTag(String tagString) {
@@ -76,7 +100,43 @@ public class MorphAnalyzer {
             }
             parseds = parsedsWithPrefix;
         }
+
+        parseds = estimate(parseds);
+        Collections.sort(parseds, Collections.reverseOrder());
         return parseds;
+    }
+
+    private List<Parsed> estimate(List<Parsed> parseds) throws IOException {
+        float[] newScores = new float[parseds.size()];
+        float sumProbs = 0.0f, sumScores = 0.0f;
+        int i = 0;
+        for (Parsed parsed : parseds) {
+            newScores[i] = prob.getProbability(parsed.word, parsed.tag);
+            sumProbs += newScores[i];
+            sumScores += parsed.score;
+            i++;
+        }
+
+        if (sumProbs < Parsed.EPS) {
+            float k = 1.0f / sumScores;
+            i = 0;
+            for (Parsed parsed : parseds) {
+                newScores[i] = parsed.score * k;
+                i++;
+            }
+        }
+
+        List<Parsed> estimatedParseds = new ArrayList<Parsed>(parseds.size());
+        i = 0;
+        for (Parsed parsed : parseds) {
+            estimatedParseds.add(new Parsed(parsed.word,
+                                            parsed.tag,
+                                            parsed.normalForm,
+                                            newScores[i]));
+            i++;
+        }
+        
+        return estimatedParseds;
     }
 
     public List<String> getNormalForms(String word) throws IOException {

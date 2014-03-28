@@ -26,6 +26,7 @@ import org.noggit.JSONParser;
 import org.apache.commons.io.input.SwappedDataInputStream;
 
 import net.uaprom.jmorphy2.dawg.PayloadsDAWG;
+import net.uaprom.jmorphy2.dawg.IntegerDAWG;
 
 
 public class Dictionary {
@@ -49,24 +50,7 @@ public class Dictionary {
 
     private static final Logger logger = LoggerFactory.getLogger(Dictionary.class);
 
-    public static abstract class Loader {
-        public abstract InputStream getStream(String filename) throws IOException;
-    }
-
-    public static class FileSystemLoader extends Loader {
-        private String path;
-
-        public FileSystemLoader(String path) {
-            this.path = path;
-        }
-
-        @Override
-        public InputStream getStream(String filename) throws IOException {
-            return new FileInputStream(path + "/" + filename);
-        }
-    }
-
-    public Dictionary(Loader loader, Map<Character,String> replaceChars) throws IOException {
+    public Dictionary(MorphAnalyzer.Loader loader, Map<Character,String> replaceChars) throws IOException {
         this(loader.getStream(META_FILENAME),
              loader.getStream(WORDS_FILENAME),
              loader.getStream(GRAMMEMES_FILENAME),
@@ -75,10 +59,6 @@ public class Dictionary {
              loader.getStream(PARADIGM_PREFIXES_FILENAME),
              loader.getStream(GRAMTAB_OPENCORPORA_FILENAME),
              replaceChars);
-    }
-
-    public Dictionary(String path, Map<Character,String> replaceChars) throws IOException {
-        this(new FileSystemLoader(path), replaceChars);
     }
 
     protected Dictionary(InputStream metaStream,
@@ -305,10 +285,6 @@ public class Dictionary {
     }
 
     public class WordsDAWG extends PayloadsDAWG {
-        public WordsDAWG(File file) throws IOException {
-            super(file);
-        }
-
         public WordsDAWG(InputStream stream) throws IOException {
             super(stream);
         }
