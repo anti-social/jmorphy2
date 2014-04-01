@@ -25,7 +25,7 @@ public class BenchmarkAnalyzer {
     public BenchmarkAnalyzer() throws IOException {
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
-        analyzer = new MorphAnalyzer(replaceChars);
+        analyzer = new MorphAnalyzer(replaceChars, 0);
         loadWords(WORDS_FREQ_RESOURCE);
     }
 

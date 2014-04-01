@@ -15,16 +15,22 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 
 public class MorphAnalyzer {
     private Dictionary dict;
     private ProbabilityEstimator prob;
+    private Cache<String,List<Parsed>> cache = null;
 
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
 
-    protected int MAX_PREFIX_LENGTH = 6;
-    protected int MIN_REMINDER = 3;
+    private static final int MAX_PREFIX_LENGTH = 6;
+    private static final int MIN_REMINDER = 3;
+
+    private static final int DEFAULT_CACHE_SIZE = 10000;
 
     private static final Logger logger = LoggerFactory.getLogger(MorphAnalyzer.class);
 
@@ -54,16 +60,31 @@ public class MorphAnalyzer {
     }
 
     public MorphAnalyzer(Map<Character,String> replaceChars) throws IOException {
-        this(System.getProperty(DICT_PATH_VAR), replaceChars);
+        this(System.getProperty(DICT_PATH_VAR), replaceChars, DEFAULT_CACHE_SIZE);
+    }
+
+    public MorphAnalyzer(Map<Character,String> replaceChars, int cacheSize) throws IOException {
+        this(System.getProperty(DICT_PATH_VAR), replaceChars, cacheSize);
     }
 
     public MorphAnalyzer(String path, Map<Character,String> replaceChars) throws IOException {
-        this(new FileSystemLoader(path), replaceChars);
+        this(new FileSystemLoader(path), replaceChars, DEFAULT_CACHE_SIZE);
+    }
+
+    public MorphAnalyzer(String path, Map<Character,String> replaceChars, int cacheSize) throws IOException {
+        this(new FileSystemLoader(path), replaceChars, cacheSize);
     }
 
     public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars) throws IOException {
+        this(loader, replaceChars, DEFAULT_CACHE_SIZE);
+    }
+
+    public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
         dict = new Dictionary(loader, replaceChars);
         prob = new ProbabilityEstimator(loader);
+        if (cacheSize > 0) {
+            cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+        }
     }
 
     public Tag getTag(String tagString) {
@@ -79,6 +100,19 @@ public class MorphAnalyzer {
     }
 
     public List<Parsed> parse(String word) throws IOException {
+        List<Parsed> parseds;
+        if (cache != null) {
+            parseds = cache.getIfPresent(word);
+            if (parseds == null) {
+                parseds = parseNC(word);
+                cache.put(word, parseds);
+            }
+            return parseds;
+        }
+        return parseNC(word);
+    }
+
+    private List<Parsed> parseNC(String word) throws IOException {
         List<Parsed> parseds = dict.parse(word);
         int wordLength = word.length();
         int i = 1;
