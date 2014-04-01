@@ -18,21 +18,21 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 @RunWith(JUnit4.class)
 public class TestPhrase {
     private MorphAnalyzer analyzer;
+    private Tagger tagger;
+    private SentenceParser parser;
 
     public TestPhrase() throws IOException {
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
         analyzer = new MorphAnalyzer(replaceChars);
+        tagger = new Tagger(analyzer);
+        parser = new SentenceParser(analyzer, tagger);
     }
 
     @Test
     public void testParse() throws IOException {
-        Phrase phrase;
-        phrase = new Phrase("женские сапоги", analyzer);
-        System.out.println(phrase.nodes);
-        phrase = new Phrase("женские сапоги коричневые", analyzer);
-        System.out.println(phrase.nodes);
-        phrase = new Phrase("уборка и вывоз снега и льда", analyzer);
-        System.out.println(phrase.nodes);
+        System.out.println(parser.topParse(new String[]{"женские", "сапоги"}));
+        // System.out.println(parser.topParse(new String[]{"женские", "сапоги", "коричневые"}));
+        // System.out.println(parser.topParse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}));
     }
 }
