@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.contrib;
+package net.uaprom.jmorphy2.nlp;
 
 import java.io.IOException;
 import java.util.List;

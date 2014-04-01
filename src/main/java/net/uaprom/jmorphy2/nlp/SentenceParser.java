@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.contrib;
+package net.uaprom.jmorphy2.nlp;
 
 import java.io.IOException;
 import java.lang.Math;
@@ -65,13 +65,13 @@ public class SentenceParser {
             if (matchedRule == null) {
                 continue;
             }
-            // float weight = matchedRule.weight * seq.score;
-            float weight = matchedRule.weight;
-            System.out.println("===================");
-            System.out.println(matchedRule);
-            System.out.println(seq.score);
-            System.out.println(weight);
-            System.out.println("===================");
+            float weight = matchedRule.weight * seq.score;
+            // float weight = matchedRule.weight;
+            // System.out.println("===================");
+            // System.out.println(matchedRule);
+            // System.out.println(seq.score);
+            // System.out.println(weight);
+            // System.out.println("===================");
             if (weight > maxWeight) {
                 bestMatchedRule = matchedRule;
                 maxWeight = weight;
@@ -84,13 +84,13 @@ public class SentenceParser {
             matchedRules.addFirst(mRule);
             mRule = mRule.parent;
         }
-        System.out.println(matchedRules);
+        // System.out.println(matchedRules);
         return applyRules(matchedRules, nodes);
     }
 
     private List<Node> applyRules(Iterable<MatchedRule> matchedRules, List<Node> nodes) {
         for (MatchedRule mRule : matchedRules) {
-            System.out.println(mRule);
+            // System.out.println(mRule);
             reduce(nodes, mRule);
         }
         return nodes;
@@ -134,16 +134,16 @@ public class SentenceParser {
     }
 
     private MatchedRule parse(List<Node> nodes, MatchedRule current) {
-        System.out.println(nodes);
+        // System.out.println(nodes);
         MatchedRule bestMatchedRule = current;
         float parentWeight = current == null ? 0.0f : current.weight;
         for (MatchedRule mRule : matchAll(nodes)) {
             mRule.parent = current;
             mRule.weight = mRule.rule.weight + parentWeight;
-            System.out.println(mRule);
+            // System.out.println(mRule);
             reduce(nodes, mRule);
             MatchedRule maybeBestRule = parse(nodes, mRule);
-            System.out.println(maybeBestRule);
+            // System.out.println(maybeBestRule);
             expand(nodes, mRule);
 
             if (bestMatchedRule == null || maybeBestRule.weight > bestMatchedRule.weight) {
@@ -151,6 +151,10 @@ public class SentenceParser {
             }
         }
 
+        // if (bestMatchedRule == current) {
+        //     System.out.println(nodes);
+        //     System.out.println(bestMatchedRule);
+        // }
         return bestMatchedRule;
     }
 
@@ -305,15 +309,15 @@ public class SentenceParser {
         defaultRules.add("NP", "NP PP", 100);
         defaultRules.add("VP", "VP PP", 90);
         defaultRules.add("PP", "PREP NP", 50);
-        defaultRules.add("NP", "NP CONJ NP", 500);
         defaultRules.add("NP,nomn", "NP,nomn CONJ NP,nomn", 750);
+        defaultRules.add("NP", "NP CONJ NP", 500);
         defaultRules.add("NP", "NP,nomn NP,gent ", 200);
+        defaultRules.add("NP,nomn", "ADJF,nomn NP,nomn", 200);
+        defaultRules.add("NP,gent", "ADJF,gent NP,gent", 150);
         defaultRules.add("NP", "ADJF NP", 100);
-        defaultRules.add("NP,nomn", "ADJF,nomn NP,nomn", 150);
-        defaultRules.add("NP,gent", "ADJF,gent NP,gent", 120);
+        defaultRules.add("NP,nomn", "NP,nomn ADJF,nomn", 100);
+        defaultRules.add("NP,gent", "NP,gent ADJF,gent", 75);
         defaultRules.add("NP", "NP ADJF", 50);
-        defaultRules.add("NP,nomn", "NP,nomn ADJF,nomn", 75);
-        defaultRules.add("NP,gent", "NP,gent ADJF,gent", 60);
         defaultRules.add("NP,nomn", "NOUN,nomn", 10);
         defaultRules.add("NP,gent", "NOUN,gent", 9);
         defaultRules.add("NP,nomn", "ADJF,nomn", 5);

@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.contrib;
+package net.uaprom.jmorphy2.nlp;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -34,5 +34,6 @@ public class TestPhrase {
         System.out.println(parser.topParse(new String[]{"женские", "сапоги"}));
         // System.out.println(parser.topParse(new String[]{"женские", "сапоги", "коричневые"}));
         // System.out.println(parser.topParse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}));
+        // System.out.println(parser.topParse(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
     }
 }
