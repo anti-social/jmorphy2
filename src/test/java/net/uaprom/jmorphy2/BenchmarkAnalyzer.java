@@ -17,8 +17,7 @@ import java.util.ArrayList;
 @RunWith(JUnit4.class)
 public class BenchmarkAnalyzer {
     private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
-    private static final int DEFAULT_REPEATS = 5;
-    private static final int DEFAULT_WARMUP_REPEATS = 50;
+    private static final int DEFAULT_REPEATS = 10;
 
     private MorphAnalyzer analyzer;
     private List<WordCount> words;
@@ -33,35 +32,27 @@ public class BenchmarkAnalyzer {
     @Test
     public void benchmark() throws IOException {
         int repeats = DEFAULT_REPEATS;
-        int warmupRepeats = DEFAULT_WARMUP_REPEATS;
 
         System.out.println("Benchmarking MorphAnalyzer:");
-        benchParse(repeats, warmupRepeats);
+        benchParse(repeats);
     }
 
-    public void benchParse(int repeats, int warmupRepeats) throws IOException {
-        benchParse(warmupRepeats, true);
-        benchParse(repeats, false);
-    }
-
-    public void benchParse(int repeats, boolean isWarmup) throws IOException {
-        long startTime, endTime;
-        int count = repeats * words.size();
+    public void benchParse(int repeats) throws IOException {
+        long startTime = 0L, endTime = 0L;
         // List<List<Parsed>> res = new ArrayList<List<Parsed>>(words.size());
 
-        startTime = System.currentTimeMillis();
         for (int i = 0; i < repeats; i++) {
             int ix = 0;
+            startTime = System.currentTimeMillis();
             for (WordCount word : words) {
                 analyzer.parse(word.word);
                 // res.add(ix, analyzer.parse(word.word));
                 ix++;
             }
+            endTime = System.currentTimeMillis();
         }
-        endTime = System.currentTimeMillis();
-        if (!isWarmup) {
-            printResults("MorphAnalyzer.parse(w)", endTime - startTime, count);
-        }
+
+        printResults("MorphAnalyzer.parse(w)", endTime - startTime, words.size());
     }
 
     private void printResults(String name, long timeMillis, int count) {
