@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @RunWith(JUnit4.class)
 public class BenchmarkAnalyzer {
     private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
-    private static final int DEFAULT_REPEATS = 10;
+    private static final int DEFAULT_REPEATS = 20;
 
     private MorphAnalyzer analyzer;
     private List<WordCount> words;

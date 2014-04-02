@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.dawg;
+package net.uaprom.dawg;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class PayloadsDAWG extends DAWG {
     }
 
     public List<Payload> similarItems(String key, Map<Character,String> replaceChars) throws IOException {
-        return similarItems(key, replaceChars, "", 0);
+        return similarItems(key, replaceChars, "", Dict.ROOT);
     }
 
     private List<Payload> similarItems(String key, Map<Character,String> replaceChars, String prefix, int index) throws IOException {
@@ -61,7 +61,7 @@ public class PayloadsDAWG extends DAWG {
                     for (int j = 0; j < replacesLength; j++) {
                         String r = replaces.substring(j, j + 1);
                         int nextIndex = dict.followBytes(r.getBytes("UTF-8"), index);
-                        if (nextIndex != -1) {
+                        if (nextIndex != Dict.MISSING) {
                             String nextPrefix = prefix + key.substring(prefixLength, i) + r;
                             items.addAll(similarItems(key, replaceChars, nextPrefix, nextIndex));
                         }
@@ -70,17 +70,17 @@ public class PayloadsDAWG extends DAWG {
             }
 
             index = dict.followBytes(Character.toString(c).getBytes("UTF-8"), index);
-            if (index == -1) {
+            if (index == Dict.MISSING) {
                 return items;
             }
         }
         
-        if (index == -1) {
+        if (index == Dict.MISSING) {
             return items;
         }
 
         index = dict.followByte(PAYLOAD_SEPARATOR, index);
-        if (index == -1) {
+        if (index == Dict.MISSING) {
             return items;
         }
 
@@ -114,7 +114,7 @@ public class PayloadsDAWG extends DAWG {
     };
 
     private class Completer {
-        private DAWGDict dict;
+        private Dict dict;
         private Guide guide;
 
         private byte[] key;
@@ -124,7 +124,7 @@ public class PayloadsDAWG extends DAWG {
 
         private static final int INITIAL_KEY_LENGTH = 9;
 
-        public Completer(DAWGDict dict, Guide guide) {
+        public Completer(Dict dict, Guide guide) {
             this.dict = dict;
             this.guide = guide;
         }
@@ -145,7 +145,7 @@ public class PayloadsDAWG extends DAWG {
 
                 if (childLabel != 0) {
                     index = follow(childLabel, index);
-                    if (index == -1) {
+                    if (index == Dict.MISSING) {
                         return false;
                     }
                 }
@@ -165,7 +165,7 @@ public class PayloadsDAWG extends DAWG {
                         index = indexStack.get(indexStack.size() - 1);
                         if (siblingLabel != 0) {
                             index = follow(siblingLabel, index);
-                            if (index == -1) {
+                            if (index == Dict.MISSING) {
                                 return false;
                             }
 
@@ -186,8 +186,8 @@ public class PayloadsDAWG extends DAWG {
     
         private int follow(byte label, int index) {
             int nextIndex = dict.followByte(label, index);
-            if (nextIndex == -1) {
-                return -1;
+            if (nextIndex == Dict.MISSING) {
+                return Dict.MISSING;
             }
 
             addLabel(label);
@@ -200,7 +200,7 @@ public class PayloadsDAWG extends DAWG {
                 byte label = guide.child(index);
 
                 index = dict.followByte(label, index);
-                if (index == -1) {
+                if (index == Dict.MISSING) {
                     return false;
                 }
 

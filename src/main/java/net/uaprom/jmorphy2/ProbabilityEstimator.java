@@ -3,7 +3,7 @@ package net.uaprom.jmorphy2;
 import java.io.InputStream;
 import java.io.IOException;
 
-import net.uaprom.jmorphy2.dawg.IntegerDAWG;
+import net.uaprom.dawg.IntegerDAWG;
 
 
 public class ProbabilityEstimator {

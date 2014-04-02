@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.dawg;
+package net.uaprom.dawg;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class IntegerDAWG extends DAWG {
 
     public Integer get(String key, Integer defaultValue) throws IOException {
         int res = dict.find(key.getBytes("UTF-8"));
-        if (res == -1) {
+        if (res == Dict.MISSING) {
             return defaultValue;
         }
         return res;

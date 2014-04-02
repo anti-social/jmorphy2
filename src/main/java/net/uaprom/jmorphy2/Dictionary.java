@@ -25,8 +25,8 @@ import org.noggit.JSONParser;
 
 import org.apache.commons.io.input.SwappedDataInputStream;
 
-import net.uaprom.jmorphy2.dawg.PayloadsDAWG;
-import net.uaprom.jmorphy2.dawg.IntegerDAWG;
+import net.uaprom.dawg.PayloadsDAWG;
+import net.uaprom.dawg.IntegerDAWG;
 
 
 public class Dictionary {
