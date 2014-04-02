@@ -20,6 +20,7 @@ import com.google.common.cache.CacheBuilder;
 
 
 public class MorphAnalyzer {
+    private final Tag.Storage tagStorage;
     private final Dictionary dict;
     private final ProbabilityEstimator prob;
     private final KnownPrefixSplitter knownPrefixSplitter;
@@ -83,7 +84,8 @@ public class MorphAnalyzer {
     }
 
     public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
-        dict = new Dictionary(loader, replaceChars);
+        tagStorage = new Tag.Storage();
+        dict = new Dictionary(tagStorage, loader, replaceChars);
         prob = new ProbabilityEstimator(loader);
         knownPrefixSplitter = new KnownPrefixSplitter(loader);
         if (cacheSize > 0) {
@@ -92,15 +94,15 @@ public class MorphAnalyzer {
     }
 
     public Tag getTag(String tagString) {
-        return dict.getTag(tagString);
+        return tagStorage.getTag(tagString);
     }
 
     public Grammeme getGrammeme(String value) {
-        return dict.getGrammeme(value);
+        return tagStorage.getGrammeme(value);
     }
 
     public Collection<Grammeme> getAllGrammemes() {
-        return dict.getAllGrammemes();
+        return tagStorage.getAllGrammemes();
     }
 
     public List<String> getNormalForms(String word) throws IOException {

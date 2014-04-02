@@ -31,9 +31,9 @@ public class Tag {
         ImmutableSet.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
 
     private final String originalTagString;
-    private final Dictionary dict;
+    private final Storage storage;
 
-    public final Set<Grammeme> grammemes;
+    public final ImmutableSet<Grammeme> grammemes;
     public final Grammeme POS;
     public final Grammeme anymacy;
     public final Grammeme aspect;
@@ -47,22 +47,18 @@ public class Tag {
     public final Grammeme transitivity;
     public final Grammeme voice;
 
-    public Tag(String tagString) {
-        this(tagString, null);
-    }
-    
-    public Tag(String tagString, Dictionary dict) {
+    public Tag(String tagString, Storage storage) {
         this.originalTagString = tagString;
-        this.dict = dict;
+        this.storage = storage;
 
         Set<Grammeme> grammemes = new HashSet<Grammeme>();
         String[] grammemeStrings = tagString.replace(" ", ",").split(",");
         for (String grammemeValue : grammemeStrings) {
             if (grammemeValue != null) {
-                grammemes.add(dict.getGrammeme(grammemeValue));
+                grammemes.add(storage.getGrammeme(grammemeValue));
             }
         }
-        this.grammemes = Collections.unmodifiableSet(grammemes);
+        this.grammemes = ImmutableSet.copyOf(grammemes);
 
         POS = getGrammemeFor(PART_OF_SPEECH);
         anymacy = getGrammemeFor(ANIMACY);
@@ -97,7 +93,7 @@ public class Tag {
     }
 
     public boolean contains(String grammemeValue) {
-        return grammemes.contains(dict.getGrammeme(grammemeValue));
+        return grammemes.contains(storage.getGrammeme(grammemeValue));
     }
 
     public boolean contains(Grammeme grammeme) {
@@ -110,7 +106,7 @@ public class Tag {
 
     public boolean containsAllValues(Collection<String> grammemeValues) {
         for (String grammemeValue : grammemeValues) {
-            if (!grammemes.contains(dict.getGrammeme(grammemeValue))) {
+            if (!grammemes.contains(storage.getGrammeme(grammemeValue))) {
                 return false;
             }
         }
@@ -119,6 +115,10 @@ public class Tag {
 
     public boolean isProductive() {
         return Sets.intersection(getGrammemeValues(), NON_PRODUCTIVE_GRAMMEMES).isEmpty();
+    }
+
+    public String getTagString() {
+        return originalTagString;
     }
 
     @Override
@@ -135,4 +135,51 @@ public class Tag {
     public String toString() {
         return originalTagString;
     }
+
+    public static class Storage {
+        private final Map<String,Tag> tags = new HashMap<String,Tag>();
+        private final Map<String,Grammeme> grammemes = new HashMap<String,Grammeme>();
+
+        public Tag getTag(String tagString) {
+            return tags.get(tagString);
+        }
+
+        public Collection<Tag> getAllTags() {
+            return tags.values();
+        }
+
+        public void addTag(Tag tag) {
+            tags.put(tag.getTagString(), tag);
+        }
+
+        public Tag newTag(String tagString) {
+            Tag tag = getTag(tagString);
+            if (tag == null) {
+                tag = new Tag(tagString, this);
+                addTag(tag);
+            }
+            return tag;
+        }
+
+        public Grammeme getGrammeme(String grammemeValue) {
+            return grammemes.get(grammemeValue);
+        }
+
+        public Collection<Grammeme> getAllGrammemes() {
+            return grammemes.values();
+        }
+
+        public void addGrammeme(Grammeme grammeme) {
+            grammemes.put(grammeme.value, grammeme);
+        }
+
+        public Grammeme newGrammeme(List<String> grammemeInfo) {
+            Grammeme grammeme = getGrammeme(grammemeInfo.get(0));
+            if (grammeme == null) {
+                grammeme = new Grammeme(grammemeInfo, this);
+                addGrammeme(grammeme);
+            }
+            return grammeme;
+        }
+    };
 }

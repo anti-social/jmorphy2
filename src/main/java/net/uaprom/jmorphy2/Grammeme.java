@@ -11,22 +11,22 @@ public class Grammeme {
     public final String russianValue;
     public final String description;
 
-    private final Dictionary dict;
+    private final Tag.Storage storage;
 
-    public Grammeme(List<String> grammemeInfo, Dictionary dict) {
+    public Grammeme(List<String> grammemeInfo, Tag.Storage storage) {
         this(grammemeInfo.get(0),
              grammemeInfo.get(1),
              grammemeInfo.get(2),
              grammemeInfo.get(3),
-             dict);
+             storage);
     }
 
-    public Grammeme(String value, String parentValue, String russianValue, String description, Dictionary dict) {
+    public Grammeme(String value, String parentValue, String russianValue, String description, Tag.Storage storage) {
         this.value = value;
         this.parentValue = stringOrNull(parentValue);
         this.russianValue = russianValue;
         this.description = description;
-        this.dict = dict;
+        this.storage = storage;
     }
 
     private String stringOrNull(String s) {
@@ -37,7 +37,7 @@ public class Grammeme {
     }
 
     public Grammeme getParent() {
-        return dict.getGrammeme(parentValue);
+        return storage.getGrammeme(parentValue);
     }
 
     public Grammeme getRoot() {

@@ -27,9 +27,9 @@ import net.uaprom.dawg.PayloadsDAWG;
 
 
 public class Dictionary {
+    private final Tag.Storage tagStorage;
     private Map<String, Object> meta;
     private WordsDAWG words;
-    private Map<String,Grammeme> grammemes;
     private Paradigm[] paradigms;
     private String[] suffixes;
     private String[] paradigmPrefixes;
@@ -46,8 +46,9 @@ public class Dictionary {
 
     private static final Logger logger = LoggerFactory.getLogger(Dictionary.class);
 
-    public Dictionary(MorphAnalyzer.Loader loader, Map<Character,String> replaceChars) throws IOException {
-        this(loader.getStream(META_FILENAME),
+    public Dictionary(Tag.Storage tagStorage, MorphAnalyzer.Loader loader, Map<Character,String> replaceChars) throws IOException {
+        this(tagStorage,
+             loader.getStream(META_FILENAME),
              loader.getStream(WORDS_FILENAME),
              loader.getStream(GRAMMEMES_FILENAME),
              loader.getStream(PARADIGMS_FILENAME),
@@ -57,7 +58,8 @@ public class Dictionary {
              replaceChars);
     }
 
-    protected Dictionary(InputStream metaStream,
+    protected Dictionary(Tag.Storage tagStorage,
+                         InputStream metaStream,
                          InputStream wordsStream,
                          InputStream grammemesStream,
                          InputStream paradigmsStream,
@@ -65,6 +67,7 @@ public class Dictionary {
                          InputStream paradigmPrefixesStream,
                          InputStream gramtabStream,
                          Map<Character,String> replaceChars) throws IOException {
+        this.tagStorage = tagStorage;
         loadMeta(metaStream);
         words = new WordsDAWG(wordsStream);
         loadGrammemes(grammemesStream);
@@ -84,19 +87,9 @@ public class Dictionary {
     }
 
     private void loadGrammemes(InputStream stream) throws IOException {
-        grammemes = new HashMap<String,Grammeme>();
         for (List<String> grammemeInfo : (List<List<String>>) parseJson(stream)) {
-            Grammeme grammeme = new Grammeme(grammemeInfo, this);
-            grammemes.put(grammeme.value, grammeme);
+            tagStorage.newGrammeme(grammemeInfo);
         }
-    }
-
-    public Grammeme getGrammeme(String value) {
-        return grammemes.get(value);
-    }
-
-    public Collection<Grammeme> getAllGrammemes() {
-        return grammemes.values();
     }
 
     private Object parseJson(InputStream stream) throws IOException {
@@ -192,13 +185,9 @@ public class Dictionary {
 
     private void loadGramtab(InputStream stream) throws IOException {
         gramtab = new ArrayList<Tag>();
-        for (String tagInfo : readJsonStrings(stream)) {
-            gramtab.add(new Tag(tagInfo, this));
+        for (String tagString : readJsonStrings(stream)) {
+            gramtab.add(tagStorage.newTag(tagString));
         }
-    }
-
-    public Tag getTag(String tagString) {
-        return new Tag(tagString, this);
     }
 
     public List<Parsed> parse(char[] word, int offset, int count) throws IOException {
