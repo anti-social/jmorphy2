@@ -20,14 +20,17 @@ import com.google.common.cache.CacheBuilder;
 
 
 public class MorphAnalyzer {
-    private Dictionary dict;
-    private ProbabilityEstimator prob;
+    private final Dictionary dict;
+    private final ProbabilityEstimator prob;
+    private final KnownPrefixSplitter knownPrefixSplitter;
     private Cache<String,List<Parsed>> cache = null;
 
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
 
-    private static final int MAX_PREFIX_LENGTH = 6;
+    private static final float KNOWN_PREFIX_DECAY = 0.75f;
+    private static final float UNKNOWN_PREFIX_DECAY = 0.5f;
+    private static final int MAX_PREFIX_LENGTH = 5;
     private static final int MIN_REMINDER = 3;
 
     private static final int DEFAULT_CACHE_SIZE = 10000;
@@ -82,6 +85,7 @@ public class MorphAnalyzer {
     public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
         dict = new Dictionary(loader, replaceChars);
         prob = new ProbabilityEstimator(loader);
+        knownPrefixSplitter = new KnownPrefixSplitter(loader);
         if (cacheSize > 0) {
             cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
         }
@@ -99,6 +103,20 @@ public class MorphAnalyzer {
         return dict.getAllGrammemes();
     }
 
+    public List<String> getNormalForms(String word) throws IOException {
+        List<Parsed> parseds = parse(word);
+        List<String> normalForms = new ArrayList<String>();
+        Set<String> uniqueNormalForms = new HashSet<String>();
+
+        for (Parsed p : parseds) {
+            if (!uniqueNormalForms.contains(p.normalForm)) {
+                normalForms.add(p.normalForm);
+                uniqueNormalForms.add(p.normalForm);
+            }
+        }
+        return normalForms;
+    }
+
     public List<Parsed> parse(String word) throws IOException {
         List<Parsed> parseds;
         if (cache != null) {
@@ -113,30 +131,55 @@ public class MorphAnalyzer {
     }
 
     private List<Parsed> parseNC(String word) throws IOException {
-        List<Parsed> parseds = dict.parse(word);
-        int wordLength = word.length();
-        int i = 1;
-        while (parseds.isEmpty()) {
-            if (i > MAX_PREFIX_LENGTH || wordLength - i < MIN_REMINDER) {
-                break;
-            }
-            parseds = dict.parse(word.substring(i));
-            i++;
+        String wordLower = word.toLowerCase();
+        List<Parsed> parseds = parseDict(wordLower);
+
+        if (parseds.isEmpty()) {
+            parseds.addAll(parseKnownPrefix(wordLower));
         }
-        if (i > 1) {
-            String prefix = word.substring(0, i - 1);
-            List<Parsed> parsedsWithPrefix = new ArrayList<Parsed>();
-            for (Parsed parsed : parseds) {
-                parsedsWithPrefix.add(new Parsed(prefix + parsed.word,
-                                                 parsed.tag,
-                                                 prefix + parsed.normalForm,
-                                                 parsed.score));
-            }
-            parseds = parsedsWithPrefix;
+        if (parseds.isEmpty()) {
+            parseds.addAll(parseUnknownPrefix(wordLower));
         }
 
+        parseds = filterDups(parseds);
         parseds = estimate(parseds);
         Collections.sort(parseds, Collections.reverseOrder());
+        return parseds;
+    }
+
+    private List<Parsed> parseDict(String word) throws IOException {
+        return dict.parse(word);
+    }
+
+    private List<Parsed> parseKnownPrefix(String word) throws IOException {
+        List<Parsed> parseds = new ArrayList<Parsed>();
+        for (String prefix : knownPrefixSplitter.prefixes(word, MIN_REMINDER)) {
+            parseds.addAll(parseWithPrefix(word, prefix, KNOWN_PREFIX_DECAY));
+        }
+        return parseds;
+    }
+
+    private List<Parsed> parseUnknownPrefix(String word) throws IOException {
+        List<Parsed> parseds = new ArrayList<Parsed>();
+        int wordLength = word.length();
+        for (int i = 1; i <= MAX_PREFIX_LENGTH && wordLength - i >= MIN_REMINDER; i++) {
+            parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1), UNKNOWN_PREFIX_DECAY));
+        }
+        return parseds;
+    }
+
+    private List<Parsed> parseWithPrefix(String word, String prefix, float decay) throws IOException {
+        List<Parsed> parseds = new ArrayList<Parsed>();
+        for (Parsed p : dict.parse(word.substring(prefix.length()))) {
+            if (!p.tag.isProductive()) {
+                continue;
+            }
+            parseds.add(new Parsed(prefix + p.word,
+                                   p.tag,
+                                   prefix + p.normalForm,
+                                   p.word,
+                                   p.score * decay));
+        }
         return parseds;
     }
 
@@ -145,7 +188,7 @@ public class MorphAnalyzer {
         float sumProbs = 0.0f, sumScores = 0.0f;
         int i = 0;
         for (Parsed parsed : parseds) {
-            newScores[i] = prob.getProbability(parsed.word, parsed.tag);
+            newScores[i] = prob.getProbability(parsed.foundWord, parsed.tag);
             sumProbs += newScores[i];
             sumScores += parsed.score;
             i++;
@@ -166,6 +209,7 @@ public class MorphAnalyzer {
             estimatedParseds.add(new Parsed(parsed.word,
                                             parsed.tag,
                                             parsed.normalForm,
+                                            parsed.foundWord,
                                             newScores[i]));
             i++;
         }
@@ -173,17 +217,15 @@ public class MorphAnalyzer {
         return estimatedParseds;
     }
 
-    public List<String> getNormalForms(String word) throws IOException {
-        List<Parsed> parseds = parse(word);
-        List<String> normalForms = new ArrayList<String>();
-        Set<String> uniqueNormalForms = new HashSet<String>();
-
+    private List<Parsed> filterDups(List<Parsed> parseds) {
+        Set<Tag> seenTags = new HashSet<Tag>();
+        List<Parsed> filteredParseds = new ArrayList<Parsed>();
         for (Parsed p : parseds) {
-            if (!uniqueNormalForms.contains(p.normalForm)) {
-                normalForms.add(p.normalForm);
-                uniqueNormalForms.add(p.normalForm);
+            if (!seenTags.contains(p.tag)) {
+                filteredParseds.add(p);
+                seenTags.add(p.tag);
             }
         }
-        return normalForms;
+        return filteredParseds;
     }
 }

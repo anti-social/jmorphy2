@@ -29,9 +29,9 @@ public class TestAnalyzer {
     public void test() throws IOException {
         List<Parsed> parseds = analyzer.parse("красивого");
         Tag tag = parseds.get(0).tag;
-        assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:0.5\n"
-                      + "красивого:ADJF,Qual masc,sing,gent:красивый:0.25\n"
-                      + "красивого:ADJF,Qual anim,masc,sing,accs:красивый:0.25",
+        assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:красивого:0.5\n" +
+                      "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:0.25\n" +
+                      "красивого:ADJF,Qual anim,masc,sing,accs:красивый:красивого:0.25",
                       parseds);
         assertEquals(analyzer.getGrammeme("POST"), analyzer.getGrammeme("ADJF").getRoot());
         assertEquals(analyzer.getGrammeme("ADJF"), tag.POS);
@@ -43,37 +43,52 @@ public class TestAnalyzer {
         assertFalse(tag.contains("NOUN"));
         assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
-        // unknown word
-        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:0.5\n"
-                      + "лошарики:NOUN,inan,masc plur,accs:лошарик:0.5",
+        // word with unknown prefix
+        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:шарики:0.2\n" +
+                      "лошарики:NOUN,inan,masc plur,accs:лошарик:шарики:0.2\n" +
+                      "лошарики:NOUN,anim,masc,Name plur,nomn:лошарик:арики:0.2\n" +
+                      "лошарики:NOUN,anim,femn,Name sing,gent:лошарика:арики:0.2\n" +
+                      "лошарики:NOUN,anim,femn,Name plur,nomn:лошарика:арики:0.2\n",
                       analyzer.parse("лошарики"));
 
-        assertParseds("снега:NOUN,inan,masc sing,gent:снег:0.777777\n"
-                      + "снега:NOUN,inan,masc plur,nomn:снег:0.111111\n"
-                      + "снега:NOUN,inan,masc plur,accs:снег:0.111111\n",
+        // unknown word
+        assertParseds("псевдокошка:NOUN,anim,femn sing,nomn:псевдокошка:кошка:0.7999999\n" +
+                      "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1999999",
+                      analyzer.parse("псевдокошка"));
+
+        assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.777777\n" +
+                      "снега:NOUN,inan,masc plur,nomn:снег:снега:0.111111\n" +
+                      "снега:NOUN,inan,masc plur,accs:снег:снега:0.111111\n",
                       analyzer.parse("снега"));
 
         // gen2, loct, loc2
-        assertParseds("снеге:NOUN,inan,masc sing,loct:снег:1.0", analyzer.parse("снеге"));
-        assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:0.5\n"
-                      + "снегу:NOUN,inan,masc sing,datv:снег:0.375\n"
-                      + "снегу:NOUN,inan,masc sing,gen2:снег:0.125\n",
+        assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", analyzer.parse("снеге"));
+        assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:снегу:0.5\n" +
+                      "снегу:NOUN,inan,masc sing,datv:снег:снегу:0.375\n" +
+                      "снегу:NOUN,inan,masc sing,gen2:снег:снегу:0.125\n",
                       analyzer.parse("снегу"));
 
         // е, ё
-        assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:1.0", analyzer.parse("ёжик"));
-        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:1.0", analyzer.parse("ежик"));
+        assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", analyzer.parse("ёжик"));
+        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", analyzer.parse("ежик"));
 
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
-        assertEquals(Arrays.asList("лошарик"), analyzer.getNormalForms("лошарикам"));
+        assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.getNormalForms("лошарикам"));
     }
 
     private void assertParseds(String expectedString, List<Parsed> parseds) throws IOException {
         List<Parsed> expected = new ArrayList<Parsed>();
         for (String s : expectedString.split("\n")) {
+            if (s.equals("")) {
+                continue;
+            }
             String[] parts = s.split(":");
-            expected.add(new Parsed(parts[0], analyzer.getTag(parts[1]), parts[2], Float.parseFloat(parts[3])));
+            expected.add(new Parsed(parts[0],
+                                    analyzer.getTag(parts[1]),
+                                    parts[2],
+                                    parts[3],
+                                    Float.parseFloat(parts[4])));
         }
         assertEquals(expected, parseds);
     }

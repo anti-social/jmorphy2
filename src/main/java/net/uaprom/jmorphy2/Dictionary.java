@@ -1,10 +1,8 @@
 package net.uaprom.jmorphy2;
 
-import java.io.File;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.DataInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
@@ -26,7 +24,6 @@ import org.noggit.JSONParser;
 import org.apache.commons.io.input.SwappedDataInputStream;
 
 import net.uaprom.dawg.PayloadsDAWG;
-import net.uaprom.dawg.IntegerDAWG;
 
 
 public class Dictionary {
@@ -39,7 +36,6 @@ public class Dictionary {
     private List<Tag> gramtab;
     private Map<Character,String> replaceChars;
 
-    // TODO: load metadata
     public static final String META_FILENAME = "meta.json";
     public static final String WORDS_FILENAME = "words.dawg";
     public static final String GRAMMEMES_FILENAME = "grammemes.json";
@@ -205,28 +201,6 @@ public class Dictionary {
         return new Tag(tagString, this);
     }
 
-    // private void loadReplaceChars(InputStream stream) throws IOException {
-    //     int i = 0;
-    //     Character c = null;
-    //     for (String letter : readJsonStrings(stream)) {
-    //         if (i % 2 == 0) {
-    //             if (letter.length() != 1) {
-    //                 throw new IOException(String.format("Replaceable string must contain only one character: '%s'", letter));
-    //             }
-
-    //             c = letter.charAt(0);
-    //         }
-    //         else {
-    //             if (replaceChars == null) {
-    //                 replaceChars = new HashMap<Character,String>();
-    //             }
-    //             replaceChars.put(c, letter);
-    //         }
-
-    //         i++;
-    //     }
-    // }
-
     public List<Parsed> parse(char[] word, int offset, int count) throws IOException {
         return parse(new String(word, offset, count));
     }
@@ -242,7 +216,7 @@ public class Dictionary {
                                         paradigm.idx,
                                         paradigm.key);
             Tag tag = buildTag(paradigm.paraId, paradigm.idx);
-            parseds.add(new Parsed(word, tag, nf, 1.0f));
+            parseds.add(new Parsed(word, tag, nf, word, 1.0f));
         }
         
         return parseds;
@@ -293,21 +267,6 @@ public class Dictionary {
         protected Payload newPayload(String key, byte[] value) throws IOException {
             return new FoundParadigm(key, value);
         }
-
-        // public List<FoundParadigm> similarParadigms(String key) throws IOException {
-        //     return similarParadigms(key, null);
-        // }
-
-        // public List<FoundParadigm> similarParadigms(String key, Map<Character,String> replaceChars) throws IOException {
-        //     List<FoundParadigm> paradigms = new ArrayList<FoundParadigm>();
-        //     for (PayloadsDAWG.Payload item : similarItems(key, replaceChars)) {
-        //         DataInput stream = new DataInputStream(new ByteArrayInputStream(item.value));
-        //         short paradigmId = stream.readShort();
-        //         short idx = stream.readShort();
-        //         paradigms.add(new FoundParadigm(paradigmId, idx, item.key));
-        //     }
-        //     return paradigms;
-        // }
 
         public class FoundParadigm extends PayloadsDAWG.Payload {
             public final short paraId;

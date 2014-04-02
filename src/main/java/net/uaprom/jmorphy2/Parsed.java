@@ -9,12 +9,14 @@ public class Parsed implements Comparable {
     public final String word;
     public final Tag tag;
     public final String normalForm;
+    public final String foundWord;
     public final float score;
 
-    public Parsed(String word, Tag tag, String normalForm, float score) {
+    public Parsed(String word, Tag tag, String normalForm, String foundWord, float score) {
         this.word = word;
         this.tag = tag;
         this.normalForm = normalForm;
+        this.foundWord = foundWord;
         this.score = score;
     }
 
@@ -33,7 +35,7 @@ public class Parsed implements Comparable {
 
     @Override
     public String toString() {
-        return String.format("<Parsed: %s, %s, %s, %.6f>", word, tag, normalForm, score);
+        return String.format("<Parsed: %s, %s, %s, %s, %.6f>", word, tag, normalForm, foundWord, score);
     }
 
     @Override

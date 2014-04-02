@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+
 
 public class Tag {
     public static final String PART_OF_SPEECH = "POST";
@@ -24,6 +27,8 @@ public class Tag {
     public static final String MOOD = "MOod";
     public static final String VOICE = "VOic";
     public static final String INVOLVEMENT = "INvl";
+    private static final ImmutableSet<String> NON_PRODUCTIVE_GRAMMEMES =
+        ImmutableSet.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
 
     private final String originalTagString;
     private final Dictionary dict;
@@ -110,6 +115,10 @@ public class Tag {
             }
         }
         return true;
+    }
+
+    public boolean isProductive() {
+        return Sets.intersection(getGrammemeValues(), NON_PRODUCTIVE_GRAMMEMES).isEmpty();
     }
 
     @Override
