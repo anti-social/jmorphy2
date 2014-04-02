@@ -148,7 +148,7 @@ public class Tag {
             return tags.values();
         }
 
-        public void addTag(Tag tag) {
+        private void addTag(Tag tag) {
             tags.put(tag.getTagString(), tag);
         }
 
@@ -169,7 +169,7 @@ public class Tag {
             return grammemes.values();
         }
 
-        public void addGrammeme(Grammeme grammeme) {
+        private void addGrammeme(Grammeme grammeme) {
             grammemes.put(grammeme.value, grammeme);
         }
 

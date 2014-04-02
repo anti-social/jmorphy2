@@ -11,12 +11,14 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.text.Normalizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 
 
 public class MorphAnalyzer {
@@ -29,6 +31,7 @@ public class MorphAnalyzer {
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
 
+    private static final float SHAPE_SCORE = 0.9f;
     private static final float KNOWN_PREFIX_DECAY = 0.75f;
     private static final float UNKNOWN_PREFIX_DECAY = 0.5f;
     private static final int MAX_PREFIX_LENGTH = 5;
@@ -85,6 +88,8 @@ public class MorphAnalyzer {
 
     public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
         tagStorage = new Tag.Storage();
+        tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "литиница"));
+        tagStorage.newTag("LATN");
         dict = new Dictionary(tagStorage, loader, replaceChars);
         prob = new ProbabilityEstimator(loader);
         knownPrefixSplitter = new KnownPrefixSplitter(loader);
@@ -97,8 +102,16 @@ public class MorphAnalyzer {
         return tagStorage.getTag(tagString);
     }
 
+    public Tag newTag(String tagString) {
+        return tagStorage.newTag(tagString);
+    }
+
     public Grammeme getGrammeme(String value) {
         return tagStorage.getGrammeme(value);
+    }
+
+    public Grammeme newGrammeme(List<String> grammemeInfo) {
+        return tagStorage.newGrammeme(grammemeInfo);
     }
 
     public Collection<Grammeme> getAllGrammemes() {
@@ -137,6 +150,9 @@ public class MorphAnalyzer {
         List<Parsed> parseds = parseDict(wordLower);
 
         if (parseds.isEmpty()) {
+            parseds.addAll(parseLatin(word));
+        }
+        if (parseds.isEmpty()) {
             parseds.addAll(parseKnownPrefix(wordLower));
         }
         if (parseds.isEmpty()) {
@@ -151,6 +167,17 @@ public class MorphAnalyzer {
 
     private List<Parsed> parseDict(String word) throws IOException {
         return dict.parse(word);
+    }
+
+    private List<Parsed> parseLatin(String word) {
+        List<Parsed> parseds = new ArrayList<Parsed>();
+        String normWord =
+            Normalizer.normalize(word, Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        if (normWord.matches("\\w+")) {
+            parseds.add(new Parsed(word, getTag("LATN"), word, word, SHAPE_SCORE));
+        }
+        return parseds;
     }
 
     private List<Parsed> parseKnownPrefix(String word) throws IOException {

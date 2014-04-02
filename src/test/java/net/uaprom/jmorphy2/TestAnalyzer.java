@@ -72,6 +72,11 @@ public class TestAnalyzer {
         assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", analyzer.parse("ёжик"));
         assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", analyzer.parse("ежик"));
 
+        // LATN
+        assertParseds("test:LATN:test:test:1.0", analyzer.parse("test"));
+        assertParseds("männer:LATN:männer:männer:1.0", analyzer.parse("männer"));
+        assertParseds("", analyzer.parse("тестsymbolmix"));
+        
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
         assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.getNormalForms("лошарикам"));
