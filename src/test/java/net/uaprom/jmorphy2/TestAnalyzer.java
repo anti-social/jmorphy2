@@ -94,7 +94,7 @@ public class TestAnalyzer {
                       "MD:LATN:MD:MD:0.5\n",
                       analyzer.parse("MD"));
 
-        // TODO: ROMN, Hyphen
+        // TODO: Hyphen
 
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
