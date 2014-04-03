@@ -96,9 +96,16 @@ public class TestAnalyzer {
 
         // TODO: Hyphen
 
-        assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
-        assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
-        assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.getNormalForms("лошарикам"));
+        // normal form
+        assertEquals(Arrays.asList("красивый"), analyzer.normalForms("красивого"));
+        assertEquals(Arrays.asList("для", "длить"), analyzer.normalForms("для"));
+        assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.normalForms("лошарикам"));
+
+        // tag
+        assertEquals(Arrays.asList(analyzer.getTag("ADJF,Qual neut,sing,gent"),
+                                   analyzer.getTag("ADJF,Qual masc,sing,gent"),
+                                   analyzer.getTag("ADJF,Qual anim,masc,sing,accs")),
+                     analyzer.tag("красивого"));
     }
 
     private void assertParseds(String expectedString, List<Parsed> parseds) throws IOException {

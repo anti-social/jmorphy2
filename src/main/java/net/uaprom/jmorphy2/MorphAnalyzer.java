@@ -117,7 +117,7 @@ public class MorphAnalyzer {
         return tagStorage.getAllTags();
     }
 
-    public List<String> getNormalForms(String word) throws IOException {
+    public List<String> normalForms(String word) throws IOException {
         List<Parsed> parseds = parse(word);
         List<String> normalForms = new ArrayList<String>();
         Set<String> uniqueNormalForms = new HashSet<String>();
@@ -129,6 +129,15 @@ public class MorphAnalyzer {
             }
         }
         return normalForms;
+    }
+
+    public List<Tag> tag(String word) throws IOException {
+        List<Parsed> parseds = parse(word);
+        List<Tag> tags = Lists.newArrayListWithCapacity(parseds.size());
+        for (Parsed p : parseds) {
+            tags.add(p.tag);
+        }
+        return tags;
     }
 
     public List<Parsed> parse(String word) throws IOException {
