@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import java.text.Normalizer;
 
 import org.slf4j.Logger;
@@ -19,23 +20,20 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Floats;
 
 
 public class MorphAnalyzer {
     private final Tag.Storage tagStorage;
     private final Dictionary dict;
-    private final ProbabilityEstimator prob;
     private final KnownPrefixSplitter knownPrefixSplitter;
+    private final List<AnalyzerUnit> units;
+    private final ProbabilityEstimator prob;
     private Cache<String,List<Parsed>> cache = null;
 
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
-
-    private static final float SHAPE_SCORE = 0.9f;
-    private static final float KNOWN_PREFIX_DECAY = 0.75f;
-    private static final float UNKNOWN_PREFIX_DECAY = 0.5f;
-    private static final int MAX_PREFIX_LENGTH = 5;
-    private static final int MIN_REMINDER = 3;
 
     private static final int DEFAULT_CACHE_SIZE = 10000;
 
@@ -88,34 +86,35 @@ public class MorphAnalyzer {
 
     public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
         tagStorage = new Tag.Storage();
-        tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "литиница"));
-        tagStorage.newTag("LATN");
         dict = new Dictionary(tagStorage, loader, replaceChars);
-        prob = new ProbabilityEstimator(loader);
         knownPrefixSplitter = new KnownPrefixSplitter(loader);
+        units = Lists.newArrayList(new DictionaryUnit(tagStorage, dict, true, 1.0f),
+                                   new NumberUnit(tagStorage, true, 0.9f),
+                                   new PunctuationUnit(tagStorage, true, 0.9f),
+                                   new RomanUnit(tagStorage, false, 0.9f),
+                                   new LatinUnit(tagStorage, true, 0.9f),
+                                   new KnownPrefixUnit(tagStorage, dict, knownPrefixSplitter, true, 0.75f),
+                                   new UnknownPrefixUnit(tagStorage, dict, true, 0.5f));
+        prob = new ProbabilityEstimator(loader);
         if (cacheSize > 0) {
             cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
         }
-    }
-
-    public Tag getTag(String tagString) {
-        return tagStorage.getTag(tagString);
-    }
-
-    public Tag newTag(String tagString) {
-        return tagStorage.newTag(tagString);
     }
 
     public Grammeme getGrammeme(String value) {
         return tagStorage.getGrammeme(value);
     }
 
-    public Grammeme newGrammeme(List<String> grammemeInfo) {
-        return tagStorage.newGrammeme(grammemeInfo);
-    }
-
     public Collection<Grammeme> getAllGrammemes() {
         return tagStorage.getAllGrammemes();
+    }
+
+    public Tag getTag(String tagString) {
+        return tagStorage.getTag(tagString);
+    }
+
+    public Collection<Tag> getAllTags() {
+        return tagStorage.getAllTags();
     }
 
     public List<String> getNormalForms(String word) throws IOException {
@@ -146,69 +145,22 @@ public class MorphAnalyzer {
     }
 
     private List<Parsed> parseNC(String word) throws IOException {
-        String wordLower = word.toLowerCase();
-        List<Parsed> parseds = parseDict(wordLower);
+        List<Parsed> parseds = Lists.newArrayList();
+        for (AnalyzerUnit unit : units) {
+            List<Parsed> unitParseds = unit.parse(word);
+            if (unitParseds == null) {
+                continue;
+            }
 
-        if (parseds.isEmpty()) {
-            parseds.addAll(parseLatin(word));
-        }
-        if (parseds.isEmpty()) {
-            parseds.addAll(parseKnownPrefix(wordLower));
-        }
-        if (parseds.isEmpty()) {
-            parseds.addAll(parseUnknownPrefix(wordLower));
+            parseds.addAll(unitParseds);
+            if (unit.isTerminated() && !parseds.isEmpty()) {
+                break;
+            }
         }
 
         parseds = filterDups(parseds);
         parseds = estimate(parseds);
         Collections.sort(parseds, Collections.reverseOrder());
-        return parseds;
-    }
-
-    private List<Parsed> parseDict(String word) throws IOException {
-        return dict.parse(word);
-    }
-
-    private List<Parsed> parseLatin(String word) {
-        List<Parsed> parseds = new ArrayList<Parsed>();
-        String normWord =
-            Normalizer.normalize(word, Normalizer.Form.NFD)
-            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        if (normWord.matches("\\w+")) {
-            parseds.add(new Parsed(word, getTag("LATN"), word, word, SHAPE_SCORE));
-        }
-        return parseds;
-    }
-
-    private List<Parsed> parseKnownPrefix(String word) throws IOException {
-        List<Parsed> parseds = new ArrayList<Parsed>();
-        for (String prefix : knownPrefixSplitter.prefixes(word, MIN_REMINDER)) {
-            parseds.addAll(parseWithPrefix(word, prefix, KNOWN_PREFIX_DECAY));
-        }
-        return parseds;
-    }
-
-    private List<Parsed> parseUnknownPrefix(String word) throws IOException {
-        List<Parsed> parseds = new ArrayList<Parsed>();
-        int wordLength = word.length();
-        for (int i = 1; i <= MAX_PREFIX_LENGTH && wordLength - i >= MIN_REMINDER; i++) {
-            parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1), UNKNOWN_PREFIX_DECAY));
-        }
-        return parseds;
-    }
-
-    private List<Parsed> parseWithPrefix(String word, String prefix, float decay) throws IOException {
-        List<Parsed> parseds = new ArrayList<Parsed>();
-        for (Parsed p : dict.parse(word.substring(prefix.length()))) {
-            if (!p.tag.isProductive()) {
-                continue;
-            }
-            parseds.add(new Parsed(prefix + p.word,
-                                   p.tag,
-                                   prefix + p.normalForm,
-                                   p.word,
-                                   p.score * decay));
-        }
         return parseds;
     }
 
@@ -257,4 +209,179 @@ public class MorphAnalyzer {
         }
         return filteredParseds;
     }
+
+    // TODO: make as part of API
+    static abstract class AnalyzerUnit {
+        protected final Tag.Storage tagStorage;
+        protected final boolean terminate;
+        protected final float score;
+
+        public AnalyzerUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            this.tagStorage = tagStorage;
+            this.terminate = terminate;
+            this.score = score;
+        }
+
+        public boolean isTerminated() {
+            return terminate;
+        }
+
+        public abstract List<Parsed> parse(String word) throws IOException;
+    };
+
+    static class DictionaryUnit extends AnalyzerUnit {
+        protected final Dictionary dict;
+
+        public DictionaryUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
+            super(tagStorage, terminate, score);
+            this.dict = dict;
+        }
+
+        @Override
+        public List<Parsed> parse(String word) throws IOException {
+            return dict.parse(word.toLowerCase());
+        }
+    };
+
+
+    static class NumberUnit extends AnalyzerUnit {
+        public NumberUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            super(tagStorage, terminate, score);
+            this.tagStorage.newGrammeme(Lists.newArrayList("NUMB", "", "ЧИСЛО", "число"));
+            this.tagStorage.newGrammeme(Lists.newArrayList("intg", "", "цел", "целое"));
+            this.tagStorage.newGrammeme(Lists.newArrayList("real", "", "вещ", "вещественное"));
+            this.tagStorage.newTag("NUMB,intg");
+            this.tagStorage.newTag("NUMB,real");
+        }
+
+        @Override
+        public List<Parsed> parse(String word) {
+            Tag tag = null;
+            if (Ints.tryParse(word) != null) {
+                tag = tagStorage.getTag("NUMB,intg");
+            }
+            else if (Floats.tryParse(word) != null) {
+                tag = tagStorage.getTag("NUMB,real");
+            }
+
+            if (tag != null) {
+                return Lists.newArrayList(new Parsed(word, tag, word, word, score));
+            }
+            return null;
+        }
+    };
+
+    static class RegexUnit extends AnalyzerUnit {
+        protected final Pattern pattern;
+        protected final String tagString;
+
+        public RegexUnit(Tag.Storage tagStorage, String regex, String tagString, boolean terminate, float score) {
+            super(tagStorage, terminate, score);
+            this.pattern = Pattern.compile(regex);
+            this.tagString = tagString;
+        }
+
+        @Override
+        public List<Parsed> parse(String word) {
+            if (pattern.matcher(word).matches()) {
+                return Lists.newArrayList(new Parsed(word, tagStorage.getTag(tagString), word, word, score));
+            }
+            return null;
+        }
+    };
+
+    static class PunctuationUnit extends RegexUnit {
+        private static final String PUNCTUATION_REGEX = "\\p{Punct}+";
+        
+        public PunctuationUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            super(tagStorage, PUNCTUATION_REGEX, "PNCT", terminate, score);
+            this.tagStorage.newGrammeme(Lists.newArrayList("PNCT", "", "ЗПР", "пунктуация"));
+            this.tagStorage.newTag("PNCT");
+        }
+
+    };
+
+    static class LatinUnit extends RegexUnit {
+        private static final String LATIN_REGEX = "[\\p{IsLatin}\\d\\p{Punct}]+";
+
+        public LatinUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            super(tagStorage, LATIN_REGEX, "LATN", terminate, score);
+            tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "литиница"));
+            tagStorage.newTag("LATN");
+        }
+    };
+
+    static class RomanUnit extends RegexUnit {
+        private static final String ROMAN_REGEX =
+            "M{0,4}" +
+            "(CM|CD|D?C{0,3})" +
+            "(XC|XL|L?X{0,3})" +
+            "(IX|IV|V?I{0,3})";
+
+        public RomanUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            super(tagStorage, ROMAN_REGEX, "ROMN", terminate, score);
+            tagStorage.newGrammeme(Lists.newArrayList("ROMN", "", "РИМ", "римские цифры"));
+            tagStorage.newTag("ROMN");
+        }
+    };
+
+    static abstract class PrefixedUnit extends DictionaryUnit {
+        protected static final int MAX_PREFIX_LENGTH = 5;
+        protected static final int MIN_REMINDER = 3;
+
+        public PrefixedUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
+            super(tagStorage, dict, terminate, score);
+        }
+
+        protected List<Parsed> parseWithPrefix(String word, String prefix) throws IOException {
+            List<Parsed> parseds = new ArrayList<Parsed>();
+            for (Parsed p : dict.parse(word.substring(prefix.length()))) {
+                if (!p.tag.isProductive()) {
+                    continue;
+                }
+                parseds.add(new Parsed(prefix + p.word,
+                                       p.tag,
+                                       prefix + p.normalForm,
+                                       p.word,
+                                       p.score * score));
+            }
+            return parseds;
+        }
+    };
+
+    static class KnownPrefixUnit extends PrefixedUnit {
+        protected final KnownPrefixSplitter knownPrefixSplitter;
+
+        public KnownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, KnownPrefixSplitter knownPrefixSplitter, boolean terminate, float score) {
+            super(tagStorage, dict, terminate, score);
+            this.knownPrefixSplitter = knownPrefixSplitter;
+        }
+
+        @Override
+        public List<Parsed> parse(String word) throws IOException {
+            word = word.toLowerCase();
+            List<Parsed> parseds = new ArrayList<Parsed>();
+            for (String prefix : knownPrefixSplitter.prefixes(word, MIN_REMINDER)) {
+                parseds.addAll(parseWithPrefix(word, prefix));
+            }
+            return parseds;
+        }
+    };
+
+    static class UnknownPrefixUnit extends PrefixedUnit {
+        public UnknownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
+            super(tagStorage, dict, terminate, score);
+        }
+
+        @Override
+        public List<Parsed> parse(String word) throws IOException {
+            word = word.toLowerCase();
+            List<Parsed> parseds = new ArrayList<Parsed>();
+            int wordLength = word.length();
+            for (int i = 1; i <= MAX_PREFIX_LENGTH && wordLength - i >= MIN_REMINDER; i++) {
+                parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1)));
+            }
+            return parseds;
+        }
+    };
 }

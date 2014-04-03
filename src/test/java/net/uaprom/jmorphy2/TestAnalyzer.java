@@ -72,11 +72,30 @@ public class TestAnalyzer {
         assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", analyzer.parse("ёжик"));
         assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", analyzer.parse("ежик"));
 
+        // NUMB
+        assertParseds("1:NUMB,intg:1:1:1.0", analyzer.parse("1"));
+        assertParseds("1.0:NUMB,real:1.0:1.0:1.0", analyzer.parse("1.0"));
+
+        // PNCT
+        assertParseds(".:PNCT:.:.:1.0", analyzer.parse("."));
+        assertParseds(",:PNCT:,:,:1.0", analyzer.parse(","));
+        assertParseds("!?:PNCT:!?:!?:1.0", analyzer.parse("!?"));
+
         // LATN
         assertParseds("test:LATN:test:test:1.0", analyzer.parse("test"));
+        assertParseds("test1:LATN:test1:test1:1.0", analyzer.parse("test1"));
+        assertParseds("test1.0:LATN:test1.0:test1.0:1.0", analyzer.parse("test1.0"));
+        assertParseds(".test.:LATN:.test.:.test.:1.0", analyzer.parse(".test."));
         assertParseds("männer:LATN:männer:männer:1.0", analyzer.parse("männer"));
         assertParseds("", analyzer.parse("тестsymbolmix"));
-        
+
+        // ROMN (all roman numbers are also latin)
+        assertParseds("MD:ROMN:MD:MD:0.5\n" +
+                      "MD:LATN:MD:MD:0.5\n",
+                      analyzer.parse("MD"));
+
+        // TODO: ROMN, Hyphen
+
         assertEquals(Arrays.asList("красивый"), analyzer.getNormalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), analyzer.getNormalForms("для"));
         assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.getNormalForms("лошарикам"));
