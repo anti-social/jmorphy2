@@ -2,15 +2,23 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>net.uaprom.jmorphy2</groupId>
-  <artifactId>jmorphy2</artifactId>
+  <artifactId>jmorphy2-solr</artifactId>
   <version>0.1</version>
-  <packaging>pom</packaging>
 
-  <modules>
-    <module>dawg</module>
-    <module>jmorphy2-core</module>
-    <module>jmorphy2-solr</module>
-  </modules>
+  <name>Solr stemmer and tagger based on pymorphy2 dictionaries</name>
+
+  <dependencies>
+    <dependency>
+	  <groupId>org.apache.solr</groupId>
+	  <artifactId>solr-core</artifactId>
+	  <version>4.7.0</version>
+    </dependency>
+    <dependency>
+	  <groupId>net.uaprom.jmorphy2</groupId>
+	  <artifactId>jmorphy2-core</artifactId>
+	  <version>0.1</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>

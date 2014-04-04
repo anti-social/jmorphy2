@@ -2,15 +2,22 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>net.uaprom.jmorphy2</groupId>
-  <artifactId>jmorphy2</artifactId>
+  <artifactId>dawg</artifactId>
   <version>0.1</version>
-  <packaging>pom</packaging>
+  <name>Java library to read dawg files</name>
 
-  <modules>
-    <module>dawg</module>
-    <module>jmorphy2-core</module>
-    <module>jmorphy2-solr</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.9</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
