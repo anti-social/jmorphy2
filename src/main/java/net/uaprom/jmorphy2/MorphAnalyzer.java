@@ -315,7 +315,7 @@ public class MorphAnalyzer {
 
         public LatinUnit(Tag.Storage tagStorage, boolean terminate, float score) {
             super(tagStorage, LATIN_REGEX, "LATN", terminate, score);
-            tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "литиница"));
+            tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "латиница"));
             tagStorage.newTag("LATN");
         }
     };
