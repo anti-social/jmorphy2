@@ -39,14 +39,14 @@ public class MorphAnalyzer {
 
     private static final Logger logger = LoggerFactory.getLogger(MorphAnalyzer.class);
 
-    public static abstract class Loader {
+    public static abstract class FileLoader {
         public abstract InputStream getStream(String filename) throws IOException;
     }
 
-    public static class FileSystemLoader extends Loader {
+    public static class FSFileLoader extends FileLoader {
         private String path;
 
-        public FileSystemLoader(String path) {
+        public FSFileLoader(String path) {
             this.path = path;
         }
 
@@ -73,18 +73,18 @@ public class MorphAnalyzer {
     }
 
     public MorphAnalyzer(String path, Map<Character,String> replaceChars) throws IOException {
-        this(new FileSystemLoader(path), replaceChars, DEFAULT_CACHE_SIZE);
+        this(new FSFileLoader(path), replaceChars, DEFAULT_CACHE_SIZE);
     }
 
     public MorphAnalyzer(String path, Map<Character,String> replaceChars, int cacheSize) throws IOException {
-        this(new FileSystemLoader(path), replaceChars, cacheSize);
+        this(new FSFileLoader(path), replaceChars, cacheSize);
     }
 
-    public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars) throws IOException {
+    public MorphAnalyzer(FileLoader loader, Map<Character,String> replaceChars) throws IOException {
         this(loader, replaceChars, DEFAULT_CACHE_SIZE);
     }
 
-    public MorphAnalyzer(Loader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
+    public MorphAnalyzer(FileLoader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
         tagStorage = new Tag.Storage();
         dict = new Dictionary(tagStorage, loader, replaceChars);
         knownPrefixSplitter = new KnownPrefixSplitter(loader);
@@ -117,6 +117,10 @@ public class MorphAnalyzer {
         return tagStorage.getAllTags();
     }
 
+    public List<String> normalForms(char[] buffer, int offset, int count) throws IOException {
+        return normalForms(new String(buffer, offset, count));
+    }
+
     public List<String> normalForms(String word) throws IOException {
         List<Parsed> parseds = parse(word);
         List<String> normalForms = new ArrayList<String>();
@@ -131,6 +135,10 @@ public class MorphAnalyzer {
         return normalForms;
     }
 
+    public List<Tag> tag(char[] buffer, int offset, int count) throws IOException {
+        return tag(new String(buffer, offset, count));
+    }
+
     public List<Tag> tag(String word) throws IOException {
         List<Parsed> parseds = parse(word);
         List<Tag> tags = Lists.newArrayListWithCapacity(parseds.size());
@@ -138,6 +146,10 @@ public class MorphAnalyzer {
             tags.add(p.tag);
         }
         return tags;
+    }
+
+    public List<Parsed> parse(char[] buffer, int offset, int count) throws IOException {
+        return parse(new String(buffer, offset, count));
     }
 
     public List<Parsed> parse(String word) throws IOException {

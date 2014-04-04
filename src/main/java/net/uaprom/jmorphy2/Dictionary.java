@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,8 +17,6 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.noggit.JSONParser;
-
 import org.apache.commons.io.input.SwappedDataInputStream;
 
 import net.uaprom.dawg.PayloadsDAWG;
@@ -28,7 +24,7 @@ import net.uaprom.dawg.PayloadsDAWG;
 
 public class Dictionary {
     private final Tag.Storage tagStorage;
-    private Map<String, Object> meta;
+    private Map<String,Object> meta;
     private WordsDAWG words;
     private Paradigm[] paradigms;
     private String[] suffixes;
@@ -46,7 +42,7 @@ public class Dictionary {
 
     private static final Logger logger = LoggerFactory.getLogger(Dictionary.class);
 
-    public Dictionary(Tag.Storage tagStorage, MorphAnalyzer.Loader loader, Map<Character,String> replaceChars) throws IOException {
+    public Dictionary(Tag.Storage tagStorage, MorphAnalyzer.FileLoader loader, Map<Character,String> replaceChars) throws IOException {
         this(tagStorage,
              loader.getStream(META_FILENAME),
              loader.getStream(WORDS_FILENAME),
@@ -80,90 +76,16 @@ public class Dictionary {
 
     private void loadMeta(InputStream stream) throws IOException {
         meta = new HashMap<String,Object>();
-        List<List<Object>> parsed = (List<List<Object>>) parseJson(stream);
+        List<List<Object>> parsed = (List<List<Object>>) JSONUtils.parseJSON(stream);
         for (List<Object> pair : parsed) {
             meta.put((String) pair.get(0), pair.get(1));
         }
     }
 
     private void loadGrammemes(InputStream stream) throws IOException {
-        for (List<String> grammemeInfo : (List<List<String>>) parseJson(stream)) {
+        for (List<String> grammemeInfo : (List<List<String>>) JSONUtils.parseJSON(stream)) {
             tagStorage.newGrammeme(grammemeInfo);
         }
-    }
-
-    private Object parseJson(InputStream stream) throws IOException {
-        JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream)));
-        Deque<Object> stack = new LinkedList<Object>();
-        Object obj = null, prevObj = null, container = null;
-        int event;
-        
-        while ((event = parser.nextEvent()) != JSONParser.EOF) {
-            switch (event) {
-            case JSONParser.ARRAY_START:
-                obj = new ArrayList<Object>();
-                stack.addFirst(obj);
-                continue;
-            case JSONParser.OBJECT_START:
-                obj = new HashMap<Object, Object>();
-                stack.addFirst(obj);
-                continue;
-            case JSONParser.STRING:
-                obj = parser.getString();
-                break;
-            case JSONParser.LONG:
-                obj = parser.getLong();
-                break;
-            case JSONParser.NUMBER:
-                obj = parser.getDouble();
-                break;
-            case JSONParser.BOOLEAN:
-                obj = parser.getBoolean();
-                break;
-            case JSONParser.NULL:
-                parser.getNull();
-                obj = null;
-                break;
-            case JSONParser.ARRAY_END:
-            case JSONParser.OBJECT_END:
-                obj = stack.removeFirst();
-                if (stack.isEmpty()) {
-                    return obj;
-                }
-                break;
-            }
-
-            container = stack.peekFirst();
-            if (container instanceof List) {
-                ((List<Object>) container).add(obj);
-            }
-            else if (container instanceof Map) {
-                if (obj != null && prevObj != null) {
-                    ((Map<Object,Object>) container).put(obj, prevObj);
-                }
-                else {
-                    prevObj = obj;
-                    obj = null;
-                }
-            }
-        }
-        return obj;
-    }
-
-    private String[] readJsonStrings(InputStream stream) throws IOException {
-        ArrayList<String> stringList = new ArrayList<String>();
-        String[] stringArray;
-
-        JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream)));
-        int event;
-        while ((event = parser.nextEvent()) != JSONParser.EOF) {
-            if (event == JSONParser.STRING) {
-                stringList.add(parser.getString());
-            }
-        }
-        
-        stringArray = new String[stringList.size()];
-        return stringList.toArray(stringArray);
     }
 
     private void loadParadigms(InputStream stream) throws IOException {
@@ -176,16 +98,16 @@ public class Dictionary {
     }
 
     private void loadSuffixes(InputStream stream) throws IOException {
-        suffixes = readJsonStrings(stream);
+        suffixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
     }
 
     private void loadParadigmPrefixes(InputStream stream) throws IOException {
-        paradigmPrefixes = readJsonStrings(stream);
+        paradigmPrefixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
     }
 
     private void loadGramtab(InputStream stream) throws IOException {
         gramtab = new ArrayList<Tag>();
-        for (String tagString : readJsonStrings(stream)) {
+        for (String tagString : (List<String>) JSONUtils.parseJSON(stream)) {
             gramtab.add(tagStorage.newTag(tagString));
         }
     }
