@@ -9,20 +9,14 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 
 @RunWith(JUnit4.class)
-public class TestAnalyzer {
-    private MorphAnalyzer analyzer;
-
-    public TestAnalyzer() throws IOException {
-        Map<Character,String> replaceChars = new HashMap<Character,String>();
-        replaceChars.put('е', "ё");
-        analyzer = new MorphAnalyzer(replaceChars);
+public class MorphAnalyzerTest extends BaseTestCase {
+    public MorphAnalyzerTest() throws IOException {
+        super();
     }
 
     @Test

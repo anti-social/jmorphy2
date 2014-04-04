@@ -67,7 +67,7 @@
         <version>2.16</version>
         <configuration>
           <excludes>
-            <exclude>**/Benchmark*.java</exclude>
+            <exclude>**/*Benchmark.java</exclude>
           </excludes>
           <systemPropertyVariables>
             <dictPath>${project.build.resources[0].directory}/dict</dictPath>

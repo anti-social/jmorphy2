@@ -8,24 +8,19 @@ import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 
 @RunWith(JUnit4.class)
-public class BenchmarkAnalyzer {
+public class MorphAnalyzerBenchmark extends BaseTestCase {
     private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
     private static final int DEFAULT_REPEATS = 20;
 
-    private MorphAnalyzer analyzer;
     private List<WordCount> words;
 
-    public BenchmarkAnalyzer() throws IOException {
-        Map<Character,String> replaceChars = new HashMap<Character,String>();
-        replaceChars.put('е', "ё");
-        analyzer = new MorphAnalyzer(replaceChars, 0);
+    public MorphAnalyzerBenchmark() throws IOException {
+        super();
         loadWords(WORDS_FREQ_RESOURCE);
     }
 
