@@ -9,4 +9,9 @@
 *~
 \#*#
 
+# maven #
 target/
+
+# pymorphy2 dicts #
+pymorphy2-dicts-*
+pymorphy2_dicts/

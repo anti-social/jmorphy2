@@ -11,7 +11,7 @@ public class BaseTestCase {
     protected MorphAnalyzer analyzer;
 
     public BaseTestCase() throws IOException {
-        final String dictPath = "/dict";
+        final String dictPath = "/pymorphy2_dicts";
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
         analyzer = new MorphAnalyzer(new MorphAnalyzer.FileLoader() {

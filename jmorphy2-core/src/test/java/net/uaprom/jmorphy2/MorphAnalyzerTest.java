@@ -50,9 +50,9 @@ public class MorphAnalyzerTest extends BaseTestCase {
                       "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1999999",
                       analyzer.parse("псевдокошка"));
 
-        assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.777777\n" +
-                      "снега:NOUN,inan,masc plur,nomn:снег:снега:0.111111\n" +
-                      "снега:NOUN,inan,masc plur,accs:снег:снега:0.111111\n",
+        assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.8\n" +
+                      "снега:NOUN,inan,masc plur,nomn:снег:снега:0.1\n" +
+                      "снега:NOUN,inan,masc plur,accs:снег:снега:0.1\n",
                       analyzer.parse("снега"));
 
         // gen2, loct, loc2
