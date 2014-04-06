@@ -69,6 +69,7 @@ public class Dictionary {
         this.replaceChars = replaceChars;
     }
 
+    @SuppressWarnings("unchecked")
     private void loadMeta(InputStream stream) throws IOException {
         meta = new HashMap<String,Object>();
         List<List<Object>> parsed = (List<List<Object>>) JSONUtils.parseJSON(stream);
@@ -77,6 +78,7 @@ public class Dictionary {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void loadGrammemes(InputStream stream) throws IOException {
         for (List<String> grammemeInfo : (List<List<String>>) JSONUtils.parseJSON(stream)) {
             tagStorage.newGrammeme(grammemeInfo);
@@ -92,14 +94,17 @@ public class Dictionary {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void loadSuffixes(InputStream stream) throws IOException {
         suffixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
     }
 
+    @SuppressWarnings("unchecked")
     private void loadParadigmPrefixes(InputStream stream) throws IOException {
         paradigmPrefixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
     }
 
+    @SuppressWarnings("unchecked")
     private void loadGramtab(InputStream stream) throws IOException {
         gramtab = new ArrayList<Tag>();
         for (String tagString : (List<String>) JSONUtils.parseJSON(stream)) {

@@ -15,6 +15,7 @@ import org.noggit.JSONParser;
 
 
 public class JSONUtils {
+    @SuppressWarnings("unchecked")
     public static Object parseJSON(InputStream stream) throws IOException {
         JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream)));
         Deque<Object> stack = new LinkedList<Object>();
@@ -28,7 +29,7 @@ public class JSONUtils {
                 stack.addFirst(obj);
                 continue;
             case JSONParser.OBJECT_START:
-                obj = new HashMap<Object, Object>();
+                obj = new HashMap<Object,Object>();
                 stack.addFirst(obj);
                 continue;
             case JSONParser.STRING:

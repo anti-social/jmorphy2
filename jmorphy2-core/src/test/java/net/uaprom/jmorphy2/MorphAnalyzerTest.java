@@ -65,6 +65,9 @@ public class MorphAnalyzerTest extends BaseTestCase {
         // е, ё
         assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", analyzer.parse("ёжик"));
         assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", analyzer.parse("ежик"));
+        assertParseds("теплые:ADJF,Qual plur,nomn:тёплый:теплые:0.5\n" +
+                      "теплые:ADJF,Qual inan,plur,accs:тёплый:теплые:0.5",
+                      analyzer.parse("теплые"));
 
         // NUMB
         assertParseds("1:NUMB,intg:1:1:1.0", analyzer.parse("1"));
