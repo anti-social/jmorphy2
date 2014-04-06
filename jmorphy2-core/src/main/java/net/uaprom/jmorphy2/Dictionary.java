@@ -14,9 +14,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Collection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.commons.io.input.SwappedDataInputStream;
 
 import net.uaprom.dawg.PayloadsDAWG;
@@ -39,8 +36,6 @@ public class Dictionary {
     public static final String SUFFIXES_FILENAME = "suffixes.json";
     public static final String PARADIGM_PREFIXES_FILENAME = "paradigm-prefixes.json";
     public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
-
-    private static final Logger logger = LoggerFactory.getLogger(Dictionary.class);
 
     public Dictionary(Tag.Storage tagStorage, MorphAnalyzer.FileLoader loader, Map<Character,String> replaceChars) throws IOException {
         this(tagStorage,

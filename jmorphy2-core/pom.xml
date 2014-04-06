@@ -36,16 +36,6 @@
       <version>16.0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.7.6</version>
-    </dependency>
-    <dependency>
 	  <groupId>net.uaprom.jmorphy2</groupId>
 	  <artifactId>dawg</artifactId>
 	  <version>0.1</version>

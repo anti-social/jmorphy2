@@ -14,9 +14,6 @@ import java.util.Collections;
 import java.util.regex.Pattern;
 import java.text.Normalizer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -36,8 +33,6 @@ public class MorphAnalyzer {
     private static final String DICT_PATH_VAR = "dictPath";
 
     private static final int DEFAULT_CACHE_SIZE = 10000;
-
-    private static final Logger logger = LoggerFactory.getLogger(MorphAnalyzer.class);
 
     public static abstract class FileLoader {
         public abstract InputStream getStream(String filename) throws IOException;
