@@ -26,7 +26,7 @@ public class Dictionary {
     private Paradigm[] paradigms;
     private String[] suffixes;
     private String[] paradigmPrefixes;
-    private List<Tag> gramtab;
+    private Tag[] gramtab;
     private Map<Character,String> replaceChars;
 
     public static final String META_FILENAME = "meta.json";
@@ -106,9 +106,11 @@ public class Dictionary {
 
     @SuppressWarnings("unchecked")
     private void loadGramtab(InputStream stream) throws IOException {
-        gramtab = new ArrayList<Tag>();
-        for (String tagString : (List<String>) JSONUtils.parseJSON(stream)) {
-            gramtab.add(tagStorage.newTag(tagString));
+        List<String> tagStrings = (List<String>) JSONUtils.parseJSON(stream);
+        int tagsLength = tagStrings.size();
+        gramtab = new Tag[tagsLength];
+        for (int i = 0; i < tagsLength; i++) {
+            gramtab[i] = tagStorage.newTag(tagStrings.get(i));
         }
     }
 
@@ -122,51 +124,36 @@ public class Dictionary {
         List<Parsed> parseds = new ArrayList<Parsed>();
 
         for (PayloadsDAWG.Payload item : items) {
-            WordsDAWG.FoundParadigm paradigm = (WordsDAWG.FoundParadigm) item;
-            String nf = buildNormalForm(paradigm.paraId,
-                                        paradigm.idx,
-                                        paradigm.key);
-            Tag tag = buildTag(paradigm.paraId, paradigm.idx);
+            WordsDAWG.FoundParadigm fp = (WordsDAWG.FoundParadigm) item;
+            Paradigm paradigm = paradigms[fp.paraId];
+            String nf = buildNormalForm(paradigm, fp.idx, fp.key);
+            Tag tag = buildTag(paradigm, fp.idx);
             parseds.add(new Parsed(word, tag, nf, word, 1.0f));
         }
         
         return parseds;
     }
 
-    protected Tag buildTag(short paraId, short idx) {
-        Paradigm paradigm = paradigms[paraId];
-        int offset = paradigm.paradigm.length / 3;
-        int tagId = paradigm.paradigm[offset + idx];
-        return gramtab.get(tagId);
+    protected Tag buildTag(Paradigm paradigm, short idx) {
+        return gramtab[paradigm.getTagId(idx)];
     }
 
-    protected String buildNormalForm(short paraId, short idx, String word) {
-        Paradigm paradigm = paradigms[paraId];
-        int paradigmLength = paradigm.paradigm.length / 3;
-        String stem = buildStem(paradigm.paradigm, idx, word);
-
-        int prefixId = paradigm.paradigm[paradigmLength * 2 + 0] & 0xFFFF;
-        int suffixId = paradigm.paradigm[0] & 0xFFFF;
-
-        String prefix = paradigmPrefixes[prefixId];
-        String suffix = suffixes[suffixId];
+    protected String buildNormalForm(Paradigm paradigm, short idx, String word) {
+        String stem = buildStem(paradigm, idx, word);
+        String prefix = paradigmPrefixes[paradigm.getNormPrefixId()];
+        String suffix = suffixes[paradigm.getNormSuffixId()];
         
         return prefix + stem + suffix;
     }
 
-    protected String buildStem(short[] paradigm, short idx, String word) {
-        int paradigmLength = paradigm.length / 3;
-        int prefixId = paradigm[paradigmLength * 2 + idx] & 0xFFFF;
-        String prefix = paradigmPrefixes[prefixId];
-        int suffixId = paradigm[idx] & 0xFFFF;
-        String suffix = suffixes[suffixId];
+    protected String buildStem(Paradigm paradigm, short idx, String word) {
+        String prefix = paradigmPrefixes[paradigm.getStemPrefixId(idx)];
+        String suffix = suffixes[paradigm.getStemSuffixId(idx)];
 
         if (!suffix.equals("")) {
             return word.substring(prefix.length(), word.length() - suffix.length());
         }
-        else {
-            return word.substring(prefix.length());
-        }
+        return word.substring(prefix.length());
     }
 
     public class WordsDAWG extends PayloadsDAWG {
@@ -193,19 +180,37 @@ public class Dictionary {
         };
     };
 
-    public static class Paradigm {
-        public short[] paradigm;
+    class Paradigm {
+        private final short[] data;
+        private final int length;
 
         public Paradigm(DataInput input) throws IOException {
-            short length = input.readShort();
-            paradigm = new short[length];
-            for (int i = 0; i < length; i++) {
-                paradigm[i] = input.readShort();
+            short size = input.readShort();
+            this.data = new short[size];
+            for (int i = 0; i < size; i++) {
+                this.data[i] = input.readShort();
             }
+            this.length = size / 3;
         }
 
-        public short[] getParadigm() {
-            return paradigm;
+        public int getNormSuffixId() {
+            return data[0];
+        }
+
+        public int getNormPrefixId() {
+            return data[length * 2];
+        }
+
+        public int getStemSuffixId(short idx) {
+            return data[idx];
+        }
+
+        public int getStemPrefixId(short idx) {
+            return data[length * 2 + idx];
+        }
+
+        public int getTagId(short idx) {
+            return data[length + idx];
         }
     };
 }
