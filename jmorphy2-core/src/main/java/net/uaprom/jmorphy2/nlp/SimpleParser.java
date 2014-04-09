@@ -55,7 +55,9 @@ public class SimpleParser {
         return partsOfSpeech;
     }
 
-    // public List<Node> topParse(String[] tokens) throws IOException {
+    // public List<Node> topParse(Node.Top[] taggedTokens) throws IOException {
+    //     return null;
+
     //     float maxWeight = 0.0f;
     //     List<Node> nodes = null;
     //     MatchedRule bestMatchedRule = null;
@@ -67,11 +69,6 @@ public class SimpleParser {
     //         }
     //         float weight = matchedRule.weight * seq.score;
     //         // float weight = matchedRule.weight;
-    //         // System.out.println("===================");
-    //         // System.out.println(matchedRule);
-    //         // System.out.println(seq.score);
-    //         // System.out.println(weight);
-    //         // System.out.println("===================");
     //         if (weight > maxWeight) {
     //             bestMatchedRule = matchedRule;
     //             maxWeight = weight;

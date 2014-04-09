@@ -86,7 +86,9 @@ public abstract class Rules {
         }
 
         public Node apply(ImmutableList<Node> nodes) {
-            return new Node(nodes.subList(0, rightSize), left);
+            float score = 0.0f;
+            for (Node n : nodes) score += n.score;
+            return new Node(nodes.subList(0, rightSize), left, score);
         }
 
         @Override

@@ -5,15 +5,11 @@ import java.util.List;
 import java.util.Deque;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.NavigableSet;
-import java.util.Comparator;
+import java.util.Collections;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.CharMatcher;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
@@ -37,6 +33,7 @@ public class SimpleTagger {
     public Node.Top[] tagAll(String[] tokens) throws IOException {
         List<Node.Top> results = new ArrayList<Node.Top>();
         tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
+        Collections.sort(results, Collections.reverseOrder(Node.comparator));
         return results.toArray(new Node.Top[0]);
     }
 
@@ -46,8 +43,6 @@ public class SimpleTagger {
         // test rules
         for (Rules.Rule rule : rules.matchAll(nodes)) {
             reducedNodes.add(rule.apply(nodes));
-            // nodes.subList(0, rule.rightSize);
-            // reducedNodes.add(new Token());
         }
         // parse word
         if (reducedNodes.isEmpty()) {
@@ -55,7 +50,8 @@ public class SimpleTagger {
             List<Parsed> parseds = analyzer.parse(tNode.word);
             for (Parsed p : parseds) {
                 reducedNodes.add(new Token(tNode.word,
-                                           ImmutableSet.copyOf(p.tag.getGrammemeValues())));
+                                           ImmutableSet.copyOf(p.tag.getGrammemeValues()),
+                                           p.score));
             }
         }
         // leave as is
@@ -68,7 +64,11 @@ public class SimpleTagger {
             int offset = node.isLeaf() ? 1 : node.getChildren().size();
             ImmutableList<Node> tail = nodes.subList(offset, nodes.size());
             if (tail.isEmpty()) {
-                results.add(new Node.Top(ImmutableList.copyOf(nodesStack), 1.0f));
+                float score = 0.0f;
+                for (Node n : nodesStack) {
+                    score += n.score;
+                }
+                results.add(new Node.Top(ImmutableList.copyOf(nodesStack), score));
             } else {
                 tagAll(results, nodesStack, tail);
             }
@@ -95,7 +95,8 @@ public class SimpleTagger {
                 if (!parseds.isEmpty()) {
                     Parsed p = parseds.get(0);
                     nodesBuilder.add(new Token(tNode.word,
-                                               ImmutableSet.copyOf(p.tag.getGrammemeValues())));
+                                               ImmutableSet.copyOf(p.tag.getGrammemeValues()),
+                                               p.score));
                     score += p.score;
                 } else {
                     nodesBuilder.add(tokenNodes.get(i));
@@ -109,7 +110,7 @@ public class SimpleTagger {
     private ImmutableList<Node> makeTokens(String[] words) {
         ImmutableList.Builder<Node> tokensBuilder = ImmutableList.builder();
         for (String w : words) {
-            tokensBuilder.add(new Token(w, ImmutableSet.of("UNKN")));
+            tokensBuilder.add(new Token(w, ImmutableSet.of("UNKN"), 1.0f));
         }
         return tokensBuilder.build();
     }
@@ -147,12 +148,15 @@ public class SimpleTagger {
 
         @Override
         public Node apply(ImmutableList<Node> nodes) {
-            List<Node> tokens = nodes.subList(0, rightSize);
+            List<Node> rNodes = nodes.subList(0, rightSize);
             List<String> words = new ArrayList<String>();
-            for (Node t : tokens) {
-                words.add(((Token) t).word);
+            float score = 0.0f;
+            for (Node node : rNodes) {
+                Token t = (Token) node;
+                words.add(t.word);
+                score += t.score;
             }
-            return new Token(Joiner.on(" ").join(words), left);
+            return new Token(Joiner.on(" ").join(words), left, score);
         }
     }
 
@@ -170,8 +174,8 @@ public class SimpleTagger {
     public static class Token extends Node {
         public final String word;
 
-        public Token(String word, ImmutableSet<String> values) {
-            super(null, values);
+        public Token(String word, ImmutableSet<String> values, float score) {
+            super(null, values, score);
             this.word = word;
         }
 
