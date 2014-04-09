@@ -55,38 +55,38 @@ public class SimpleParser {
         return partsOfSpeech;
     }
 
-    public List<Node> topParse(String[] tokens) throws IOException {
-        float maxWeight = 0.0f;
-        List<Node> nodes = null;
-        MatchedRule bestMatchedRule = null;
-        for (SimpleTagger.Sequence seq : tagger.allSequences(tokens)) {
-            nodes = makeNodes(seq);
-            MatchedRule matchedRule = parse(nodes);
-            if (matchedRule == null) {
-                continue;
-            }
-            float weight = matchedRule.weight * seq.score;
-            // float weight = matchedRule.weight;
-            // System.out.println("===================");
-            // System.out.println(matchedRule);
-            // System.out.println(seq.score);
-            // System.out.println(weight);
-            // System.out.println("===================");
-            if (weight > maxWeight) {
-                bestMatchedRule = matchedRule;
-                maxWeight = weight;
-            }
-        }
+    // public List<Node> topParse(String[] tokens) throws IOException {
+    //     float maxWeight = 0.0f;
+    //     List<Node> nodes = null;
+    //     MatchedRule bestMatchedRule = null;
+    //     for (SimpleTagger.Sequence seq : tagger.allSequences(tokens)) {
+    //         nodes = makeNodes(seq);
+    //         MatchedRule matchedRule = parse(nodes);
+    //         if (matchedRule == null) {
+    //             continue;
+    //         }
+    //         float weight = matchedRule.weight * seq.score;
+    //         // float weight = matchedRule.weight;
+    //         // System.out.println("===================");
+    //         // System.out.println(matchedRule);
+    //         // System.out.println(seq.score);
+    //         // System.out.println(weight);
+    //         // System.out.println("===================");
+    //         if (weight > maxWeight) {
+    //             bestMatchedRule = matchedRule;
+    //             maxWeight = weight;
+    //         }
+    //     }
 
-        Deque<MatchedRule> matchedRules = new LinkedList<MatchedRule>();
-        MatchedRule mRule = bestMatchedRule;
-        while (mRule != null) {
-            matchedRules.addFirst(mRule);
-            mRule = mRule.parent;
-        }
-        // System.out.println(matchedRules);
-        return applyRules(matchedRules, nodes);
-    }
+    //     Deque<MatchedRule> matchedRules = new LinkedList<MatchedRule>();
+    //     MatchedRule mRule = bestMatchedRule;
+    //     while (mRule != null) {
+    //         matchedRules.addFirst(mRule);
+    //         mRule = mRule.parent;
+    //     }
+    //     // System.out.println(matchedRules);
+    //     return applyRules(matchedRules, nodes);
+    // }
 
     private List<Node> applyRules(Iterable<MatchedRule> matchedRules, List<Node> nodes) {
         for (MatchedRule mRule : matchedRules) {
@@ -96,13 +96,13 @@ public class SimpleParser {
         return nodes;
     }
 
-    private List<Node> makeNodes(SimpleTagger.Sequence seq) {
-        List<Node> nodes = new LinkedList<Node>();
-        for (Parsed p : seq.parsedTokens) {
-            nodes.add(new Word(p.tag.getGrammemeValues(), p.word));
-        }
-        return nodes;
-    }
+    // private List<Node> makeNodes(SimpleTagger.Sequence seq) {
+    //     List<Node> nodes = new LinkedList<Node>();
+    //     for (Parsed p : seq.parsedTokens) {
+    //         nodes.add(new Word(p.tag.getGrammemeValues(), p.word));
+    //     }
+    //     return nodes;
+    // }
 
     private void reduce(List<Node> nodes, MatchedRule matchedRule) {
         List<Node> children = new ArrayList<Node>();
@@ -123,7 +123,7 @@ public class SimpleParser {
         // }
         // return reducedNodes;
     }
-    
+
     private void expand(List<Node> nodes, MatchedRule matchedRule) {
         Node oldNode = nodes.remove(matchedRule.offset);
         nodes.addAll(matchedRule.offset, oldNode.children);
@@ -275,7 +275,7 @@ public class SimpleParser {
         public String toString() {
             return String.format("%s -> %s [%s]", origLeft, origRight, weight);
         }
-    }
+    };
 
     public static class Rules {
         public final List<Rule> rules = new ArrayList<Rule>();
