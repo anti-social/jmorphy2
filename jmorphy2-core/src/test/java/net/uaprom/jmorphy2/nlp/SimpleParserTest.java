@@ -32,23 +32,29 @@ public class SimpleParserTest extends BaseTestCase {
         System.out.println(tagger.tag(new String[]{"женские", "сапоги", "на", "зиму"}));
         System.out.println(tagger.tag(new String[]{"чехол", "для", "iphone", "4s"}));
         System.out.println(tagger.tag(new String[]{"шуруповерт", "Bosch"}));
-
         System.out.println("=======================");
-        for (Node.Top t : tagger.tagAll(new String[]{"женские", "сапоги"})) {
-            System.out.println(t);
-        }
-        for (Node.Top t : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
-            System.out.println(t);
-        }
+
+        // for (Node top : tagger.tagAll(new String[]{"женские", "сапоги"})) {
+        //     System.out.println(top);
+        // }
+        // for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
+        //     System.out.println(top);
+        // }
+        // System.out.println("=======================");
     }
 
-    // @Test
-    // public void testParse() throws IOException {
-    //     System.out.println(parser.topParse(new String[]{"женские", "сапоги"}));
-    //     System.out.println(parser.topParse(new String[]{"чехол", "для", "телефона"}));
-    //     System.out.println(parser.topParse(new String[]{"чехол", "для", "iphone", "5"}));
-    //     // System.out.println(parser.topParse(new String[]{"женские", "сапоги", "коричневые"}));
-    //     // System.out.println(parser.topParse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}));
-    //     // System.out.println(parser.topParse(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
-    // }
+    @Test
+    public void testParse() throws IOException {
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})));
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})));
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})));
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги", "коричневые"})));
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})));
+        System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"})));
+        System.out.println("=======================");
+        // for (Node top : parser.parseAll(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}))) {
+        //     System.out.println(top);
+        // }
+        // System.out.println("=======================");
+    }
 }

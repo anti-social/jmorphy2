@@ -5,16 +5,15 @@ import java.util.ArrayList;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
 
-public abstract class Rules {
+public class Rules {
     private final List<Rule> rules = new ArrayList<Rule>();
 
     private static Splitter rhsSplitter = Splitter.on("|").trimResults().omitEmptyStrings();
-
-    public abstract Rule newRule(String left, String right, float weight);
 
     public void add(String left, String right) {
         add(left, right, 1.0f);
@@ -22,7 +21,7 @@ public abstract class Rules {
 
     public void add(String left, String right, float weight) {
         for (String rightPart : rhsSplitter.split(right)) {
-            rules.add(newRule(left, rightPart, weight));
+            rules.add(new Rule(left, rightPart, weight));
         }
     }
 
@@ -50,13 +49,17 @@ public abstract class Rules {
         return Joiner.on("\n").join(rules);
     }
 
-    public static abstract class Rule {
+    public static class Rule {
         public final String origLeft;
         public final String origRight;
         public final ImmutableSet<String> left;
-        public final ImmutableList<Node.Matcher> right;
+        public final ImmutableList<NodeMatcher> right;
         public final int rightSize;
         public final float weight;
+
+        private static Splitter grammemeSplitter = Splitter.on(",");
+        private static Splitter rhsSplitter = Splitter.on(" ").trimResults();
+        private static CharMatcher wordMatcher = CharMatcher.anyOf("'\"");
 
         public Rule(String left, String right, float weight) {
             this.origLeft = left;
@@ -67,9 +70,22 @@ public abstract class Rules {
             this.weight = weight;
         }
 
-        protected abstract ImmutableSet<String> parseLeft(String left);
-            
-        protected abstract ImmutableList<Node.Matcher> parseRight(String right);
+        protected ImmutableSet<String> parseLeft(String left) {
+            return ImmutableSet.copyOf(grammemeSplitter.split(left));
+        }
+
+        protected ImmutableList<NodeMatcher> parseRight(String right) {
+            ImmutableList.Builder<NodeMatcher> listBuilder = ImmutableList.builder();
+            for (String part : rhsSplitter.split(right)) {
+                if ((part.startsWith("'") && part.endsWith("'")) ||
+                    (part.startsWith("\"") && part.endsWith("\""))) {
+                    listBuilder.add(new NodeMatcher(null, wordMatcher.trimFrom(part)));
+                } else {
+                    listBuilder.add(new NodeMatcher(ImmutableSet.copyOf(grammemeSplitter.split(part)), null));
+                }
+            }
+            return listBuilder.build();
+        }
 
         public boolean match(List<Node> nodes) {
             int n = right.size();
@@ -86,14 +102,27 @@ public abstract class Rules {
         }
 
         public Node apply(ImmutableList<Node> nodes) {
-            float score = 0.0f;
-            for (Node n : nodes) score += n.score;
-            return new Node(nodes.subList(0, rightSize), left, score);
+            ImmutableList<Node> reducedNodes = nodes.subList(0, rightSize);
+            return new Node(left, reducedNodes, Node.calcScore(reducedNodes));
         }
 
         @Override
         public String toString() {
             return String.format("%s -> %s", origLeft, origRight);
         }
-    }
+
+        public static class NodeMatcher {
+            private final ImmutableSet<String> grammemeValues;
+            private final String word;
+
+            public NodeMatcher(ImmutableSet<String> grammemeValues, String word) {
+                this.grammemeValues = grammemeValues;
+                this.word = word;
+            }
+
+            public boolean match(Node node) {
+                return node.match(grammemeValues, word);
+            }
+        };
+    };
 }

@@ -1,7 +1,7 @@
 package net.uaprom.jmorphy2.nlp;
 
 import java.io.IOException;
-import java.lang.Math;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Deque;
 import java.util.ArrayList;
@@ -10,16 +10,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Collections;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import com.google.common.base.Function;
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
 import net.uaprom.jmorphy2.Tag;
@@ -55,252 +48,65 @@ public class SimpleParser {
         return partsOfSpeech;
     }
 
-    // public List<Node> topParse(Node.Top[] taggedTokens) throws IOException {
-    //     return null;
-
-    //     float maxWeight = 0.0f;
-    //     List<Node> nodes = null;
-    //     MatchedRule bestMatchedRule = null;
-    //     for (SimpleTagger.Sequence seq : tagger.allSequences(tokens)) {
-    //         nodes = makeNodes(seq);
-    //         MatchedRule matchedRule = parse(nodes);
-    //         if (matchedRule == null) {
-    //             continue;
-    //         }
-    //         float weight = matchedRule.weight * seq.score;
-    //         // float weight = matchedRule.weight;
-    //         if (weight > maxWeight) {
-    //             bestMatchedRule = matchedRule;
-    //             maxWeight = weight;
-    //         }
-    //     }
-
-    //     Deque<MatchedRule> matchedRules = new LinkedList<MatchedRule>();
-    //     MatchedRule mRule = bestMatchedRule;
-    //     while (mRule != null) {
-    //         matchedRules.addFirst(mRule);
-    //         mRule = mRule.parent;
-    //     }
-    //     // System.out.println(matchedRules);
-    //     return applyRules(matchedRules, nodes);
-    // }
-
-    private List<Node> applyRules(Iterable<MatchedRule> matchedRules, List<Node> nodes) {
-        for (MatchedRule mRule : matchedRules) {
-            // System.out.println(mRule);
-            reduce(nodes, mRule);
-        }
-        return nodes;
+    public Node.Top parse(Node.Top[] sentences) {
+        return parseAll(sentences)[0];
     }
 
-    // private List<Node> makeNodes(SimpleTagger.Sequence seq) {
-    //     List<Node> nodes = new LinkedList<Node>();
-    //     for (Parsed p : seq.parsedTokens) {
-    //         nodes.add(new Word(p.tag.getGrammemeValues(), p.word));
-    //     }
-    //     return nodes;
-    // }
-
-    private void reduce(List<Node> nodes, MatchedRule matchedRule) {
-        List<Node> children = new ArrayList<Node>();
-        for (int i = 0; i < matchedRule.count; i++) {
-            children.add(nodes.remove(matchedRule.offset));
-        }
-        Node newNode = new Node(children, matchedRule.rule.left);
-        nodes.add(matchedRule.offset, newNode);
-
-        // List<Node> reducedNodes = new ArrayList<Node>();
-        // for (int i = 0; i < matchedRule.offset; i++) {
-        //     reducedNodes.add(nodes.get(i));
-        // }
-        // Node newNode = new Node(matchedRule.rule.left);
-        // reducedNodes.add(matchedRule.offset, newNode);
-        // for (int i = matchedRule.offset + matchedRule.count; i < nodes.size(); i++) {
-        //     reducedNodes.add(nodes.get(i));
-        // }
-        // return reducedNodes;
+    public Node.Top[] parseAll(Node.Top[] sentences) {
+        return parseAll(Arrays.asList(sentences)).toArray(new Node.Top[0]);
     }
 
-    private void expand(List<Node> nodes, MatchedRule matchedRule) {
-        Node oldNode = nodes.remove(matchedRule.offset);
-        nodes.addAll(matchedRule.offset, oldNode.children);
-    }
-    
-    private MatchedRule parse(List<Node> nodes) {
-        return parse(nodes, null);
-    }
-
-    private MatchedRule parse(List<Node> nodes, MatchedRule current) {
-        // System.out.println(nodes);
-        MatchedRule bestMatchedRule = current;
-        float parentWeight = current == null ? 0.0f : current.weight;
-        for (MatchedRule mRule : matchAll(nodes)) {
-            mRule.parent = current;
-            mRule.weight = mRule.rule.weight + parentWeight;
-            // System.out.println(mRule);
-            reduce(nodes, mRule);
-            MatchedRule maybeBestRule = parse(nodes, mRule);
-            // System.out.println(maybeBestRule);
-            expand(nodes, mRule);
-
-            if (bestMatchedRule == null || maybeBestRule.weight > bestMatchedRule.weight) {
-                bestMatchedRule = maybeBestRule;
-            }
-        }
-
-        // if (bestMatchedRule == current) {
-        //     System.out.println(nodes);
-        //     System.out.println(bestMatchedRule);
-        // }
-        return bestMatchedRule;
-    }
-
-    private List<MatchedRule> matchAll(List<Node> nodes) {
-        List<MatchedRule> matchedRules = new ArrayList<MatchedRule>();
-        int maxCount = Math.min(rules.getLongestRuleCount(), nodes.size());
-
-        for (int count = 1; count <= maxCount; count++) {
-            for (int offset = 0; offset <= nodes.size() - count; offset++) {
-                Rule rule = rules.match(nodes, offset, count);
-                if (rule != null) {
-                    matchedRules.add(new MatchedRule(rule, offset, count));
-                }
-            }
-        }
-
-        return matchedRules;
-    }
-
-    static class MatchedRule {
-        public final Rule rule;
-        public final int offset;
-        public final int count;
-        public float weight;
-        public MatchedRule parent;
-        public List<MatchedRule> children;
-
-        public MatchedRule(Rule rule, int offset, int count) {
-            this.rule = rule;
-            this.offset = offset;
-            this.count = count;
-            this.children = new LinkedList<MatchedRule>();
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s, %s", rule, weight);
-        }
-    };
-
-    public static class Rule {
-        public final String origLeft;
-        public final String origRight;
-        public final Set<String> left;
-        public final List<Set<String>> right;
-        public final float weight;
-
-        private final int[] flags;
-        private static final int NO_COMMON = 0x01;
-
-        public Rule(String left, String right, float weight) {
-            this.origLeft = left;
-            this.origRight = right;
-            this.weight = weight;
-
-            this.left = new HashSet<String>();
-            for (String value : left.split(",")) {
-                this.left.add(value);
-            }
-
-            this.right = new ArrayList<Set<String>>();
-            String[] parts = right.split(" ");
-            this.flags = new int[parts.length];
-            int i = 0;
-            for (String part : parts) {
-                Set<String> clauses = new HashSet<String>();
-                this.right.add(clauses);
-
-                CharMatcher matcher = CharMatcher.is('@');
-                if (matcher.matchesAnyOf(part)) {
-                    part = matcher.removeFrom(part);
-                    flags[i] |= NO_COMMON;
-                }
-                
-                for (String value : part.split(",")) {
-                    clauses.add(value);
+    private List<Node.Top> parseAll(List<Node.Top> sentences) {
+        List<Node.Top> results = new ArrayList<Node.Top>();
+        Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
+        
+        while (!sentences.isEmpty()) {
+            List<Node.Top> nextSentences = new ArrayList<Node.Top>();
+            for (Node.Top sent : sentences) {
+                boolean hasMatchedRules = false;
+                ImmutableList<Node> nodes = sent.getChildren();
+                int nodesSize = sent.getChildrenSize();
+                for (int i = 0; i < nodesSize; i++) {
+                    List<Rules.Rule> matchedRules = rules.matchAll(nodes.subList(i, nodesSize));
+                    if (!matchedRules.isEmpty()) {
+                        hasMatchedRules = true;
+                    }
+                    for (Rules.Rule rule : matchedRules) {
+                        List<Node> subNodes = nodes.subList(i, i + rule.rightSize);
+                        Node.Top top = new Node.Top(reduce(rule, nodes, i),
+                                                    (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
+                        if (!uniqueTops.contains(top)) {
+                            nextSentences.add(top);
+                            uniqueTops.add(top);
+                        }
+                    }
                 }
 
-                i++;
-            }
-        }
-
-        public boolean match(List<Node> nodes, int offset, int count) {
-            int n = right.size();
-            if (count != n) {
-                return false;
-            }
-
-            for (int i = 0; i < count; i++) {
-                if (!nodes.get(offset + i).grammemes.containsAll(right.get(i))) {
-                    return false;
+                if (!hasMatchedRules) {
+                    results.add(sent);
                 }
             }
-
-            return true;
+            sentences = nextSentences;
         }
 
-        // private Set<String> calculateCommon(List<Set<String>> candidate) {
-        //     Set<String> common = null;
-        //     for (int i = 0; i < right.size(); i++) {
-        //         if ((flags[i] & NO_COMMON) != 0) {
-        //             continue;
-        //         }
-        //         if (common == null) {
-        //             common = candidate.get(i);
-        //         }
-        //         else {
-        //             common = Sets.intersection(common, candidate.get(i));
-        //         }
-        //     }
-        //     if (common == null) {
-        //         return Collections.EMPTY_SET;
-        //     }
-        //     return common;
-        // }
+        Collections.sort(results, Collections.reverseOrder(Node.scoreComparator));
+        return results;
+    }
 
-        @Override
-        public String toString() {
-            return String.format("%s -> %s [%s]", origLeft, origRight, weight);
-        }
-    };
-
-    public static class Rules {
-        public final List<Rule> rules = new ArrayList<Rule>();
-        protected int longestRuleCount = 0;
-
-        public void add(String left, String right, float weight) {
-            Rule rule = new Rule(left, right, weight);
-            rules.add(rule);
-            longestRuleCount = Math.max(longestRuleCount, rule.right.size());
-        }
-
-        public int getLongestRuleCount() {
-            return longestRuleCount;
-        }
-
-        public Rule match(List<Node> nodes, int offset, int count) {
-            for (Rule rule : rules) {
-                if (rule.match(nodes, offset, count)) {
-                    return rule;
-                }
-            }
-            return null;
-        }
-    };
+    private ImmutableList<Node> reduce(Rules.Rule rule, ImmutableList<Node> nodes, int offset) {
+        ImmutableList<Node> reducedNodes = nodes.subList(offset, offset + rule.rightSize);
+        ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
+        newNodesBuilder.addAll(nodes.subList(0, offset));
+        newNodesBuilder.add(new Node(rule.left, reducedNodes, Node.calcScore(reducedNodes)));
+        newNodesBuilder.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
+        return newNodesBuilder.build();
+    }
 
     public static final Rules defaultRules = new Rules();
     static {
+        // S - sentence
         // NP - noun phrase
+        // VP - verb phrase
         // defaultRules.add("S", "NP VP", 1000);
         // defaultRules.add("S", "NP", 900);
         defaultRules.add("NP", "NP PP", 100);
@@ -308,8 +114,8 @@ public class SimpleParser {
         defaultRules.add("PP", "PREP NP", 50);
         defaultRules.add("PP", "PREP LATN", 50);
         defaultRules.add("PP", "PREP NUMB", 50);
-        defaultRules.add("PP", "PP LATN", 50);
-        defaultRules.add("PP", "PP NUMB", 50);
+        defaultRules.add("PP", "PP LATN", 75);
+        defaultRules.add("PP", "PP NUMB", 75);
         defaultRules.add("NP,nomn", "NP,nomn CONJ NP,nomn", 750);
         defaultRules.add("NP", "NP CONJ NP", 500);
         defaultRules.add("NP", "NP,nomn NP,gent ", 200);
@@ -381,34 +187,5 @@ public class SimpleParser {
         ADVERBIAL,  // обстоятельство
         APPOSITION, // приложение
         OBJECT,     // дополнение
-    };
-
-    public static class Node {
-        protected final List<Node> children;
-        protected final Set<String> grammemes;
-
-        public Node(List<Node> children, Set<String> grammemes) {
-            this.children = children;
-            this.grammemes = grammemes;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s %s)", grammemes, Joiner.on(" ").join(children));
-        }
-    }
-    
-    public static class Word extends Node {
-        public final String word;
-
-        public Word(Set<String> grammemes, String word) {
-            super(null, grammemes);
-            this.word = word;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s %s)", grammemes, word);
-        }
     };
 }
