@@ -1,7 +1,6 @@
 package net.uaprom.jmorphy2.nlp;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Deque;
 import java.util.ArrayList;
@@ -14,6 +13,9 @@ import java.util.TreeSet;
 import java.util.SortedSet;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.lang.UnsupportedOperationException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -51,11 +53,11 @@ public class SimpleParser {
     }
 
     public Node.Top parse(List<Node.Top> sentences) {
-        return parseAll(sentences).last();
+        return parseAll(sentences).get(0);
     }
 
-    private SortedSet<Node.Top> parseAll(List<Node.Top> sentences) {
-        // int variants = 0, filteredVariants = 0;
+    public List<Node.Top> parseAll(List<Node.Top> sentences) {
+        int variants = 0, filteredVariants = 0;
         SortedSet<Node.Top> results = new TreeSet<Node.Top>(Node.scoreComparator());
         Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
         
@@ -65,22 +67,42 @@ public class SimpleParser {
                 boolean hasMatchedRules = false;
                 ImmutableList<Node> nodes = sent.getChildren();
                 int nodesSize = sent.getChildrenSize();
-                for (int i = 0; i < nodesSize; i++) {
-                    List<Rules.Rule> matchedRules = rules.matchAll(nodes.subList(i, nodesSize));
-                    if (!matchedRules.isEmpty()) {
-                        hasMatchedRules = true;
-                    }
-                    for (Rules.Rule rule : matchedRules) {
-                        List<Node> subNodes = nodes.subList(i, i + rule.rightSize);
-                        Node.Top top = new Node.Top(reduce(rule, nodes, i),
-                                                    (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
-                        // variants++;
-                        if (!uniqueTops.contains(top)) {
-                            nextSentences.add(top);
-                            uniqueTops.add(top);
+                int minCount = 1;
+                for (int offset = 0; offset <= nodesSize - minCount; offset++) {
+                    for (int count = minCount; count <= nodesSize - offset; count++) {
+                        List<Node> subNodes = nodes.subList(offset, offset + count);
+                        List<Rules.Rule> matchedRules = rules.matchAll(subNodes);
+                        if (!matchedRules.isEmpty()) {
+                            hasMatchedRules = true;
+                        }
+                        for (Rules.Rule rule : matchedRules) {
+                            Node.Top top = new Node.Top(reduce(rule, nodes, offset),
+                                                        (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
+                            variants++;
+                            if (!uniqueTops.contains(top)) {
+                                nextSentences.add(top);
+                                uniqueTops.add(top);
+                            }
                         }
                     }
                 }
+
+                // for (List<Node> subNodes : subNodes(nodes, 1, rules.getMaxRightSize())) {
+                //     List<Rules.Rule> matchedRules = rules.matchAll(subNodes);
+                //     if (!matchedRules.isEmpty()) {
+                //         hasMatchedRules = true;
+                //     }
+                //     for (Rules.Rule rule : matchedRules) {
+                //         List<Node> subNodes = nodes.subList(i, i + rule.rightSize);
+                //         Node.Top top = new Node.Top(reduce(rule, nodes, i),
+                //                                     (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
+                //         variants++;
+                //         if (!uniqueTops.contains(top)) {
+                //             nextSentences.add(top);
+                //             uniqueTops.add(top);
+                //         }
+                //     }
+                // }
 
                 if (!hasMatchedRules) {
                     results.add(sent);
@@ -89,11 +111,52 @@ public class SimpleParser {
             sentences = nextSentences;
         }
 
-        // Collections.sort(results, Collections.reverseOrder(Node.scoreComparator));
         // System.out.println(variants);
         // System.out.println(uniqueTops.size());
-        return results;
+        // System.out.println(results.size());
+        return new ArrayList<Node.Top>(results);
     }
+
+    // private Iterable<List<Node>> subNodes(final List<Node> nodes, final int minCount, final int maxCount) {
+    //     final int nodesSize = nodes.size();
+    //     final int maxOffset = nodesSize - minCount;
+
+    //     return new Iterable<List<Node>>() {
+    //         @Override
+    //         public Iterator<List<Node>> iterator() {
+    //             return new Iterator<List<Node>>() {
+    //                 private int curOffset = 0;
+    //                 private int curCount = minCount;
+                
+    //                 @Override
+    //                 public boolean hasNext() {
+    //                     if (curOffset <= maxOffset) return true;
+    //                     return false;
+    //                 }
+
+    //                 @Override
+    //                 public List<Node> next() {
+    //                     if (!hasNext()) {
+    //                         throw new NoSuchElementException();
+    //                     }
+
+    //                     List<Node> subNodes = nodes.subList(curOffset, curOffset + curCount);
+    //                     if (curOffset + curCount < nodesSize) {
+    //                         curCount++;
+    //                     } else {
+    //                         curOffset++;
+    //                         curCount = minCount;
+    //                     }
+    //                     return subNodes;
+    //                 }
+
+    //                 public void remove() {
+    //                     throw new UnsupportedOperationException();
+    //                 }
+    //             };
+    //         }
+    //     };
+    // }
 
     private ImmutableList<Node> reduce(Rules.Rule rule, ImmutableList<Node> nodes, int offset) {
         ImmutableList<Node> reducedNodes = nodes.subList(offset, offset + rule.rightSize);
@@ -118,21 +181,29 @@ public class SimpleParser {
         defaultRules.add("PP", "PREP NUMB", 50);
         defaultRules.add("PP", "PP LATN", 75);
         defaultRules.add("PP", "PP NUMB", 75);
-        defaultRules.add("NP,nomn", "NP,nomn CONJ NP,nomn", 750);
+
+        // defaultRules.add("NP,nomn", "NP,nomn CONJ NP,nomn", 750);
         defaultRules.add("NP", "NP CONJ NP", 500);
+
         defaultRules.add("NP", "NP,nomn NP,gent ", 200);
-        defaultRules.add("NP,nomn", "ADJF,nomn NP,nomn", 200);
-        defaultRules.add("NP,gent", "ADJF,gent NP,gent", 150);
+
+        // defaultRules.add("NP,nomn", "ADJF,nomn NP,nomn", 200);
+        // defaultRules.add("NP,gent", "ADJF,gent NP,gent", 150);
         defaultRules.add("NP", "ADJF NP", 100);
-        defaultRules.add("NP,nomn", "NP,nomn ADJF,nomn", 100);
-        defaultRules.add("NP,gent", "NP,gent ADJF,gent", 75);
+
+        // defaultRules.add("NP,nomn", "NP,nomn ADJF,nomn", 100);
+        // defaultRules.add("NP,gent", "NP,gent ADJF,gent", 75);
         defaultRules.add("NP", "NP ADJF", 50);
-        defaultRules.add("NP,nomn", "NOUN,nomn", 10);
-        defaultRules.add("NP,gent", "NOUN,gent", 9);
-        defaultRules.add("NP,nomn", "ADJF,nomn", 5);
+
         defaultRules.add("VP", "INFN VERB", 10);
+
+        // defaultRules.add("NP,nomn", "NOUN,nomn", 10);
+        // defaultRules.add("NP,gent", "NOUN,gent", 9);
         defaultRules.add("NP", "NOUN", 3);
+
+        // defaultRules.add("NP,nomn", "ADJF,nomn", 5);
         defaultRules.add("NP", "ADJF", 2);
+
         defaultRules.add("VP", "INFN", 1);
         defaultRules.add("VP", "VERB", 1);
     };
@@ -164,23 +235,6 @@ public class SimpleParser {
     //         PREPOSITION_MATHING.put("по", "accs|datv|loct");
     //         PREPOSITION_MATHING.put("с", "gent|accs|ablt");
     //     };
-
-    //     public static int CASE_MATHING_SCORE = 100;
-    //     public static List<Rule> CASE_MATCHING = new ArrayList<Rule>();
-    //     static {
-    //         // CASE_MATHING.put(new Sequence("ADJF", "NOUN"), 1.5f);
-    //         // CASE_MATHING.put(new Sequence("NOUN", "ADJF"), 1.0f);
-
-    //         CASE_MATHING.add(new Rule("NP", "NP CONJ NP", 1000));
-    //         CASE_MATHING.add(new Rule("NP", "ADJF NP", 1000));
-    //         CASE_MATHING.add(new Rule("NP", "NP ADJF", 900));
-    //         CASE_MATHING.add(new Rule("NP", "ADJF NOUN", 1000));
-    //         CASE_MATHING.add(new Rule("NP", "NOUN ADJF", 400));
-    //         CASE_MATHING.add(new Rule("NP", "NOUN,nomn NOUN,gent"), 100);
-    //         CASE_MATHING.add(new Rule("NP", "NOUN,nomn", 50));
-    //         CASE_MATHING.add(new Rule("NP", "ADJF,nomn", 40));
-    //     };
-    // };
 
     public static enum Grammar {
         SUBJECT,    // подлежащее

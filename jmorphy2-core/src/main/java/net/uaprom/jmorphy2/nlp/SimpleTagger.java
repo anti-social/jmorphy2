@@ -52,8 +52,10 @@ public class SimpleTagger {
         List<Node> reducedNodes = new ArrayList<Node>();
 
         // test rules
-        for (Rules.Rule rule : rules.matchAll(nodes)) {
-            reducedNodes.add(reduce(rule, nodes));
+        for (int count = 1; count <= rules.getMaxRightSize(); count++) {
+            for (Rules.Rule rule : rules.matchAll(nodes.subList(0, count))) {
+                reducedNodes.add(reduce(rule, nodes));
+            }
         }
         // parse word
         if (reducedNodes.isEmpty()) {

@@ -1,34 +1,26 @@
 package net.uaprom.jmorphy2.nlp;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Comparator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Function;
 import com.google.common.hash.HashCode;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
 
 public class Node {
     public final ImmutableSet<String> grammemeValues;
+    public final String grammemeValuesStr;
     public final ImmutableList<Node> children;
     public final String word;
     public final float score;
-    protected final ByteBuffer digest = null;
-    private Integer cachedHash = null;
-
-    public static Comparator<Node> scoreComparator() {
-        return new Comparator<Node>() {
-            @Override
-            public int compare(Node n1, Node n2) {
-                return Float.compare(n1.score, n2.score);
-            }
-        };
-    }
+    private final Integer cachedHashCode;
 
     public Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, float score) {
         this(grammemeValues, children, null, score);
@@ -39,11 +31,15 @@ public class Node {
     }
 
     protected Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, String word, float score) {
+        if (grammemeValues == null) {
+            throw new RuntimeException("grammemeValues must not be null");
+        }
         this.grammemeValues = grammemeValues;
+        this.grammemeValuesStr = Joiner.on(",").join(Ordering.natural().sortedCopy(grammemeValues));
         this.children = children;
         this.word = word;
         this.score = score;
-        // this.digest = calcDigest();
+        this.cachedHashCode = calcHashCode();
     }
 
     public boolean hasChildren() {
@@ -62,10 +58,6 @@ public class Node {
         return word;
     }
 
-    public ByteBuffer getDigest() {
-        return digest;
-    }
-
     public boolean match(ImmutableSet<String> grammemeValues, String word) {
         if (grammemeValues != null) {
             if (!this.grammemeValues.containsAll(grammemeValues)) {
@@ -80,6 +72,23 @@ public class Node {
         return true;
     }
 
+    public String getCacheKey() {
+        String w = "";
+        if (word != null) {
+            w = String.format("'%s'", word);
+        }
+        return String.format("%s%s", w, grammemeValuesStr);
+    }
+
+    public static Function<Node,String> cacheKeyFunc() {
+        return new Function<Node,String>() {
+            @Override
+            public String apply(Node node) {
+                return node.getCacheKey();
+            }
+        };
+    }
+
     public static float calcScore(List<Node> nodes) {
         float score = 0.0f;
         for (Node n : nodes) {
@@ -88,49 +97,21 @@ public class Node {
         return score;
     }
 
-    // protected ByteBuffer calcDigest() {
-    //     System.out.println(">>> calcDigest");
-    //     System.out.println(this);
-    //     MessageDigest md;
-    //     try {
-    //         md = MessageDigest.getInstance("SHA-1");
-    //     } catch (NoSuchAlgorithmException e) {
-    //         throw new RuntimeException(e.getMessage());
-    //     }
-
-    //     try {
-    //         System.out.println(Joiner.on(",").join(grammemeValues));
-    //         md.update(Joiner.on(",").join(grammemeValues).getBytes("UTF-8"));
-    //     } catch (UnsupportedEncodingException e) {
-    //         throw new RuntimeException(e.getMessage());
-    //     }
-
-    //     if (hasChildren()) {
-    //         for (Node child : children) {
-    //             System.out.println(HashCode.fromBytes(child.digest.array()));
-    //             System.out.println(HashCode.fromBytes(child.calcDigest().array()));
-    //             md.update(child.digest);
-    //         }
-    //     } else {
-    //         try {
-    //             System.out.println(word);
-    //             md.update(word.getBytes("UTF-8"));
-    //         } catch (UnsupportedEncodingException e) {
-    //             throw new RuntimeException(e.getMessage());
-    //         }
-    //     }
-
-    //     System.out.println(HashCode.fromBytes(md.digest()));
-    //     System.out.println("<<< calcDigest");
-    //     System.out.println("");
-    //     return ByteBuffer.wrap(md.digest());
-    // }
+    public static Comparator<Node> scoreComparator() {
+        return new Comparator<Node>() {
+            @Override
+            public int compare(Node n1, Node n2) {
+                return Float.compare(n2.score, n1.score);
+            }
+        };
+    }
 
     @Override
     public int hashCode() {
-        if (cachedHash != null) {
-            return cachedHash;
-        }
+        return cachedHashCode;
+    }
+
+    private int calcHashCode() {
         int h = grammemeValues.hashCode();
         if (children != null) {
             h = h * 37 + children.hashCode();
@@ -138,8 +119,7 @@ public class Node {
         if (word != null) {
             h = h * 37 + word.hashCode();
         }
-        cachedHash = h;
-        return cachedHash;
+        return h;
     }
 
     @Override
@@ -149,23 +129,15 @@ public class Node {
         }
 
         Node other = (Node) obj;
-        if (word == null && other.word != null ||
-            other.word == null && word != null) {
-            return false;
-        }
-        if (children == null && other.children != null ||
-            other.children == null && children != null) {
-            return false;
-        }
         return grammemeValues.equals(other.grammemeValues)
-            && (children == other.children || children.equals(other.children))
-            && (word == other.word || word.equals(other.word));
+            && (children == null ? other.children == null : children.equals(other.children))
+            && (word == null ? other.word == null : word.equals(other.word));
     }
 
     @Override
     public String toString() {
         return String.format("(%s %s)",
-                             Joiner.on(",").join(grammemeValues),
+                             grammemeValuesStr,
                              hasChildren() ? Joiner.on(" ").join(children) : word);
     }
 
