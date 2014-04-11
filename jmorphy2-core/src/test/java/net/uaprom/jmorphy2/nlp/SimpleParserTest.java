@@ -26,32 +26,47 @@ public class SimpleParserTest extends BaseTestCase {
         parser = new SimpleParser(analyzer, tagger);
     }
 
-    @Test
-    public void testTagger() throws IOException {
-        System.out.println(tagger.tag(new String[]{"женские", "сапоги"}));
-        System.out.println(tagger.tag(new String[]{"женские", "сапоги", "на", "зиму"}));
-        System.out.println(tagger.tag(new String[]{"чехол", "для", "iphone", "4s"}));
-        System.out.println(tagger.tag(new String[]{"шуруповерт", "Bosch"}));
-        System.out.println("=======================");
+    // @Test
+    // public void testTagger() throws IOException {
+    //     System.out.println(tagger.tag(new String[]{"женские", "сапоги"}));
+    //     System.out.println(tagger.tag(new String[]{"женские", "сапоги", "на", "зиму"}));
+    //     System.out.println(tagger.tag(new String[]{"чехол", "для", "iphone", "4s"}));
+    //     System.out.println(tagger.tag(new String[]{"шуруповерт", "Bosch"}));
+    //     System.out.println("=======================");
 
-        // for (Node top : tagger.tagAll(new String[]{"женские", "сапоги"})) {
-        //     System.out.println(top);
-        // }
-        // for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
-        //     System.out.println(top);
-        // }
-        // System.out.println("=======================");
-    }
+    //     // for (Node top : tagger.tagAll(new String[]{"женские", "сапоги"})) {
+    //     //     System.out.println(top);
+    //     // }
+    //     // for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
+    //     //     System.out.println(top);
+    //     // }
+    //     // System.out.println("=======================");
+    // }
 
     @Test
     public void testParse() throws IOException {
-        System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})));
-        System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})));
-        System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})));
-        System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги", "коричневые"})));
-        System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})));
+        // System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})));
+        // System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})));
+        // System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})));
+        // System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги", "коричневые"})));
+        // System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})));
         System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"})));
         System.out.println("=======================");
+
+        long startTime = 0L, endTime = 0L;
+        int N = 1000;
+        // warmup
+        for (int i = 0; i < N * 10; i++) {
+            parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
+        }
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < N; i++) {
+            parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",
+                                         ((float) N) / (endTime - startTime) * 1000));
+        
         // for (Node top : parser.parseAll(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}))) {
         //     System.out.println(top);
         // }

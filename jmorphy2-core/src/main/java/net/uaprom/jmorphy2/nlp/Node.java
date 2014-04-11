@@ -21,13 +21,14 @@ public class Node {
     protected final ByteBuffer digest = null;
     private Integer cachedHash = null;
 
-    public static final Comparator<Node> scoreComparator =
-        new Comparator<Node>() {
+    public static Comparator<Node> scoreComparator() {
+        return new Comparator<Node>() {
             @Override
             public int compare(Node n1, Node n2) {
                 return Float.compare(n1.score, n2.score);
             }
-    };
+        };
+    }
 
     public Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, float score) {
         this(grammemeValues, children, null, score);

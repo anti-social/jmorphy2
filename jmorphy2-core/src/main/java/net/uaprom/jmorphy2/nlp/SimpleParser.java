@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.SortedSet;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -48,16 +50,13 @@ public class SimpleParser {
         return partsOfSpeech;
     }
 
-    public Node.Top parse(Node.Top[] sentences) {
-        return parseAll(sentences)[0];
+    public Node.Top parse(List<Node.Top> sentences) {
+        return parseAll(sentences).last();
     }
 
-    public Node.Top[] parseAll(Node.Top[] sentences) {
-        return parseAll(Arrays.asList(sentences)).toArray(new Node.Top[0]);
-    }
-
-    private List<Node.Top> parseAll(List<Node.Top> sentences) {
-        List<Node.Top> results = new ArrayList<Node.Top>();
+    private SortedSet<Node.Top> parseAll(List<Node.Top> sentences) {
+        // int variants = 0, filteredVariants = 0;
+        SortedSet<Node.Top> results = new TreeSet<Node.Top>(Node.scoreComparator());
         Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
         
         while (!sentences.isEmpty()) {
@@ -75,6 +74,7 @@ public class SimpleParser {
                         List<Node> subNodes = nodes.subList(i, i + rule.rightSize);
                         Node.Top top = new Node.Top(reduce(rule, nodes, i),
                                                     (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
+                        // variants++;
                         if (!uniqueTops.contains(top)) {
                             nextSentences.add(top);
                             uniqueTops.add(top);
@@ -89,7 +89,9 @@ public class SimpleParser {
             sentences = nextSentences;
         }
 
-        Collections.sort(results, Collections.reverseOrder(Node.scoreComparator));
+        // Collections.sort(results, Collections.reverseOrder(Node.scoreComparator));
+        // System.out.println(variants);
+        // System.out.println(uniqueTops.size());
         return results;
     }
 

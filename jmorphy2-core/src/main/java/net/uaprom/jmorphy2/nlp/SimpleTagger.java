@@ -30,11 +30,11 @@ public class SimpleTagger {
         this.rules = rules;
     }
 
-    public Node.Top[] tagAll(String[] tokens) throws IOException {
+    public List<Node.Top> tagAll(String[] tokens) throws IOException {
         List<Node.Top> results = new ArrayList<Node.Top>();
         tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
-        Collections.sort(results, Collections.reverseOrder(Node.scoreComparator));
-        return results.toArray(new Node.Top[0]);
+        Collections.sort(results, Collections.reverseOrder(Node.scoreComparator()));
+        return results;
     }
 
     private Node reduce(Rules.Rule rule, ImmutableList<Node> nodes) {
