@@ -1,6 +1,5 @@
 package net.uaprom.jmorphy2.nlp;
 
-import java.lang.Math;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +8,6 @@ import java.util.ArrayList;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.CharMatcher;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -21,21 +18,8 @@ public class Rules {
     private final Map<Integer,List<Rule>> rulesBySize = new HashMap<Integer,List<Rule>>();
     private int maxRightSize;
 
-    private Cache<String,List<Rule>> cache = null;
-    
-    private static final int DEFAULT_CACHE_SIZE = 10000;
     private static final Splitter rhsSplitter = Splitter.on("|").trimResults().omitEmptyStrings();
 
-    public Rules() {
-        this(DEFAULT_CACHE_SIZE);
-    }
-
-    public Rules(int cacheSize) {
-        if (cacheSize > 0) {
-            cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
-        }
-    }
-    
     public void add(String left, String right) {
         add(left, right, 1.0f);
     }
@@ -70,20 +54,6 @@ public class Rules {
     }
 
     public List<Rule> matchAll(List<Node> nodes) {
-        String cacheKey =
-            Joiner.on(" ").join(Lists.transform(nodes, Node.cacheKeyFunc()));
-        List<Rule> matchedRules = cache.getIfPresent(cacheKey);
-        // System.out.println(cacheKey);
-        // System.out.println(matchedRules);
-        if (matchedRules == null) {
-            matchedRules = matchAllNC(nodes);
-            cache.put(cacheKey, matchedRules);
-        }
-        return matchedRules;
-        // return matchAllNC(nodes);
-    }
-
-    private List<Rule> matchAllNC(List<Node> nodes) {
         List<Rule> matchedRules = new ArrayList<Rule>();
         List<Rule> testRules = rulesBySize.get(nodes.size());
         if (testRules == null) {

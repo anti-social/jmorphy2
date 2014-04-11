@@ -9,8 +9,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
 
 import net.uaprom.jmorphy2.MorphAnalyzer;
 import net.uaprom.jmorphy2.BaseTestCase;
@@ -44,7 +42,7 @@ public class SimpleParserTest extends BaseTestCase {
     }
 
     @Test
-    public void testParse() throws IOException {
+    public void testParser() throws IOException {
         System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})));
         System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})));
         System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})));
@@ -53,24 +51,28 @@ public class SimpleParserTest extends BaseTestCase {
         System.out.println(parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"})));
         System.out.println("=======================");
 
-        // long startTime = 0L, endTime = 0L;
-        // int N = 1000;
-        // // warmup
-        // for (int i = 0; i < N * 10; i++) {
-        //     parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
-        // }
-        // startTime = System.currentTimeMillis();
-        // for (int i = 0; i < N; i++) {
-        //     parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}));
-        // }
-        // endTime = System.currentTimeMillis();
-        // System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",
-        //                                  ((float) N) / (endTime - startTime) * 1000));
-        // System.out.println("=======================");
-        
         // for (Node top : parser.parseAll(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}))) {
         //     System.out.println(top);
         // }
         // System.out.println("=======================");
+    }
+
+    // @Test
+    public void benchmarkParser() throws IOException {
+        String[] words = new String[]{"уборка", "снега", "и", "вывоз", "льда"};
+        long startTime = 0L, endTime = 0L;
+        int N = 1000;
+        // warmup
+        for (int i = 0; i < N * 20; i++) {
+            parser.parse(tagger.tagAll(words));
+        }
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < N; i++) {
+            parser.parse(tagger.tagAll(words));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",
+                                         ((float) N) / (endTime - startTime) * 1000));
+        System.out.println("=======================");
     }
 }

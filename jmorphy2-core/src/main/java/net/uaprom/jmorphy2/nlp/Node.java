@@ -1,14 +1,9 @@
 package net.uaprom.jmorphy2.nlp;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Comparator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Function;
-import com.google.common.hash.HashCode;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -70,23 +65,6 @@ public class Node {
             }
         }
         return true;
-    }
-
-    public String getCacheKey() {
-        String w = "";
-        if (word != null) {
-            w = String.format("'%s'", word);
-        }
-        return String.format("%s%s", w, grammemeValuesStr);
-    }
-
-    public static Function<Node,String> cacheKeyFunc() {
-        return new Function<Node,String>() {
-            @Override
-            public String apply(Node node) {
-                return node.getCacheKey();
-            }
-        };
     }
 
     public static float calcScore(List<Node> nodes) {

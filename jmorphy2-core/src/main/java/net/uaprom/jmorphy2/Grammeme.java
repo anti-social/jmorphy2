@@ -43,6 +43,9 @@ public class Grammeme {
     public Grammeme getRoot() {
         Grammeme grammeme = this;
         Grammeme parentGrammeme = grammeme.getParent();
+        if (parentGrammeme == null) {
+            return null;
+        }
         while (parentGrammeme != null) {
             grammeme = parentGrammeme;
             parentGrammeme = grammeme.getParent();
