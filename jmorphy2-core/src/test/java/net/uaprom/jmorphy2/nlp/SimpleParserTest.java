@@ -24,7 +24,7 @@ public class SimpleParserTest extends BaseTestCase {
         parser = new SimpleParser(analyzer, tagger);
     }
 
-    // @Test
+    @Test
     public void testTagger() throws IOException {
         System.out.println(tagger.tag(new String[]{"женские", "сапоги"}));
         System.out.println(tagger.tag(new String[]{"женские", "сапоги", "на", "зиму"}));
@@ -32,17 +32,17 @@ public class SimpleParserTest extends BaseTestCase {
         System.out.println(tagger.tag(new String[]{"шуруповерт", "Bosch"}));
         System.out.println("=======================");
 
-        // for (Node top : tagger.tagAll(new String[]{"женские", "сапоги"})) {
+        // for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
         //     System.out.println(top);
         // }
-        for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
-            System.out.println(top);
-        }
-        System.out.println("=======================");
+        // System.out.println("=======================");
     }
 
     @Test
     public void testParser() throws IOException {
+        // assertEquals("(TOP (NP,nomn,plur (ADJF,nomn,plur женские) ((NP,nomn,plur (NOUN,nomn,plur сапоги)))))",
+        //              parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})).toString());
+        
         System.out.println(parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})));
         System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})));
         System.out.println(parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})));

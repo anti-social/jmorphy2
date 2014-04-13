@@ -131,7 +131,7 @@ public class Rules {
 
         @Override
         public String toString() {
-            return String.format("%s -> %s", leftStr, rightStr);
+            return String.format("%s -> %s [%s]", leftStr, rightStr, weight);
         }
 
         public static class NodeMatcher {

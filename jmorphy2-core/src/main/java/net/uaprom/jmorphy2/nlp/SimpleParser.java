@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.SortedSet;
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
@@ -57,7 +56,7 @@ public class SimpleParser {
     }
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {
-        SortedSet<Node.Top> results = new TreeSet<Node.Top>(Node.scoreComparator());
+        List<Node.Top> results = new ArrayList<Node.Top>();
         Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
         
         while (!sentences.isEmpty()) {
@@ -75,8 +74,8 @@ public class SimpleParser {
                             hasMatchedRules = true;
                         }
                         for (Rules.Rule rule : matchedRules) {
-                            Node.Top top = new Node.Top(reduce(rule, nodes, offset),
-                                                        (Node.calcScore(subNodes) + rule.weight) / subNodes.size());
+                            ImmutableList<Node> reducedNodes = reduce(rule, nodes, offset);
+                            Node.Top top = new Node.Top(reducedNodes, Node.calcScore(reducedNodes));
                             if (!uniqueTops.contains(top)) {
                                 nextSentences.add(top);
                                 uniqueTops.add(top);
@@ -92,7 +91,8 @@ public class SimpleParser {
             sentences = nextSentences;
         }
 
-        return new ArrayList<Node.Top>(results);
+        Collections.sort(results, Node.scoreComparator());
+        return results;
     }
 
     private ImmutableList<Node> reduce(Rules.Rule rule, ImmutableList<Node> nodes, int offset) {
@@ -100,7 +100,7 @@ public class SimpleParser {
         ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
         newNodesBuilder.addAll(nodes.subList(0, offset));
         ImmutableSet<String> grammemeValues = commonGrammemeValues(rule.left, reducedNodes);
-        float score = Node.calcScore(reducedNodes) * grammemeValues.size();
+        float score = (Node.calcScore(reducedNodes) + rule.weight) * grammemeValues.size();
         newNodesBuilder.add(new Node(grammemeValues, reducedNodes, score));
         newNodesBuilder.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
         return newNodesBuilder.build();
