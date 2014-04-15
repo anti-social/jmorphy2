@@ -22,18 +22,16 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 public class SimpleParser {
     protected final MorphAnalyzer analyzer;
-    protected final SimpleTagger tagger;
     protected final Rules rules;
 
     protected final Set<String> allowedGrammemeValues;
 
-    public SimpleParser(MorphAnalyzer analyzer, SimpleTagger tagger) throws IOException {
-        this(analyzer, tagger, defaultRules);
+    public SimpleParser(MorphAnalyzer analyzer) throws IOException {
+        this(analyzer, defaultRules);
     }
       
-    public SimpleParser(MorphAnalyzer analyzer, SimpleTagger tagger, Rules rules) throws IOException {
+    public SimpleParser(MorphAnalyzer analyzer, Rules rules) throws IOException {
         this.analyzer = analyzer;
-        this.tagger = tagger;
         this.rules = rules;
 
         this.allowedGrammemeValues = Sets.union(getGrammemeValuesFor(Tag.CASE),
@@ -52,10 +50,16 @@ public class SimpleParser {
     }
 
     public Node.Top parse(List<Node.Top> sentences) {
-        return parseAll(sentences).get(0);
+        List<Node.Top> tops = parseAll(sentences);
+        // for (Node.Top top : tops) {
+        //     System.out.println(String.format("%s [%s]", top, top.score));
+        // }
+        return tops.get(0);
     }
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {
+        int var = 0;
+        int level = 1;
         List<Node.Top> results = new ArrayList<Node.Top>();
         Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
         
@@ -69,18 +73,32 @@ public class SimpleParser {
                 for (int offset = 0; offset <= nodesSize - minCount; offset++) {
                     for (int count = minCount; count <= nodesSize - offset; count++) {
                         List<Node> subNodes = nodes.subList(offset, offset + count);
-                        List<Rules.Rule> matchedRules = rules.matchAll(subNodes);
-                        if (!matchedRules.isEmpty()) {
+
+                        Rules.Rule mRule = rules.match(subNodes);
+                        if (mRule != null) {
                             hasMatchedRules = true;
-                        }
-                        for (Rules.Rule rule : matchedRules) {
-                            ImmutableList<Node> reducedNodes = reduce(rule, nodes, offset);
-                            Node.Top top = new Node.Top(reducedNodes, Node.calcScore(reducedNodes));
+                            ImmutableList<Node> reducedNodes = reduce(mRule, nodes, offset);
+                            Node.Top top = new Node.Top(reducedNodes,
+                                                        Node.calcScore(reducedNodes) / reducedNodes.size());
+                            var++;
                             if (!uniqueTops.contains(top)) {
                                 nextSentences.add(top);
                                 uniqueTops.add(top);
                             }
                         }
+                        // List<Rules.Rule> matchedRules = rules.matchAll(subNodes);
+                        // if (!matchedRules.isEmpty()) {
+                        //     hasMatchedRules = true;
+                        // }
+                        // for (Rules.Rule rule : matchedRules) {
+                        //     ImmutableList<Node> reducedNodes = reduce(rule, nodes, offset);
+                        //     Node.Top top = new Node.Top(reducedNodes, Node.calcScore(reducedNodes));
+                        //     var++;
+                        //     if (!uniqueTops.contains(top)) {
+                        //         nextSentences.add(top);
+                        //         uniqueTops.add(top);
+                        //     }
+                        // }
                     }
                 }
 
@@ -89,8 +107,13 @@ public class SimpleParser {
                 }
             }
             sentences = nextSentences;
+            level++;
         }
 
+        // System.out.println(var);
+        // System.out.println(uniqueTops.size());
+        // System.out.println(results.size());
+        // System.out.println("=====");
         Collections.sort(results, Node.scoreComparator());
         return results;
     }
@@ -99,28 +122,14 @@ public class SimpleParser {
         ImmutableList<Node> reducedNodes = nodes.subList(offset, offset + rule.rightSize);
         ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
         newNodesBuilder.addAll(nodes.subList(0, offset));
-        ImmutableSet<String> grammemeValues = commonGrammemeValues(rule.left, reducedNodes);
+        ImmutableSet<String> grammemeValues = rule.commonGrammemeValues(reducedNodes, allowedGrammemeValues);
         float score = (Node.calcScore(reducedNodes) + rule.weight) * grammemeValues.size();
         newNodesBuilder.add(new Node(grammemeValues, reducedNodes, score));
         newNodesBuilder.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
         return newNodesBuilder.build();
     }
 
-    private ImmutableSet<String> commonGrammemeValues(ImmutableSet<String> base, List<Node> nodes) {
-        Set<String> values = null;
-        for (Node node : nodes) {
-            if (values == null) {
-                values = node.grammemeValues;
-            } else {
-                values = Sets.intersection(values, node.grammemeValues);
-            }
-        }
-        values = Sets.intersection(values, allowedGrammemeValues);
-        values = Sets.union(values, base);
-        return ImmutableSet.copyOf(values);
-    }
-
-    public static final Rules defaultRules = new Rules();
+    protected static final Rules defaultRules = new Rules();
     static {
         // S - sentence
         // NP - noun phrase
@@ -128,58 +137,25 @@ public class SimpleParser {
         // PP - preposition phrase
         // defaultRules.add("S", "NP VP", 1000);
         // defaultRules.add("S", "NP", 900);
-        defaultRules.add("NP", "NP PP", 100);
-        defaultRules.add("VP", "VP PP", 90);
-        defaultRules.add("PP", "PREP NP", 50);
-        defaultRules.add("PP", "PREP LATN", 50);
-        defaultRules.add("PP", "PREP NUMB", 50);
-        defaultRules.add("PP", "PP LATN", 75);
-        defaultRules.add("PP", "PP NUMB", 75);
-        defaultRules.add("NP", "NP CONJ NP", 500);
-        defaultRules.add("NP", "NP,nomn NP,gent ", 200);
-        defaultRules.add("NP", "ADJF NP", 100);
-        defaultRules.add("NP", "NP ADJF", 50);
-        defaultRules.add("VP", "INFN VERB", 10);
-        defaultRules.add("NP", "NOUN", 3);
-        defaultRules.add("NP", "ADJF", 2);
+        defaultRules.add("NP", "NP @CONJ NP", 10);
+        defaultRules.add("NP", "NP PP", 9);
+        defaultRules.add("VP", "VP PP", 9);
+        defaultRules.add("PP", "PREP NP", 8);
+        defaultRules.add("NP", "NP,nomn NP,gent", 8);
+        defaultRules.add("NP", "NP @LATN", 5);
+        defaultRules.add("NP", "NP @NUMB", 5);
+        defaultRules.add("NP", "@LATN NP", 4);
+        defaultRules.add("NP", "@NUMB NP", 4);
+        defaultRules.add("NP", "ADJF NP", 9);
+        defaultRules.add("NP", "NP ADJF", 8);
+        defaultRules.add("VP", "INFN VERB", 2);
+        defaultRules.add("UNKN", "Name | Erro", 2);
+        defaultRules.add("NP", "NOUN,nomn", 2);
+        defaultRules.add("NP", "NOUN,accs", 1);
+        defaultRules.add("NP", "NOUN", 1);
+        defaultRules.add("NP,nomn,sing", "LATN", 1);
+        defaultRules.add("NP", "ADJF", 1);
         defaultRules.add("VP", "INFN", 1);
         defaultRules.add("VP", "VERB", 1);
-    };
-
-    // public static class Rules {
-    //     public static int PREPOSITION_MATHING_SCORE = 100;
-    //     public static Map<String,String> PREPOSITION_MATHING = new HashMap<String,String>();
-    //     static {
-    //         PREPOSITION_MATHING.put(new Sequence("без(PREP)", "gent"), 1.0f);
-    //         PREPOSITION_MATHING.put("без", "gent");
-    //         PREPOSITION_MATHING.put("до", "gent");
-    //         PREPOSITION_MATHING.put("для", "gent");
-    //         PREPOSITION_MATHING.put("у", "gent");
-    //         PREPOSITION_MATHING.put("ради", "gent");
-    //         PREPOSITION_MATHING.put("к", "datv");
-    //         PREPOSITION_MATHING.put("про", "accs");
-    //         PREPOSITION_MATHING.put("через", "accs");
-    //         PREPOSITION_MATHING.put("сквозь", "accs");
-    //         PREPOSITION_MATHING.put("над", "ablt");
-    //         PREPOSITION_MATHING.put("перед", "ablt");
-    //         PREPOSITION_MATHING.put("при", "loct");
-    //         PREPOSITION_MATHING.put("в", "accs|loct");
-    //         PREPOSITION_MATHING.put("во", "accs|loct");
-    //         PREPOSITION_MATHING.put("на", "accs|loct");
-    //         PREPOSITION_MATHING.put("о", "accs|loct");
-    //         PREPOSITION_MATHING.put("между", "gent|ablt");
-    //         PREPOSITION_MATHING.put("за", "accs|ablt");
-    //         PREPOSITION_MATHING.put("под", "accs|ablt");
-    //         PREPOSITION_MATHING.put("по", "accs|datv|loct");
-    //         PREPOSITION_MATHING.put("с", "gent|accs|ablt");
-    //     };
-
-    public static enum Grammar {
-        SUBJECT,    // подлежащее
-        PREDICATE,  // сказуемое
-        MODIFIER,   // определение
-        ADVERBIAL,  // обстоятельство
-        APPOSITION, // приложение
-        OBJECT,     // дополнение
     };
 }

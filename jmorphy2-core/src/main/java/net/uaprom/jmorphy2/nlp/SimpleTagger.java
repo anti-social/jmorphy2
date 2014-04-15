@@ -63,7 +63,7 @@ public class SimpleTagger {
             List<Parsed> parseds = analyzer.parse(tNode.word);
             for (Parsed p : parseds) {
                 reducedNodes.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
-                                          tNode.word,
+                                          p,
                                           p.score));
             }
         }
@@ -108,7 +108,7 @@ public class SimpleTagger {
                 if (!parseds.isEmpty()) {
                     Parsed p = parseds.get(0);
                     nodesBuilder.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
-                                              tNode.word,
+                                              p,
                                               p.score));
                     score += p.score;
                 } else {
