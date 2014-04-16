@@ -1,6 +1,6 @@
 package net.uaprom.jmorphy2.nlp;
 
-import org.junit.*;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertEquals;
@@ -14,9 +14,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
-import net.uaprom.jmorphy2.MorphAnalyzer;
-import net.uaprom.jmorphy2.BaseTestCase;
-
 
 @RunWith(JUnit4.class)
 public class SimpleParserTest extends BaseTestCase {
@@ -26,32 +23,6 @@ public class SimpleParserTest extends BaseTestCase {
     public SimpleParserTest() throws IOException {
         tagger = new SimpleTagger(analyzer);
         parser = new SimpleParser(analyzer);
-    }
-
-    // @Test
-    public void testTagger() throws IOException {
-        assertTaggedSent(new String[]{
-                "(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
-                "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
-                "(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги))",
-                "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги))"},
-            tagger.tagAll(new String[]{"женские", "сапоги"}));
-        System.out.println(tagger.tagAll(new String[]{"женские", "сапоги", "на", "зиму"}));
-        System.out.println(tagger.tag(new String[]{"чехол", "для", "iphone", "4s"}));
-        System.out.println(tagger.tag(new String[]{"шуруповерт", "Bosch"}));
-        System.out.println("=======================");
-
-        // for (Node top : tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})) {
-        //     System.out.println(top);
-        // }
-        // System.out.println("=======================");
-    }
-
-    private void assertTaggedSent(String[] expected, List<Node.Top> sents) {
-        assertEquals(expected.length, sents.size());
-        for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], sents.get(i).toString());
-        }
     }
 
     @Test
@@ -173,29 +144,5 @@ public class SimpleParserTest extends BaseTestCase {
                        ")" +
                      ")",
                      parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"})).toString());
-
-        // for (Node top : parser.parseAll(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"}))) {
-        //     System.out.println(top);
-        // }
-        // System.out.println("=======================");
-    }
-
-    // @Test
-    public void benchmarkParser() throws IOException {
-        String[] words = new String[]{"уборка", "снега", "и", "вывоз", "льда"};
-        long startTime = 0L, endTime = 0L;
-        int N = 1000;
-        // warmup
-        for (int i = 0; i < N * 10; i++) {
-            parser.parse(tagger.tagAll(words));
-        }
-        startTime = System.currentTimeMillis();
-        for (int i = 0; i < N; i++) {
-            parser.parse(tagger.tagAll(words));
-        }
-        endTime = System.currentTimeMillis();
-        System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",
-                                         ((float) N) / (endTime - startTime) * 1000));
-        System.out.println("=======================");
     }
 }

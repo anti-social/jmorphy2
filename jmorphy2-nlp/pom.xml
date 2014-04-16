@@ -9,7 +9,15 @@
   </parent>
 
   <groupId>net.uaprom.jmorphy2</groupId>
-  <artifactId>jmorphy2-core</artifactId>
-  <name>Java port of pymorphy2</name>
+  <artifactId>jmorphy2-nlp</artifactId>
+  <name>NLP based on pymorphy2 dictionaries</name>
   <version>0.1</version>
+
+  <dependencies>
+    <dependency>
+	  <groupId>net.uaprom.jmorphy2</groupId>
+	  <artifactId>jmorphy2-core</artifactId>
+	  <version>0.1</version>
+    </dependency>
+  </dependencies>
 </project>
