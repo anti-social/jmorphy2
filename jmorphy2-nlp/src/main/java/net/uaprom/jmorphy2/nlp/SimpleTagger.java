@@ -19,13 +19,13 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 public class SimpleTagger {
     private final MorphAnalyzer analyzer;
-    private final Rules rules;
+    private final Ruleset rules;
 
     public SimpleTagger(MorphAnalyzer analyzer) {
         this(analyzer, defaultRules);
     }
 
-    public SimpleTagger(MorphAnalyzer analyzer, Rules rules) {
+    public SimpleTagger(MorphAnalyzer analyzer, Ruleset rules) {
         this.analyzer = analyzer;
         this.rules = rules;
     }
@@ -37,7 +37,7 @@ public class SimpleTagger {
         return results;
     }
 
-    private Node reduce(Rules.Rule rule, ImmutableList<Node> nodes) {
+    private Node reduce(Rule rule, ImmutableList<Node> nodes) {
         List<Node> rNodes = nodes.subList(0, rule.rightSize);
         List<String> words = new ArrayList<String>();
         float score = 0.0f;
@@ -53,7 +53,7 @@ public class SimpleTagger {
 
         // test rules
         for (int count = 1; count <= rules.getMaxRightSize(); count++) {
-            for (Rules.Rule rule : rules.matchAll(nodes.subList(0, count))) {
+            for (Rule rule : rules.matchAll(nodes.subList(0, count))) {
                 reducedNodes.add(reduce(rule, nodes));
             }
         }
@@ -97,7 +97,7 @@ public class SimpleTagger {
         ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
         int i = 0;
         while (i < tokensSize) {
-            Rules.Rule mRule = rules.match(tokenNodes);
+            Rule mRule = rules.match(tokenNodes);
             if (mRule != null) {
                 nodesBuilder.add(reduce(mRule, tokenNodes));
                 score += mRule.weight;
@@ -128,7 +128,7 @@ public class SimpleTagger {
         return tokensBuilder.build();
     }
 
-    public static final Rules defaultRules = new Rules();
+    public static final Ruleset defaultRules = new Ruleset();
     static {
         defaultRules.add("CONJ", "'а' | 'и' | 'но'");
         defaultRules.add("PREP",

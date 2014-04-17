@@ -22,12 +22,20 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 public class SimpleParserTest extends _BaseTestCase {
     private SimpleTagger tagger;
     private SimpleParser parser;
+    private boolean initialized = false;
+
+    private static final String PARSER_RULES_RESOURCE = "/parser_rules.txt";
 
     @Before
     public void setUp() throws IOException {
+        if (initialized) {
+            return;
+        }
         initAnalyzer();
         tagger = new SimpleTagger(analyzer);
-        parser = new SimpleParser(analyzer);
+        parser = new SimpleParser(analyzer,
+                                  new Ruleset(getClass().getResourceAsStream(PARSER_RULES_RESOURCE)));
+        initialized = true;
     }
 
     @Test

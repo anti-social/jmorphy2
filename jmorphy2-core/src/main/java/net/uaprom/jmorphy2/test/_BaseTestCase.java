@@ -11,7 +11,7 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 public class _BaseTestCase {
     protected MorphAnalyzer analyzer;
-    private boolean initialized;
+    private boolean initialized = false;
 
     public void initAnalyzer() throws IOException {
         if (initialized) {

@@ -22,7 +22,7 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 public class SimpleParser {
     protected final MorphAnalyzer analyzer;
-    protected final Rules rules;
+    protected final Ruleset rules;
 
     protected final Set<String> allowedGrammemeValues;
 
@@ -30,7 +30,7 @@ public class SimpleParser {
         this(analyzer, defaultRules);
     }
       
-    public SimpleParser(MorphAnalyzer analyzer, Rules rules) throws IOException {
+    public SimpleParser(MorphAnalyzer analyzer, Ruleset rules) throws IOException {
         this.analyzer = analyzer;
         this.rules = rules;
 
@@ -50,16 +50,10 @@ public class SimpleParser {
     }
 
     public Node.Top parse(List<Node.Top> sentences) {
-        List<Node.Top> tops = parseAll(sentences);
-        // for (Node.Top top : tops) {
-        //     System.out.println(String.format("%s [%s]", top, top.score));
-        // }
-        return tops.get(0);
+        return parseAll(sentences).get(0);
     }
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {
-        int var = 0;
-        int level = 1;
         List<Node.Top> results = new ArrayList<Node.Top>();
         Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
         
@@ -74,31 +68,17 @@ public class SimpleParser {
                     for (int count = minCount; count <= nodesSize - offset; count++) {
                         List<Node> subNodes = nodes.subList(offset, offset + count);
 
-                        Rules.Rule mRule = rules.match(subNodes);
+                        Rule mRule = rules.match(subNodes);
                         if (mRule != null) {
                             hasMatchedRules = true;
                             ImmutableList<Node> reducedNodes = reduce(mRule, nodes, offset);
                             Node.Top top = new Node.Top(reducedNodes,
                                                         Node.calcScore(reducedNodes) / reducedNodes.size());
-                            var++;
                             if (!uniqueTops.contains(top)) {
                                 nextSentences.add(top);
                                 uniqueTops.add(top);
                             }
                         }
-                        // List<Rules.Rule> matchedRules = rules.matchAll(subNodes);
-                        // if (!matchedRules.isEmpty()) {
-                        //     hasMatchedRules = true;
-                        // }
-                        // for (Rules.Rule rule : matchedRules) {
-                        //     ImmutableList<Node> reducedNodes = reduce(rule, nodes, offset);
-                        //     Node.Top top = new Node.Top(reducedNodes, Node.calcScore(reducedNodes));
-                        //     var++;
-                        //     if (!uniqueTops.contains(top)) {
-                        //         nextSentences.add(top);
-                        //         uniqueTops.add(top);
-                        //     }
-                        // }
                     }
                 }
 
@@ -107,18 +87,13 @@ public class SimpleParser {
                 }
             }
             sentences = nextSentences;
-            level++;
         }
 
-        // System.out.println(var);
-        // System.out.println(uniqueTops.size());
-        // System.out.println(results.size());
-        // System.out.println("=====");
         Collections.sort(results, Node.scoreComparator());
         return results;
     }
 
-    private ImmutableList<Node> reduce(Rules.Rule rule, ImmutableList<Node> nodes, int offset) {
+    private ImmutableList<Node> reduce(Rule rule, ImmutableList<Node> nodes, int offset) {
         ImmutableList<Node> reducedNodes = nodes.subList(offset, offset + rule.rightSize);
         ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
         newNodesBuilder.addAll(nodes.subList(0, offset));
@@ -129,7 +104,7 @@ public class SimpleParser {
         return newNodesBuilder.build();
     }
 
-    protected static final Rules defaultRules = new Rules();
+    protected static final Ruleset defaultRules = new Ruleset();
     static {
         // S - sentence
         // NP - noun phrase

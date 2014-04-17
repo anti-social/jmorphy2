@@ -17,11 +17,19 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 @RunWith(JUnit4.class)
 public class SimpleTaggerTest extends _BaseTestCase {
     private SimpleTagger tagger;
+    private boolean initialized = false;
+
+    private static final String TAGGER_RULES_RESOURCE = "/tagger_rules.txt";
 
     @Before
     public void setUp() throws IOException {
+        if (initialized) {
+            return;
+        }
         initAnalyzer();
-        tagger = new SimpleTagger(analyzer);
+        tagger = new SimpleTagger(analyzer,
+                                  new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE)));
+        initialized = true;
     }
 
     @Test
