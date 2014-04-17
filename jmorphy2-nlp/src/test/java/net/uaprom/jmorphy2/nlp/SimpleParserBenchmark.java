@@ -1,18 +1,23 @@
 package net.uaprom.jmorphy2.nlp;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 
+import net.uaprom.jmorphy2.test._BaseTestCase;
+
 
 @RunWith(JUnit4.class)
-public class SimpleParserBenchmark extends BaseTestCase {
+public class SimpleParserBenchmark extends _BaseTestCase {
     private SimpleTagger tagger;
     private SimpleParser parser;
 
-    public SimpleParserBenchmark() throws IOException {
+    @Before
+    public void setUp() throws IOException {
+        initAnalyzer();
         tagger = new SimpleTagger(analyzer);
         parser = new SimpleParser(analyzer);
     }

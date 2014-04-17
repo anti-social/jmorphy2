@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2;
 
-import org.junit.*;
+import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertEquals;
@@ -12,11 +13,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
+import net.uaprom.jmorphy2.test._BaseTestCase;
+
 
 @RunWith(JUnit4.class)
-public class MorphAnalyzerTest extends BaseTestCase {
-    public MorphAnalyzerTest() throws IOException {
-        super();
+public class MorphAnalyzerTest extends _BaseTestCase {
+    @Before
+    public void setUp() throws IOException {
+        initAnalyzer();
     }
 
     @Test

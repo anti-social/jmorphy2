@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.nlp;
+package net.uaprom.jmorphy2.test;
 
 import java.io.File;
 import java.io.InputStream;
@@ -9,10 +9,15 @@ import java.util.HashMap;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
-public class BaseTestCase {
+public class _BaseTestCase {
     protected MorphAnalyzer analyzer;
+    private boolean initialized;
 
-    public BaseTestCase() throws IOException {
+    public void initAnalyzer() throws IOException {
+        if (initialized) {
+            return;
+        }
+
         final String dictPath = "/pymorphy2_dicts";
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
@@ -24,5 +29,6 @@ public class BaseTestCase {
             },
             replaceChars,
             0);
+        initialized = true;
     }
 }

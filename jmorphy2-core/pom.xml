@@ -3,13 +3,32 @@
   
   <parent>
     <groupId>net.uaprom.jmorphy2</groupId>
-    <artifactId>jmorphy2-base-pom</artifactId>
+    <artifactId>jmorphy2</artifactId>
     <version>0.1</version>
-    <relativePath>../jmorphy2-base-pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>net.uaprom.jmorphy2</groupId>
   <artifactId>jmorphy2-core</artifactId>
   <name>Java port of pymorphy2</name>
   <version>0.1</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.noggit</groupId>
+      <artifactId>noggit</artifactId>
+      <version>0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>16.0.1</version>
+    </dependency>
+    <dependency>
+	  <groupId>net.uaprom.jmorphy2</groupId>
+	  <artifactId>dawg</artifactId>
+	  <version>0.1</version>
+    </dependency>
+  </dependencies>
+  
 </project>

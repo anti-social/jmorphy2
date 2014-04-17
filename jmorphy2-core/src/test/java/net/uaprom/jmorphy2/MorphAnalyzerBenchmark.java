@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2;
 
-import org.junit.*;
+import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -11,16 +12,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
+import net.uaprom.jmorphy2.test._BaseTestCase;
+
 
 @RunWith(JUnit4.class)
-public class MorphAnalyzerBenchmark extends BaseTestCase {
+public class MorphAnalyzerBenchmark extends _BaseTestCase {
     private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
     private static final int DEFAULT_REPEATS = 20;
 
     private List<WordCount> words;
 
-    public MorphAnalyzerBenchmark() throws IOException {
-        super();
+    @Before
+    public void setUp() throws IOException {
+        initAnalyzer();
         loadWords(WORDS_FREQ_RESOURCE);
     }
 
@@ -55,7 +59,7 @@ public class MorphAnalyzerBenchmark extends BaseTestCase {
         System.out.println(String.format("    %-50s %.1f words/sec", name, wps));
     }
 
-    private void loadWords(String resource) throws IOException {
+    public void loadWords(String resource) throws IOException {
         words = new ArrayList<WordCount>();
         InputStream stream = getClass().getResourceAsStream(resource);
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));

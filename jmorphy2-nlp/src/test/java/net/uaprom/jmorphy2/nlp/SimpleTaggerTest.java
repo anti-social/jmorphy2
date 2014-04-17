@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2.nlp;
 
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertEquals;
@@ -10,12 +11,16 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.uaprom.jmorphy2.test._BaseTestCase;
+
 
 @RunWith(JUnit4.class)
-public class SimpleTaggerTest extends BaseTestCase {
+public class SimpleTaggerTest extends _BaseTestCase {
     private SimpleTagger tagger;
 
-    public SimpleTaggerTest() throws IOException {
+    @Before
+    public void setUp() throws IOException {
+        initAnalyzer();
         tagger = new SimpleTagger(analyzer);
     }
 

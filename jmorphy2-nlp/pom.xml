@@ -3,9 +3,9 @@
   
   <parent>
     <groupId>net.uaprom.jmorphy2</groupId>
-    <artifactId>jmorphy2-base-pom</artifactId>
+    <artifactId>jmorphy2</artifactId>
     <version>0.1</version>
-    <relativePath>../jmorphy2-base-pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>net.uaprom.jmorphy2</groupId>
