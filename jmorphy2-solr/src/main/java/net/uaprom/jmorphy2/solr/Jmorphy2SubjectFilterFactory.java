@@ -15,23 +15,33 @@ import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
-import net.uaprom.jmorphy2.JSONUtils;
 import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.JSONUtils;
+import net.uaprom.jmorphy2.nlp.Ruleset;
+import net.uaprom.jmorphy2.nlp.Tagger;
+import net.uaprom.jmorphy2.nlp.SimpleTagger;
+import net.uaprom.jmorphy2.nlp.Parser;
+import net.uaprom.jmorphy2.nlp.SimpleParser;
+import net.uaprom.jmorphy2.nlp.SubjectExtractor;
 
 
-public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
+public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
-    public static final String TAG_LIST_ATTR = "tagList";
+    public static final String TAGGER_RULES_PATH_ATTR = "taggerRules";
+    public static final String PARSER_RULES_PATH_ATTR = "parserRules";
+    public static final String EXTRACT_ATTR = "extract";
     
     public static final String DEFAULT_DICT_PATH = "pymorphy2_dicts";
 
-    private MorphAnalyzer morph;
+    private SubjectExtractor subjExtractor;
     private final String dictPath;
     private final String replacesPath;
-    private final List<Set<String>> tagList;
+    private final String taggerRulesPath;
+    private final String parserRulesPath;
+    private final String extract;
 
-    public Jmorphy2StemFilterFactory(Map<String,String> args) {
+    public Jmorphy2SubjectFilterFactory(Map<String,String> args) {
         super(args);
         assureMatchVersion();
 
@@ -40,22 +50,11 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             dictPath = DEFAULT_DICT_PATH;
         }
 
-        String tagListStr = args.get(TAG_LIST_ATTR);
-        List<Set<String>> tagList = null;
-        if (tagListStr != null) {
-            tagList = new ArrayList<Set<String>>();
-            for (String tagStr : tagListStr.split(" ")) {
-                Set<String> grammemeValues = new HashSet<String>();
-                tagList.add(grammemeValues);
-                for (String grammemeStr : tagStr.split(",")) {
-                    grammemeValues.add(grammemeStr);
-                }
-            }
-        }
-
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
-        this.tagList = tagList;
+        this.taggerRulesPath = args.get(TAGGER_RULES_PATH_ATTR);
+        this.parserRulesPath = args.get(PARSER_RULES_PATH_ATTR);
+        this.extract = args.get(EXTRACT_ATTR);
     }
 
     public void inform(ResourceLoader loader) throws IOException {
@@ -64,11 +63,14 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
+        MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
+        Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)));
+        Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(taggerRulesPath)));
+        subjExtractor = new SubjectExtractor(parser, extract, true);
     }
 
     public TokenStream create(TokenStream tokenStream) {
-        return new Jmorphy2StemFilter(tokenStream, morph, tagList);
+        return new Jmorphy2SubjectFilter(tokenStream, subjExtractor);
     }
 
     @SuppressWarnings("unchecked")

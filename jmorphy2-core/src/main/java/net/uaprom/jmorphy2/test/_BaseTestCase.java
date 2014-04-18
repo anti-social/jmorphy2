@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 
+import net.uaprom.jmorphy2.FileLoader;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
 public class _BaseTestCase {
-    protected MorphAnalyzer analyzer;
+    protected MorphAnalyzer morph;
     private boolean initialized = false;
 
-    public void initAnalyzer() throws IOException {
+    public void initMorphAnalyzer() throws IOException {
         if (initialized) {
             return;
         }
@@ -21,7 +22,7 @@ public class _BaseTestCase {
         final String dictPath = "/pymorphy2_dicts";
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         replaceChars.put('е', "ё");
-        analyzer = new MorphAnalyzer(new MorphAnalyzer.FileLoader() {
+        morph = new MorphAnalyzer(new FileLoader() {
                 @Override
                 public InputStream getStream(String filename) throws IOException {
                     return getClass().getResourceAsStream((new File(dictPath, filename)).getPath());

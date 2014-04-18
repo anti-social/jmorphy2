@@ -34,23 +34,6 @@ public class MorphAnalyzer {
 
     private static final int DEFAULT_CACHE_SIZE = 10000;
 
-    public static abstract class FileLoader {
-        public abstract InputStream getStream(String filename) throws IOException;
-    }
-
-    public static class FSFileLoader extends FileLoader {
-        private String path;
-
-        public FSFileLoader(String path) {
-            this.path = path;
-        }
-
-        @Override
-        public InputStream getStream(String filename) throws IOException {
-            return new FileInputStream(new File(path, filename));
-        }
-    }
-
     public MorphAnalyzer() throws IOException {
         this(System.getProperty(DICT_PATH_VAR), null);
     }

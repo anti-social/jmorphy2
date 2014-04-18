@@ -17,23 +17,24 @@ import net.uaprom.jmorphy2.Parsed;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
-public class SimpleTagger {
-    private final MorphAnalyzer analyzer;
+public class SimpleTagger extends Tagger {
     private final Ruleset rules;
 
-    public SimpleTagger(MorphAnalyzer analyzer) {
-        this(analyzer, defaultRules);
+    public SimpleTagger(MorphAnalyzer morph) {
+        this(morph, defaultRules);
     }
 
-    public SimpleTagger(MorphAnalyzer analyzer, Ruleset rules) {
-        this.analyzer = analyzer;
+    public SimpleTagger(MorphAnalyzer morph, Ruleset rules) {
+        super(morph);
         this.rules = rules;
     }
 
     public List<Node.Top> tagAll(String[] tokens) throws IOException {
         List<Node.Top> results = new ArrayList<Node.Top>();
-        tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
-        Collections.sort(results, Collections.reverseOrder(Node.scoreComparator()));
+        if (tokens.length != 0) {
+            tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
+            Collections.sort(results, Collections.reverseOrder(Node.scoreComparator()));
+        }
         return results;
     }
 
@@ -60,7 +61,7 @@ public class SimpleTagger {
         // parse word
         if (reducedNodes.isEmpty()) {
             Node tNode = nodes.get(0);
-            List<Parsed> parseds = analyzer.parse(tNode.word);
+            List<Parsed> parseds = morph.parse(tNode.word);
             for (Parsed p : parseds) {
                 reducedNodes.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                           p,
@@ -104,7 +105,7 @@ public class SimpleTagger {
                 i += mRule.rightSize;
             } else {
                 Node tNode = tokenNodes.get(i);
-                List<Parsed> parseds = analyzer.parse(tNode.word);
+                List<Parsed> parseds = morph.parse(tNode.word);
                 if (!parseds.isEmpty()) {
                     Parsed p = parseds.get(0);
                     nodesBuilder.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),

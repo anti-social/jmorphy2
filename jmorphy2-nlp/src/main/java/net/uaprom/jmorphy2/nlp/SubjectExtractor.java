@@ -1,24 +1,51 @@
 package net.uaprom.jmorphy2.nlp;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
+
 
 public class SubjectExtractor {
-    private final List<Set<String>> enableExtractionValues;
-    private final List<Set<String>> disableExtractionValues;
-    private final List<Set<String>> subjValues;
+    private final Parser parser;
     private final boolean normalize;
+    private List<Set<String>> enableExtractionValues;
+    private List<Set<String>> disableExtractionValues;
+    private List<Set<String>> subjValues;
 
-    public SubjectExtractor(List<Set<String>> enableExtractionValues,
-                            List<Set<String>> disableExtractionValues,
-                            List<Set<String>> subjValues,
-                            boolean normalize) {
-        this.enableExtractionValues = enableExtractionValues;
-        this.disableExtractionValues = disableExtractionValues;
-        this.subjValues = subjValues;
+    private static final Splitter partsSplitter = Splitter.on(" ").trimResults().omitEmptyStrings();
+    private static final Splitter valuesSplitter = Splitter.on(",").trimResults().omitEmptyStrings();
+
+    public SubjectExtractor(Parser parser, String confStr, boolean normalize) {
+        this.parser = parser;
         this.normalize = normalize;
+        loadConfigString(confStr);
+    }
+
+    private void loadConfigString(String confStr) {
+        enableExtractionValues = new ArrayList<Set<String>>();
+        disableExtractionValues = new ArrayList<Set<String>>();
+        subjValues = new ArrayList<Set<String>>();
+        for (String part : partsSplitter.split(confStr)) {
+            if (part.startsWith("+")) {
+                enableExtractionValues.add(parsePart(part.substring(1, part.length())));
+            } else if (part.startsWith("-")) {
+                disableExtractionValues.add(parsePart(part.substring(1, part.length())));
+            } else {
+                subjValues.add(parsePart(part));
+            }
+        }
+    }
+
+    private Set<String> parsePart(String part) {
+        return ImmutableSet.copyOf(valuesSplitter.split(part));
+    }
+
+    public List<String> extract(String[] tokens) throws IOException {
+        return extract(parser.parse(tokens));
     }
     
     public List<String> extract(Node.Top sent) {

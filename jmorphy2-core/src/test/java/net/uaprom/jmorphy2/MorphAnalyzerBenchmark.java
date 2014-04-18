@@ -24,7 +24,7 @@ public class MorphAnalyzerBenchmark extends _BaseTestCase {
 
     @Before
     public void setUp() throws IOException {
-        initAnalyzer();
+        initMorphAnalyzer();
         loadWords(WORDS_FREQ_RESOURCE);
     }
 
@@ -44,8 +44,8 @@ public class MorphAnalyzerBenchmark extends _BaseTestCase {
             int ix = 0;
             startTime = System.currentTimeMillis();
             for (WordCount word : words) {
-                analyzer.parse(word.word);
-                // res.add(ix, analyzer.parse(word.word));
+                morph.parse(word.word);
+                // res.add(ix, morph.parse(word.word));
                 ix++;
             }
             endTime = System.currentTimeMillis();

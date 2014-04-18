@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.Lists;
 
 
 public class Ruleset {
@@ -52,7 +53,7 @@ public class Ruleset {
                 continue;
             }
 
-            List<String> parts = partsSplitter.splitToList(row);
+            List<String> parts = Lists.newArrayList(partsSplitter.split(row));
             if (parts.size() < 2) {
                 throw new RuntimeException("Left or right part is missing");
             }

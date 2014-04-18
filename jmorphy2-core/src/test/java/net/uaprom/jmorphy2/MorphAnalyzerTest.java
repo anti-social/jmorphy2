@@ -20,22 +20,22 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 public class MorphAnalyzerTest extends _BaseTestCase {
     @Before
     public void setUp() throws IOException {
-        initAnalyzer();
+        initMorphAnalyzer();
     }
 
     @Test
     public void test() throws IOException {
-        List<Parsed> parseds = analyzer.parse("красивого");
+        List<Parsed> parseds = morph.parse("красивого");
         Tag tag = parseds.get(0).tag;
         assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:красивого:0.5\n" +
                       "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:0.25\n" +
                       "красивого:ADJF,Qual anim,masc,sing,accs:красивый:красивого:0.25",
                       parseds);
-        assertEquals(analyzer.getGrammeme("POST"), analyzer.getGrammeme("ADJF").getRoot());
-        assertEquals(analyzer.getGrammeme("ADJF"), tag.POS);
-        assertEquals(analyzer.getGrammeme("gent"), tag.Case);
-        assertEquals(analyzer.getGrammeme("sing"), tag.number);
-        assertEquals(analyzer.getGrammeme("neut"), tag.gender);
+        assertEquals(morph.getGrammeme("POST"), morph.getGrammeme("ADJF").getRoot());
+        assertEquals(morph.getGrammeme("ADJF"), tag.POS);
+        assertEquals(morph.getGrammeme("gent"), tag.Case);
+        assertEquals(morph.getGrammeme("sing"), tag.number);
+        assertEquals(morph.getGrammeme("neut"), tag.gender);
         assertTrue(tag.contains("ADJF"));
         assertTrue(tag.containsAllValues(Arrays.asList("ADJF", "gent")));
         assertFalse(tag.contains("NOUN"));
@@ -47,66 +47,66 @@ public class MorphAnalyzerTest extends _BaseTestCase {
                       "лошарики:NOUN,anim,masc,Name plur,nomn:лошарик:арики:0.2\n" +
                       "лошарики:NOUN,anim,femn,Name sing,gent:лошарика:арики:0.2\n" +
                       "лошарики:NOUN,anim,femn,Name plur,nomn:лошарика:арики:0.2\n",
-                      analyzer.parse("лошарики"));
+                      morph.parse("лошарики"));
 
         // unknown word
         assertParseds("псевдокошка:NOUN,anim,femn sing,nomn:псевдокошка:кошка:0.7999999\n" +
                       "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1999999",
-                      analyzer.parse("псевдокошка"));
+                      morph.parse("псевдокошка"));
 
         assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.8\n" +
                       "снега:NOUN,inan,masc plur,nomn:снег:снега:0.1\n" +
                       "снега:NOUN,inan,masc plur,accs:снег:снега:0.1\n",
-                      analyzer.parse("снега"));
+                      morph.parse("снега"));
 
         // gen2, loct, loc2
-        assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", analyzer.parse("снеге"));
+        assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", morph.parse("снеге"));
         assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:снегу:0.5\n" +
                       "снегу:NOUN,inan,masc sing,datv:снег:снегу:0.375\n" +
                       "снегу:NOUN,inan,masc sing,gen2:снег:снегу:0.125\n",
-                      analyzer.parse("снегу"));
+                      morph.parse("снегу"));
 
         // е, ё
-        assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", analyzer.parse("ёжик"));
-        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", analyzer.parse("ежик"));
+        assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", morph.parse("ёжик"));
+        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", morph.parse("ежик"));
         assertParseds("теплые:ADJF,Qual plur,nomn:тёплый:теплые:0.5\n" +
                       "теплые:ADJF,Qual inan,plur,accs:тёплый:теплые:0.5",
-                      analyzer.parse("теплые"));
+                      morph.parse("теплые"));
 
         // NUMB
-        assertParseds("1:NUMB,intg:1:1:1.0", analyzer.parse("1"));
-        assertParseds("1.0:NUMB,real:1.0:1.0:1.0", analyzer.parse("1.0"));
+        assertParseds("1:NUMB,intg:1:1:1.0", morph.parse("1"));
+        assertParseds("1.0:NUMB,real:1.0:1.0:1.0", morph.parse("1.0"));
 
         // PNCT
-        assertParseds(".:PNCT:.:.:1.0", analyzer.parse("."));
-        assertParseds(",:PNCT:,:,:1.0", analyzer.parse(","));
-        assertParseds("!?:PNCT:!?:!?:1.0", analyzer.parse("!?"));
+        assertParseds(".:PNCT:.:.:1.0", morph.parse("."));
+        assertParseds(",:PNCT:,:,:1.0", morph.parse(","));
+        assertParseds("!?:PNCT:!?:!?:1.0", morph.parse("!?"));
 
         // LATN
-        assertParseds("test:LATN:test:test:1.0", analyzer.parse("test"));
-        assertParseds("test1:LATN:test1:test1:1.0", analyzer.parse("test1"));
-        assertParseds("test1.0:LATN:test1.0:test1.0:1.0", analyzer.parse("test1.0"));
-        assertParseds(".test.:LATN:.test.:.test.:1.0", analyzer.parse(".test."));
-        assertParseds("männer:LATN:männer:männer:1.0", analyzer.parse("männer"));
-        assertParseds("", analyzer.parse("тестsymbolmix"));
+        assertParseds("test:LATN:test:test:1.0", morph.parse("test"));
+        assertParseds("test1:LATN:test1:test1:1.0", morph.parse("test1"));
+        assertParseds("test1.0:LATN:test1.0:test1.0:1.0", morph.parse("test1.0"));
+        assertParseds(".test.:LATN:.test.:.test.:1.0", morph.parse(".test."));
+        assertParseds("männer:LATN:männer:männer:1.0", morph.parse("männer"));
+        assertParseds("", morph.parse("тестsymbolmix"));
 
         // ROMN (all roman numbers are also latin)
         assertParseds("MD:ROMN:MD:MD:0.5\n" +
                       "MD:LATN:MD:MD:0.5\n",
-                      analyzer.parse("MD"));
+                      morph.parse("MD"));
 
         // TODO: Hyphen
 
         // normal form
-        assertEquals(Arrays.asList("красивый"), analyzer.normalForms("красивого"));
-        assertEquals(Arrays.asList("для", "длить"), analyzer.normalForms("для"));
-        assertEquals(Arrays.asList("лошарик", "лошарика"), analyzer.normalForms("лошарикам"));
+        assertEquals(Arrays.asList("красивый"), morph.normalForms("красивого"));
+        assertEquals(Arrays.asList("для", "длить"), morph.normalForms("для"));
+        assertEquals(Arrays.asList("лошарик", "лошарика"), morph.normalForms("лошарикам"));
 
         // tag
-        assertEquals(Arrays.asList(analyzer.getTag("ADJF,Qual neut,sing,gent"),
-                                   analyzer.getTag("ADJF,Qual masc,sing,gent"),
-                                   analyzer.getTag("ADJF,Qual anim,masc,sing,accs")),
-                     analyzer.tag("красивого"));
+        assertEquals(Arrays.asList(morph.getTag("ADJF,Qual neut,sing,gent"),
+                                   morph.getTag("ADJF,Qual masc,sing,gent"),
+                                   morph.getTag("ADJF,Qual anim,masc,sing,accs")),
+                     morph.tag("красивого"));
     }
 
     private void assertParseds(String expectedString, List<Parsed> parseds) throws IOException {
@@ -117,7 +117,7 @@ public class MorphAnalyzerTest extends _BaseTestCase {
             }
             String[] parts = s.split(":");
             expected.add(new Parsed(parts[0],
-                                    analyzer.getTag(parts[1]),
+                                    morph.getTag(parts[1]),
                                     parts[2],
                                     parts[3],
                                     Float.parseFloat(parts[4])));

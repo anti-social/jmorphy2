@@ -20,27 +20,25 @@ import net.uaprom.jmorphy2.Grammeme;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
-public class SimpleParser {
-    protected final MorphAnalyzer analyzer;
+public class SimpleParser extends Parser {
     protected final Ruleset rules;
 
     protected final Set<String> allowedGrammemeValues;
 
-    public SimpleParser(MorphAnalyzer analyzer) throws IOException {
-        this(analyzer, defaultRules);
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger) throws IOException {
+        this(morph, tagger, defaultRules);
     }
       
-    public SimpleParser(MorphAnalyzer analyzer, Ruleset rules) throws IOException {
-        this.analyzer = analyzer;
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules) throws IOException {
+        super(morph, tagger);
         this.rules = rules;
-
         this.allowedGrammemeValues = Sets.union(getGrammemeValuesFor(Tag.CASE),
                                                 getGrammemeValuesFor(Tag.NUMBER));
     }
 
     private Set<String> getGrammemeValuesFor(String rootValue) {
         Set<String> values = new HashSet<String>();
-        for (Grammeme grammeme : analyzer.getAllGrammemes()) {
+        for (Grammeme grammeme : morph.getAllGrammemes()) {
             Grammeme rootGrammeme = grammeme.getRoot();
             if (rootGrammeme != null && rootGrammeme.equals(rootValue)) {
                 values.add(grammeme.value);
@@ -50,7 +48,11 @@ public class SimpleParser {
     }
 
     public Node.Top parse(List<Node.Top> sentences) {
-        return parseAll(sentences).get(0);
+        List<Node.Top> tops = parseAll(sentences);
+        if (tops.isEmpty()) {
+            return new Node.Top(ImmutableList.<Node>of(), 0.0f);
+        }
+        return tops.get(0);
     }
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {

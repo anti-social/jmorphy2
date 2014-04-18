@@ -37,7 +37,7 @@ public class Dictionary {
     public static final String PARADIGM_PREFIXES_FILENAME = "paradigm-prefixes.json";
     public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
 
-    public Dictionary(Tag.Storage tagStorage, MorphAnalyzer.FileLoader loader, Map<Character,String> replaceChars) throws IOException {
+    public Dictionary(Tag.Storage tagStorage, FileLoader loader, Map<Character,String> replaceChars) throws IOException {
         this(tagStorage,
              loader.getStream(META_FILENAME),
              loader.getStream(WORDS_FILENAME),

@@ -12,14 +12,12 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 
 @RunWith(JUnit4.class)
 public class SimpleParserBenchmark extends _BaseTestCase {
-    private SimpleTagger tagger;
-    private SimpleParser parser;
+    private Parser parser;
 
     @Before
     public void setUp() throws IOException {
-        initAnalyzer();
-        tagger = new SimpleTagger(analyzer);
-        parser = new SimpleParser(analyzer);
+        initMorphAnalyzer();
+        parser = new SimpleParser(morph, new SimpleTagger(morph));
     }
 
     @Test
@@ -30,13 +28,13 @@ public class SimpleParserBenchmark extends _BaseTestCase {
 
         // warmup
         for (int i = 0; i < N * WARMUP_CYCLES; i++) {
-            parser.parse(tagger.tagAll(words));
+            parser.parse(words);
         }
 
         // 
         startTime = System.currentTimeMillis();
         for (int i = 0; i < N; i++) {
-            parser.parse(tagger.tagAll(words));
+            parser.parse(words);
         }
         endTime = System.currentTimeMillis();
         System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",

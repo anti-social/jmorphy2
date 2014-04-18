@@ -13,7 +13,7 @@ public class KnownPrefixSplitter {
 
     private DAWG dict;
 
-    public KnownPrefixSplitter(MorphAnalyzer.FileLoader loader) throws IOException {
+    public KnownPrefixSplitter(FileLoader loader) throws IOException {
         this(loader.getStream(PREDICTION_PREFIXES_FILENAME));
     }
     

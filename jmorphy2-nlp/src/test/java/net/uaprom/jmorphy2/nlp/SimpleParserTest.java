@@ -20,8 +20,7 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 
 @RunWith(JUnit4.class)
 public class SimpleParserTest extends _BaseTestCase {
-    private SimpleTagger tagger;
-    private SimpleParser parser;
+    private Parser parser;
     private boolean initialized = false;
 
     private static final String PARSER_RULES_RESOURCE = "/parser_rules.txt";
@@ -31,54 +30,37 @@ public class SimpleParserTest extends _BaseTestCase {
         if (initialized) {
             return;
         }
-        initAnalyzer();
-        tagger = new SimpleTagger(analyzer);
-        parser = new SimpleParser(analyzer,
+        initMorphAnalyzer();
+        parser = new SimpleParser(morph,
+                                  new SimpleTagger(morph),
                                   new Ruleset(getClass().getResourceAsStream(PARSER_RULES_RESOURCE)));
         initialized = true;
     }
 
     @Test
     public void testExtractSubject() throws IOException {
-        List<Set<String>> enableExtractionValues = Lists.newArrayList();
-        enableExtractionValues.add(ImmutableSet.of("NP", "nomn"));
-        enableExtractionValues.add(ImmutableSet.of("NP", "accs"));
-
-        List<Set<String>> disableExtractionValues = Lists.newArrayList();
-        disableExtractionValues.add(ImmutableSet.of("PP"));
-
-        List<Set<String>> subjValues = Lists.newArrayList();
-        subjValues.add(ImmutableSet.of("NOUN", "nomn"));
-        subjValues.add(ImmutableSet.of("NOUN", "accs"));
-        subjValues.add(ImmutableSet.of("LATN"));
-        subjValues.add(ImmutableSet.of("NUMB"));
-
         SubjectExtractor subjExtractor =
-            new SubjectExtractor(enableExtractionValues,
-                                 disableExtractionValues,
-                                 subjValues,
+            new SubjectExtractor(parser,
+                                 "+NP,nomn +NP,accs -PP NOUN,nomn NOUN,accs LATN NUMB",
                                  true);
 
-        Node.Top sent;
-        sent = parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"}));
         assertEquals(Arrays.asList(new String[]{"сапог"}),
-                     subjExtractor.extract(sent));
+                     subjExtractor.extract(new String[]{"женские", "сапоги"}));
 
-        sent = parser.parse(tagger.tagAll(new String[]{"чехол", "ozaki", "для", "iphone", "5"}));
         assertEquals(Arrays.asList(new String[]{"чехол", "ozaki"}),
-                     subjExtractor.extract(sent));
+                     subjExtractor.extract(new String[]{"чехол", "ozaki", "для", "iphone", "5"}));
 
-        sent = parser.parse(tagger.tagAll(new String[]{"GLOBAL", "Зарядное", "устройство"}));
+        assertEquals(Arrays.asList(new String[]{"магнит"}),
+                     subjExtractor.extract(new String[]{"магнит", "на", "холодильник"}));
+
         assertEquals(Arrays.asList(new String[]{"GLOBAL", "устройство"}),
-                     subjExtractor.extract(sent));
+                     subjExtractor.extract(new String[]{"GLOBAL", "Зарядное", "устройство"}));
 
-        sent = parser.parse(tagger.tagAll(new String[]{"Лыжные", "зимние", "теплые", "перчатки", "HEAD"}));
         assertEquals(Arrays.asList(new String[]{"перчатка", "HEAD"}),
-                     subjExtractor.extract(sent));
+                     subjExtractor.extract(new String[]{"Лыжные", "зимние", "теплые", "перчатки", "HEAD"}));
 
-        sent = parser.parse(tagger.tagAll(new String[]{"Купить", "туристическую", "палатку", "в", "Украине", "VAUDE", "Opera", "4P", "2013", "цвет", "sand"}));
         assertEquals(Arrays.asList(new String[]{"палатка", "VAUDE", "Opera", "4P", "2013", "цвет", "sand"}),
-                     subjExtractor.extract(sent));
+                     subjExtractor.extract(new String[]{"Купить", "туристическую", "палатку", "в", "Украине", "VAUDE", "Opera", "4P", "2013", "цвет", "sand"}));
     }
 
     @Test
@@ -89,7 +71,7 @@ public class SimpleParserTest extends _BaseTestCase {
                          "(NP,nomn,plur (NOUN,inan,masc,nomn,plur сапоги))" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"женские", "сапоги"})).toString());
+                     parser.parse(new String[]{"женские", "сапоги"}).toString());
 
         assertEquals("(TOP " +
                        "(NP,nomn,plur " +
@@ -100,7 +82,7 @@ public class SimpleParserTest extends _BaseTestCase {
                          "(ADJF,Qual,nomn,plur коричневые)" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"женские", "сапоги", "коричневые"})).toString());
+                     parser.parse(new String[]{"женские", "сапоги", "коричневые"}).toString());
 
         assertEquals("(TOP " +
                        "(NP " +
@@ -108,7 +90,7 @@ public class SimpleParserTest extends _BaseTestCase {
                          "(PP (PREP для) (NP,gent,sing (NOUN,gent,inan,masc,sing телефона)))" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"чехол", "для", "телефона"})).toString());
+                     parser.parse(new String[]{"чехол", "для", "телефона"}).toString());
 
         assertEquals("(TOP " +
                        "(NP " +
@@ -122,10 +104,10 @@ public class SimpleParserTest extends _BaseTestCase {
                          ")" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"чехол", "для", "iphone", "5"})).toString());
+                     parser.parse(new String[]{"чехол", "для", "iphone", "5"}).toString());
 
         assertEquals("(TOP (NP,nomn,sing (NP,nomn,sing (LATN iphone)) (NUMB,intg 5)))",
-                     parser.parse(tagger.tagAll(new String[]{"iphone", "5"})).toString());
+                     parser.parse(new String[]{"iphone", "5"}).toString());
 
         assertEquals("(TOP " +
                        "(NP,sing " +
@@ -141,7 +123,7 @@ public class SimpleParserTest extends _BaseTestCase {
                          ")" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"})).toString());
+                     parser.parse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}).toString());
         
         assertEquals("(TOP " +
                        "(NP,sing " +
@@ -156,6 +138,6 @@ public class SimpleParserTest extends _BaseTestCase {
                          ")" +
                        ")" +
                      ")",
-                     parser.parse(tagger.tagAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"})).toString());
+                     parser.parse(new String[]{"уборка", "снега", "и", "вывоз", "льда"}).toString());
     }
 }

@@ -13,7 +13,7 @@ public class ProbabilityEstimator {
 
     private IntegerDAWG dict;
 
-    public ProbabilityEstimator(MorphAnalyzer.FileLoader loader) throws IOException {
+    public ProbabilityEstimator(FileLoader loader) throws IOException {
         this(loader.getStream(PROBABILITY_FILENAME));
     }
     

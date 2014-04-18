@@ -26,8 +26,8 @@ public class SimpleTaggerTest extends _BaseTestCase {
         if (initialized) {
             return;
         }
-        initAnalyzer();
-        tagger = new SimpleTagger(analyzer,
+        initMorphAnalyzer();
+        tagger = new SimpleTagger(morph,
                                   new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE)));
         initialized = true;
     }
