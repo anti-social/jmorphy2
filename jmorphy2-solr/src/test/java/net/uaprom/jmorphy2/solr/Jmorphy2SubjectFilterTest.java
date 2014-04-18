@@ -69,14 +69,17 @@ public class Jmorphy2SubjectFilterTest extends _BaseTestCase {
                          "",
                          Arrays.asList(new String[0]));
         assertAnalyzesTo(analyzer,
+                         "iphone",
+                         Arrays.asList(new String[]{"iphone"}));
+        assertAnalyzesTo(analyzer,
                          "теплые перчатки",
                          Arrays.asList(new String[]{"перчатка"}));
         assertAnalyzesTo(analyzer,
                          "магнит на холодильник",
                          Arrays.asList(new String[]{"магнит"}));
         assertAnalyzesTo(analyzer,
-                         "чехол for iphone",
-                         Arrays.asList(new String[]{"чехол"}));
+                         "чехол 5 for iphone 4",
+                         Arrays.asList(new String[]{"чехол", "5"}));
     }
 
     private void assertAnalyzesTo(Analyzer analyzer, String sent, List<String> expected) throws IOException {
