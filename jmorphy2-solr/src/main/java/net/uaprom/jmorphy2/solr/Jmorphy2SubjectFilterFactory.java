@@ -31,8 +31,10 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     public static final String TAGGER_RULES_PATH_ATTR = "taggerRules";
     public static final String PARSER_RULES_PATH_ATTR = "parserRules";
     public static final String EXTRACT_ATTR = "extract";
+    public static final String MAX_SENTENCE_LENGTH_ATTR = "maxSentenceLength";
     
     public static final String DEFAULT_DICT_PATH = "pymorphy2_dicts";
+    public static final int DEFAULT_MAX_SENTENCE_LENGTH = 10;
 
     private SubjectExtractor subjExtractor;
     private final String dictPath;
@@ -40,6 +42,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     private final String taggerRulesPath;
     private final String parserRulesPath;
     private final String extract;
+    private final int maxSentenceLength;
 
     public Jmorphy2SubjectFilterFactory(Map<String,String> args) {
         super(args);
@@ -55,6 +58,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
         this.taggerRulesPath = args.get(TAGGER_RULES_PATH_ATTR);
         this.parserRulesPath = args.get(PARSER_RULES_PATH_ATTR);
         this.extract = args.get(EXTRACT_ATTR);
+        this.maxSentenceLength = getInt(args, MAX_SENTENCE_LENGTH_ATTR, DEFAULT_MAX_SENTENCE_LENGTH);
     }
 
     public void inform(ResourceLoader loader) throws IOException {
@@ -65,12 +69,12 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
 
         MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
         Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)));
-        Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(taggerRulesPath)));
+        Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)));
         subjExtractor = new SubjectExtractor(parser, extract, true);
     }
 
     public TokenStream create(TokenStream tokenStream) {
-        return new Jmorphy2SubjectFilter(tokenStream, subjExtractor);
+        return new Jmorphy2SubjectFilter(tokenStream, subjExtractor, maxSentenceLength);
     }
 
     @SuppressWarnings("unchecked")

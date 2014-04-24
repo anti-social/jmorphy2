@@ -50,17 +50,21 @@ public class SubjectExtractor {
     
     public List<String> extract(Node.Top sent) {
         List<String> results = new ArrayList<String>();
-        for (Node subjNode : extract(sent, false, false)) {
-            if (normalize && subjNode.parsed != null) {
-                results.add(subjNode.parsed.normalForm);
-            } else {
-                results.add(subjNode.word);
-            }
+        for (Token token : extractTokens(sent)) {
+            results.add(token.word);
         }
-        return results;
+        return results;  
     }
 
-    private List<Node> extract(Node node, boolean enabled, boolean disabled) {
+    public List<Token> extractTokens(String[] tokens) throws IOException {
+        return extractTokens(parser.parse(tokens));
+    }
+
+    public List<Token> extractTokens(Node.Top sent) {
+        return extractTokens(sent, 0, false, false);
+    }
+
+    private List<Token> extractTokens(Node node, int index, boolean enabled, boolean disabled) {
         if (match(enableExtractionValues, node.grammemeValues)) {
             enabled = true;
         }
@@ -68,17 +72,22 @@ public class SubjectExtractor {
             disabled = true;
         }
 
-        List<Node> subjNodes = new ArrayList<Node>();
+        List<Token> subjTokens = new ArrayList<Token>();
         for (Node child : node.getChildren()) {
             if (child.isLeaf()) {
                 if (enabled && !disabled && match(subjValues, child.grammemeValues)) {
-                    subjNodes.add(child);
+                    if (normalize && child.parsed != null) {
+                        subjTokens.add(new Token(child.parsed.normalForm, index));
+                    } else {
+                        subjTokens.add(new Token(child.word, index));
+                    }
+                    index++;
                 }
             } else {
-                subjNodes.addAll(extract(child, enabled, disabled));
+                subjTokens.addAll(extractTokens(child, index, enabled, disabled));
             }
         }
-        return subjNodes;
+        return subjTokens;
     }
 
     private boolean match(List<Set<String>> matchValues, Set<String> values) {
@@ -89,4 +98,19 @@ public class SubjectExtractor {
         }
         return false;
     }
+
+    public static class Token {
+        public final String word;
+        public final int index;
+
+        public Token(String word, int index) {
+            this.word = word;
+            this.index = index;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s_%s", word, index);
+        }
+    };
 }

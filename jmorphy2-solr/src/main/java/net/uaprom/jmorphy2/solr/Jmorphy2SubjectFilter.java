@@ -23,53 +23,57 @@ public class Jmorphy2SubjectFilter extends TokenFilter {
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
 
     private final SubjectExtractor subjExtractor;
-    private final int maxSentenceLength = 10;
+    private final int maxSentenceLength;
 
-    private Iterator<String> termsIterator = null;
+    private Iterator<SubjectExtractor.Token> subjTokensIterator = null;
+    private List<State> savedStates = null;
     
     private static final Logger logger = LoggerFactory.getLogger(Jmorphy2SubjectFilter.class);
 
     public Jmorphy2SubjectFilter(TokenStream input, SubjectExtractor subjExtractor) {
+        this(input, subjExtractor, Jmorphy2SubjectFilterFactory.DEFAULT_MAX_SENTENCE_LENGTH);
+    }
+
+    public Jmorphy2SubjectFilter(TokenStream input, SubjectExtractor subjExtractor, int maxSentenceLength) {
         super(input);
         this.subjExtractor = subjExtractor;
+        this.maxSentenceLength = maxSentenceLength;
+    }
+
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        subjTokensIterator = null;
+        savedStates = null;
     }
 
     @Override
     public final boolean incrementToken() throws IOException {
-        if (termsIterator != null && termsIterator.hasNext()) {
-            // TODO: save and restore state for this token
-            setTerm(termsIterator.next());
-            return true;
-        }
-
-        List<String> terms = new ArrayList<String>(maxSentenceLength);
-        int i = 0;
-        while (i < maxSentenceLength && input.incrementToken()) {
-            logger.info(String.format("%s", i));
-            if (keywordAtt.isKeyword()) {
-                logger.info(String.format("%s", keywordAtt.isKeyword()));
-                continue;
+        if (subjTokensIterator == null) {
+            List<String> terms = new ArrayList<String>(maxSentenceLength);
+            savedStates = new ArrayList<State>(maxSentenceLength);
+            while (terms.size() < maxSentenceLength && input.incrementToken()) {
+                if (keywordAtt.isKeyword()) {
+                    continue;
+                }
+                terms.add(new String(termAtt.buffer(), 0, termAtt.length()));
+                savedStates.add(captureState());
             }
-            terms.add(new String(termAtt.buffer(), 0, termAtt.length()));
-            i++;
+            List<SubjectExtractor.Token> subjTerms =
+                subjExtractor.extractTokens(terms.toArray(new String[0]));
+            subjTokensIterator = subjTerms.iterator();
         }
-        logger.info(String.format(">terms: %s", terms));
-        // clearAttributes();
 
-        List<String> subjTerms = subjExtractor.extract(terms.toArray(new String[0]));
-        logger.info(String.format(">subjTerms: %s", subjTerms));
-        termsIterator = subjTerms.iterator();
-        if (!termsIterator.hasNext()) {
+        if (!subjTokensIterator.hasNext()) {
             return false;
         }
-        setTerm(termsIterator.next());
+        setTerm(subjTokensIterator.next());
         return true;
     }
 
-    private void setTerm(String term) {
-        logger.info(String.format("%s", term));
-        termAtt.copyBuffer(term.toCharArray(), 0, term.length());
-        termAtt.setLength(term.length());
-        posIncAtt.setPositionIncrement(1);
+    private void setTerm(SubjectExtractor.Token token) {
+        restoreState(savedStates.get(token.index));
+        termAtt.copyBuffer(token.word.toCharArray(), 0, token.word.length());
+        termAtt.setLength(token.word.length());
     }
 }

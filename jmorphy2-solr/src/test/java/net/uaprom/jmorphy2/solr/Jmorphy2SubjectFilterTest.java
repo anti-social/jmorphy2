@@ -19,6 +19,7 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
 import net.uaprom.jmorphy2.nlp.Ruleset;
 import net.uaprom.jmorphy2.nlp.Tagger;
@@ -67,30 +68,39 @@ public class Jmorphy2SubjectFilterTest extends _BaseTestCase {
 
         assertAnalyzesTo(analyzer,
                          "",
-                         Arrays.asList(new String[0]));
+                         Arrays.asList(new String[0]),
+                         Arrays.asList(new Integer[0]));
         assertAnalyzesTo(analyzer,
                          "iphone",
-                         Arrays.asList(new String[]{"iphone"}));
+                         Arrays.asList(new String[]{"iphone"}),
+                         Arrays.asList(new Integer[]{1}));
         assertAnalyzesTo(analyzer,
                          "теплые перчатки",
-                         Arrays.asList(new String[]{"перчатка"}));
+                         Arrays.asList(new String[]{"перчатка"}),
+                         Arrays.asList(new Integer[]{1}));
         assertAnalyzesTo(analyzer,
                          "магнит на холодильник",
-                         Arrays.asList(new String[]{"магнит"}));
+                         Arrays.asList(new String[]{"магнит"}),
+                         Arrays.asList(new Integer[]{1}));
         assertAnalyzesTo(analyzer,
-                         "чехол 5 for iphone 4",
-                         Arrays.asList(new String[]{"чехол", "5"}));
+                         "чехол кожаный 5 for iphone 4",
+                         Arrays.asList(new String[]{"чехол", "5"}),
+                         Arrays.asList(new Integer[]{1, 1}));
     }
 
-    private void assertAnalyzesTo(Analyzer analyzer, String sent, List<String> expected) throws IOException {
+    private void assertAnalyzesTo(Analyzer analyzer, String sent, List<String> expectedTokens, List<Integer> expectedPositions) throws IOException {
         TokenStream ts = analyzer.tokenStream("dummy", sent);
         CharTermAttribute termAtt = ts.getAttribute(CharTermAttribute.class);
+        PositionIncrementAttribute posIncAtt = ts.getAttribute(PositionIncrementAttribute.class);
         List<String> tokens = new ArrayList<String>();
+        List<Integer> positions = new ArrayList<Integer>();
         ts.reset();
         for (int i = 0; ts.incrementToken(); i++) {
             tokens.add(new String(termAtt.buffer(), 0, termAtt.length()));
+            positions.add(new Integer(posIncAtt.getPositionIncrement()));
         }
         ts.close();
-        assertEquals(expected, tokens);
+        assertEquals(expectedTokens, tokens);
+        assertEquals(expectedPositions, positions);
     }
 }
