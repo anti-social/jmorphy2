@@ -45,8 +45,9 @@ public class Node {
         this.children = children;
         this.parsed = parsed;
         this.word = word;
-        this.maxDepth = calcMaxDepth();
-        this.score = score / this.maxDepth;
+        this.score = score;
+
+        this.maxDepth = maxDepthFor(getChildren()) + 1;
         this.cachedHashCode = calcHashCode();
     }
 
@@ -87,12 +88,22 @@ public class Node {
         return true;
     }
 
-    public static float calcScore(List<Node> nodes) {
+    public static float sumScoreFor(List<Node> nodes) {
         float score = 0.0f;
         for (Node n : nodes) {
             score += n.score;
         }
         return score;
+    }
+
+    public static int maxDepthFor(List<Node> nodes) {
+        int maxDepth = 0;
+        for (Node n : nodes) {
+            if (n.maxDepth > maxDepth) {
+                maxDepth = n.maxDepth;
+            }
+        }
+        return maxDepth;
     }
 
     public static Comparator<Node> scoreComparator() {
@@ -120,18 +131,6 @@ public class Node {
         return h;
     }
 
-    private int calcMaxDepth() {
-        int childMaxDepth = 0;
-        if (children != null) {
-            for (Node child : children) {
-                if (child.maxDepth > childMaxDepth) {
-                    childMaxDepth = child.maxDepth;
-                }
-            }
-        }
-        return childMaxDepth + 1;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (getClass() != obj.getClass()) {
@@ -152,19 +151,29 @@ public class Node {
     }
 
     public String prettyToString() {
-        return prettyToString(0);
+        return prettyToString(false);
     }
 
-    protected String prettyToString(int level) {
+    public String prettyToString(boolean withScore) {
+        return prettyToString(withScore, 0);
+    }
+
+    protected String prettyToString(boolean withScore, int level) {
         String pad = level == 0 ? "" : String.format("\n%s", Strings.repeat(" ", level * 4));
         List<String> childrenStrings = new ArrayList<String>();
         for (Node child : getChildren()) {
-            childrenStrings.add(child.prettyToString(level + 1));
+            childrenStrings.add(child.prettyToString(withScore, level + 1));
         }
-        return String.format("%s(%s %s)",
+
+        String addInfo = "";
+        if (withScore) {
+            addInfo = String.format(" [%s]", score);
+        }
+        return String.format("%s(%s %s)%s",
                              pad,
                              grammemeValuesStr,
-                             hasChildren() ? Joiner.on(" ").join(childrenStrings): word);
+                             hasChildren() ? Joiner.on(" ").join(childrenStrings): word,
+                             addInfo);
     }
 
     public static class Top extends Node {

@@ -74,8 +74,8 @@ public class SimpleParser extends Parser {
                         if (mRule != null) {
                             hasMatchedRules = true;
                             ImmutableList<Node> reducedNodes = reduce(mRule, nodes, offset);
-                            Node.Top top = new Node.Top(reducedNodes,
-                                                        Node.calcScore(reducedNodes) / reducedNodes.size());
+                            float topScore = Node.sumScoreFor(reducedNodes) / reducedNodes.size() / (Node.maxDepthFor(reducedNodes) + 1);
+                            Node.Top top = new Node.Top(reducedNodes, topScore);
                             if (!uniqueTops.contains(top)) {
                                 nextSentences.add(top);
                                 uniqueTops.add(top);
@@ -96,13 +96,29 @@ public class SimpleParser extends Parser {
     }
 
     private ImmutableList<Node> reduce(Rule rule, ImmutableList<Node> nodes, int offset) {
-        ImmutableList<Node> reducedNodes = nodes.subList(offset, offset + rule.rightSize);
         ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
         newNodesBuilder.addAll(nodes.subList(0, offset));
-        ImmutableSet<String> grammemeValues = rule.commonGrammemeValues(reducedNodes, allowedGrammemeValues);
-        float score = (Node.calcScore(reducedNodes) + rule.weight) * grammemeValues.size();
+
+        ImmutableList<Node> subNodes = nodes.subList(offset, offset + rule.rightSize);
+        ImmutableSet<String> grammemeValues = rule.commonGrammemeValues(subNodes, allowedGrammemeValues);
+        float score = Node.sumScoreFor(subNodes) + rule.weight * grammemeValues.size();
+        ImmutableList.Builder<Node>  reducedNodesBuilder = ImmutableList.builder();
+        int i = 0;
+        for (Node rNode : subNodes) {
+            Rule.NodeMatcher m = rule.right.get(i);
+            if (grammemeValues.equals(rNode.grammemeValues) &&
+                (m.flags & Rule.NodeMatcher.NO_REDUCE) == 0) {
+                reducedNodesBuilder.addAll(rNode.getChildren());
+            } else {
+                reducedNodesBuilder.add(rNode);
+            }
+            i++;
+        }
+        ImmutableList<Node> reducedNodes = reducedNodesBuilder.build();
         newNodesBuilder.add(new Node(grammemeValues, reducedNodes, score));
+
         newNodesBuilder.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
+
         return newNodesBuilder.build();
     }
 
@@ -112,9 +128,11 @@ public class SimpleParser extends Parser {
         // NP - noun phrase
         // VP - verb phrase
         // PP - preposition phrase
+        // @ - no common grammemes
+        // $ - do not reduce
         // defaultRules.add("S", "NP VP", 1000);
         // defaultRules.add("S", "NP", 900);
-        defaultRules.add("NP", "NP @CONJ NP", 10);
+        defaultRules.add("NP", "$NP @CONJ $NP", 10);
         defaultRules.add("NP", "NP PP", 9);
         defaultRules.add("VP", "VP PP", 9);
         defaultRules.add("PP", "PREP NP", 8);

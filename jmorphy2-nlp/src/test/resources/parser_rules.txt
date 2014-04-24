@@ -1,5 +1,5 @@
 # Test rules
-NP -> NP @CONJ NP [10]
+NP -> $NP @CONJ $NP [10]
 
 NP -> NP PP [9]
 VP -> VP PP [9]

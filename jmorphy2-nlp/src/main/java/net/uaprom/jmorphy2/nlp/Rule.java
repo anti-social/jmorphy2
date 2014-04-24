@@ -18,7 +18,7 @@ public class Rule {
     public final int rightSize;
     public final float weight;
 
-    private static Splitter grammemeSplitter = Splitter.on(",").trimResults(CharMatcher.anyOf("@!"));
+    private static Splitter grammemeSplitter = Splitter.on(",").trimResults(CharMatcher.anyOf("@$!"));
     private static Splitter rhsSplitter = Splitter.on(" ").trimResults();
     private static CharMatcher wordMatcher = CharMatcher.anyOf("'\"");
 
@@ -41,6 +41,9 @@ public class Rule {
             int flags = 0;
             if (part.startsWith("@")) {
                 flags |= NodeMatcher.NO_COMMONS;
+            }
+            if (part.startsWith("$")) {
+                flags |= NodeMatcher.NO_REDUCE;
             }
             if ((part.startsWith("'") && part.endsWith("'")) ||
                 (part.startsWith("\"") && part.endsWith("\""))) {
@@ -86,22 +89,18 @@ public class Rule {
         return ImmutableSet.copyOf(values);
     }
 
-    public Node apply(ImmutableList<Node> nodes) {
-        ImmutableList<Node> reducedNodes = nodes.subList(0, rightSize);
-        return new Node(left, reducedNodes, Node.calcScore(reducedNodes));
-    }
-
     @Override
     public String toString() {
         return String.format("%s -> %s [%s]", leftStr, rightStr, weight);
     }
 
     public static class NodeMatcher {
-        private final ImmutableSet<String> grammemeValues;
-        private final int flags;
-        private final String word;
+        public final ImmutableSet<String> grammemeValues;
+        public final String word;
+        public final int flags;
 
-        private final static int NO_COMMONS = 1;
+        public final static int NO_COMMONS = 0x01;
+        public final static int NO_REDUCE = 0x02;
 
         public NodeMatcher(ImmutableSet<String> grammemeValues, String word, int flags) {
             this.grammemeValues = grammemeValues;
