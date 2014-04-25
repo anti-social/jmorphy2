@@ -35,12 +35,20 @@ public class SimpleParserTest extends _BaseTestCase {
 
     // @Test
     public void test() throws IOException {
+        // System.out.println(parser.parse("Набор кухонной посуды из нержавеющей стали CALVE CL 1081".split(" ")).prettyToString(true));
+
         // List<Node.Top> sents = parser.parseAll(new String[]{"чехол", "для", "телефона", "iphone"});
         // List<Node.Top> sents = parser.parseAll(new String[]{"женские", "сапоги"});
-        List<Node.Top> sents = parser.parseAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"});
+        // List<Node.Top> sents = parser.parseAll(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"});
         // List<Node.Top> sents = parser.parseAll(new String[]{"уборка", "снега", "и", "вывоз", "льда"});
+        // List<Node.Top> sents = parser.parseAll("Набор кухонной посуды из нержавеющей стали CALVE CL 1081".split(" "));
+        // List<Node.Top> sents = parser.parseAll("Проектирование систем полива".split(" "));
+        // List<Node.Top> sents = parser.parseAll("Кнопка вызова официанта".split(" "));
+        // List<Node.Top> sents = parser.parseAll("Видеокарта ATI Radeon HD5770 1Gb GDDR5 SAPPHIRE 11163 02 20R".split(" "));
+        // List<Node.Top> sents = parser.parseAll("Масляной пилинг для рук Манго маракуйя 100 мл".split(" "));
+        List<Node.Top> sents = parser.parseAll("Продам МАЗ 5551 самосвал".split(" "));
         for (Node.Top sent : sents) {
-            System.out.println(sent.prettyToString(true));
+            System.out.println(sent.prettyToString());
         }
     }
 
@@ -50,14 +58,25 @@ public class SimpleParserTest extends _BaseTestCase {
                        "(NP,nomn,plur " +
                          "(ADJF,nomn,plur женские) " +
                          "(NOUN,inan,masc,nomn,plur сапоги)))",
-                     parser.parse(new String[]{"женские", "сапоги"}).toString());
+                     parser.parse("женские сапоги".split(" ")).toString());
 
         assertEquals("(TOP " +
                        "(NP,nomn,plur " +
                          "(ADJF,nomn,plur женские) " +
                          "(NOUN,inan,masc,nomn,plur сапоги) " +
                          "(ADJF,Qual,nomn,plur коричневые)))",
-                     parser.parse(new String[]{"женские", "сапоги", "коричневые"}).toString());
+                     parser.parse("женские сапоги коричневые".split(" ")).toString());
+
+        assertEquals("(TOP " +
+                       "(NP,nomn,sing " +
+                         "(NP,nomn,sing " +
+                           "(NP,nomn,sing " +
+                             "(NOUN,inan,neut,nomn,sing проектирование)) " +
+                           "(NP,gent,plur " +
+                             "(NOUN,femn,gent,inan,plur систем))) " +
+                         "(NP,gent,sing " +
+                           "(NOUN,gent,inan,masc,sing полива))))",
+                     parser.parse("проектирование систем полива".split(" ")).toString());
 
         assertEquals("(TOP " +
                        "(NP " +
@@ -95,7 +114,7 @@ public class SimpleParserTest extends _BaseTestCase {
                      parser.parse(new String[]{"iphone", "5"}).toString());
 
         assertEquals("(TOP " +
-                       "(NP,sing " +
+                       "(NP,nomn,sing " +
                          "(NP,nomn,sing " +
                            "(NP,nomn,sing " +
                              "(NOUN,femn,inan,nomn,sing уборка)) " +
@@ -111,14 +130,18 @@ public class SimpleParserTest extends _BaseTestCase {
                      parser.parse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}).toString());
         
         assertEquals("(TOP " +
-                       "(NP,sing " +
-                         "(NP,sing " +
-                           "(NP,nomn,sing (NOUN,femn,inan,nomn,sing уборка)) " +
-                           "(NP,gent,sing (NOUN,gent,inan,masc,sing снега))) " +
+                       "(NP,nomn,sing " +
+                         "(NP,nomn,sing " +
+                           "(NP,nomn,sing " +
+                             "(NOUN,femn,inan,nomn,sing уборка)) " +
+                           "(NP,gent,sing " +
+                             "(NOUN,gent,inan,masc,sing снега))) " +
                          "(CONJ и) " +
-                         "(NP,sing " +
-                           "(NP,nomn,sing (NOUN,inan,masc,nomn,sing вывоз)) " +
-                           "(NP,gent,sing (NOUN,gent,inan,masc,sing льда)))))",
+                         "(NP,nomn,sing " +
+                           "(NP,nomn,sing " +
+                             "(NOUN,inan,masc,nomn,sing вывоз)) " +
+                           "(NP,gent,sing " +
+                             "(NOUN,gent,inan,masc,sing льда)))))",
                      parser.parse(new String[]{"уборка", "снега", "и", "вывоз", "льда"}).toString());
     }
 }

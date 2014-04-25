@@ -31,7 +31,7 @@ public class SimpleParserBenchmark extends _BaseTestCase {
             parser.parse(words);
         }
 
-        // 
+        // bench
         startTime = System.currentTimeMillis();
         for (int i = 0; i < N; i++) {
             parser.parse(words);

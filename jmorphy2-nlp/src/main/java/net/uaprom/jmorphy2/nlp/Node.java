@@ -22,7 +22,7 @@ public class Node {
     public final float score;
     public final int maxDepth;
 
-    private final int cachedHashCode;
+    public final long uniqueHash;
 
     public Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, float score) {
         this(grammemeValues, children, null, null, score);
@@ -48,7 +48,7 @@ public class Node {
         this.score = score;
 
         this.maxDepth = maxDepthFor(getChildren()) + 1;
-        this.cachedHashCode = calcHashCode();
+        this.uniqueHash = calcUniqueHash();
     }
 
     public boolean hasChildren() {
@@ -115,32 +115,17 @@ public class Node {
         };
     }
 
-    @Override
-    public int hashCode() {
-        return cachedHashCode;
-    }
-
-    private int calcHashCode() {
-        int h = grammemeValues.hashCode();
+    private long calcUniqueHash() {
+        long h = grammemeValues.hashCode();
         if (children != null) {
-            h = h * 37 + children.hashCode();
+            for (Node child : children) {
+                h = h * 524287 + child.uniqueHash;
+            }
         }
         if (word != null) {
-            h = h * 37 + word.hashCode();
+            h = h * 2147483647 + word.hashCode();
         }
         return h;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        Node other = (Node) obj;
-        return grammemeValues.equals(other.grammemeValues)
-            && (children == null ? other.children == null : children.equals(other.children))
-            && (word == null ? other.word == null : word.equals(other.word));
     }
 
     @Override

@@ -14,7 +14,7 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 
 @RunWith(JUnit4.class)
 public class SubjectExtractorTest extends _BaseTestCase {
-    private SubjectExtractor subjExtractor;
+    protected SubjectExtractor subjExtractor;
     private boolean initialized = false;
 
     @Before
@@ -26,7 +26,7 @@ public class SubjectExtractorTest extends _BaseTestCase {
         Parser parser = new SimpleParser(morph, new SimpleTagger(morph));
         subjExtractor =
             new SubjectExtractor(parser,
-                                 "+NP,nomn +NP,accs -PP NOUN,nomn NOUN,accs LATN NUMB",
+                                 "+NP,nomn +NP,accs -PP -Geox NOUN,nomn NOUN,accs LATN NUMB",
                                  true);
         initialized = true;
     }
@@ -35,6 +35,9 @@ public class SubjectExtractorTest extends _BaseTestCase {
     public void testExtractSubject() throws IOException {
         assertEquals(Arrays.asList(new String[]{"сапог"}),
                      subjExtractor.extract(new String[]{"женские", "сапоги"}));
+
+        assertEquals(Arrays.asList(new String[]{"сапог"}),
+                     subjExtractor.extract(new String[]{"женские", "сапоги", "днепропетровск"}));
 
         assertEquals(Arrays.asList(new String[]{"чехол", "ozaki"}),
                      subjExtractor.extract(new String[]{"чехол", "ozaki", "для", "iphone", "5"}));

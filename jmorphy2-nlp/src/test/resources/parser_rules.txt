@@ -5,8 +5,12 @@ NP -> NP PP [9]
 VP -> VP PP [9]
 
 PP -> PREP NP [8]
+PP -> PP LATN [8]
+PP -> PP NUMB [8]
+PP -> PREP LATN [8]
+PP -> PREP NUMB [8]
 
-NP -> NP,nomn NP,gent [8]
+NP -> $NP,nomn @NP,gent [8]
 
 NP -> NP @LATN [5]
 NP -> NP @NUMB [5]

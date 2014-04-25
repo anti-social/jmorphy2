@@ -20,6 +20,8 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 public class SimpleTagger extends Tagger {
     private final Ruleset rules;
 
+    public static final int THRESHOLD = 1000;
+
     public SimpleTagger(MorphAnalyzer morph) {
         this(morph, defaultRules);
     }
@@ -66,11 +68,18 @@ public class SimpleTagger extends Tagger {
                 reducedNodes.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                           p,
                                           p.score));
+                if (p.tag.contains("Fixd")) {
+                    break;
+                }
             }
         }
         // unknown word
         if (reducedNodes.isEmpty()) {
             reducedNodes.add(nodes.get(0));
+        }
+
+        if (!reducedNodes.isEmpty() && results.size() > THRESHOLD) {
+            reducedNodes = reducedNodes.subList(0, 1);
         }
 
         for (Node node : reducedNodes) {

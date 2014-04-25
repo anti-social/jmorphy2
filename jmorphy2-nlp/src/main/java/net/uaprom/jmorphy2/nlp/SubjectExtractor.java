@@ -73,17 +73,17 @@ public class SubjectExtractor {
         }
 
         List<Token> subjTokens = new ArrayList<Token>();
-        for (Node child : node.getChildren()) {
-            if (child.isLeaf()) {
-                if (enabled && !disabled && match(subjValues, child.grammemeValues)) {
-                    if (normalize && child.parsed != null) {
-                        subjTokens.add(new Token(child.parsed.normalForm, index));
-                    } else {
-                        subjTokens.add(new Token(child.word, index));
-                    }
-                    index++;
+        if (node.isLeaf()) {
+            if (enabled && !disabled && match(subjValues, node.grammemeValues)) {
+                if (normalize && node.parsed != null) {
+                    subjTokens.add(new Token(node.parsed.normalForm, index));
+                } else {
+                    subjTokens.add(new Token(node.word, index));
                 }
-            } else {
+                index++;
+            }
+        } else {
+            for (Node child : node.getChildren()) {
                 subjTokens.addAll(extractTokens(child, index, enabled, disabled));
             }
         }

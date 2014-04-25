@@ -1,6 +1,7 @@
 package net.uaprom.jmorphy2.nlp;
 
 import java.io.IOException;
+import java.lang.Math;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -24,6 +25,8 @@ public class SimpleParser extends Parser {
     protected final Ruleset rules;
 
     protected final Set<String> allowedGrammemeValues;
+
+    public static final int MAX_SENTENCES = 100;
 
     public SimpleParser(MorphAnalyzer morph, Tagger tagger) throws IOException {
         this(morph, tagger, defaultRules);
@@ -56,12 +59,15 @@ public class SimpleParser extends Parser {
     }
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {
+        // System.out.println(sentences.size());
+        int var = 0, wave = 0;
         List<Node.Top> results = new ArrayList<Node.Top>();
-        Set<Node.Top> uniqueTops = new HashSet<Node.Top>();
+        Set<Long> uniqueTopHashes = new HashSet<Long>();
         
         while (!sentences.isEmpty()) {
             List<Node.Top> nextSentences = new ArrayList<Node.Top>();
-            for (Node.Top sent : sentences) {
+            List<Node.Top> cutSentences = sentences.subList(0, Math.min(MAX_SENTENCES, sentences.size()));
+            for (Node.Top sent : cutSentences) {
                 boolean hasMatchedRules = false;
                 ImmutableList<Node> nodes = sent.getChildren();
                 int nodesSize = sent.getChildrenSize();
@@ -76,10 +82,11 @@ public class SimpleParser extends Parser {
                             ImmutableList<Node> reducedNodes = reduce(mRule, nodes, offset);
                             float topScore = Node.sumScoreFor(reducedNodes) / reducedNodes.size() / (Node.maxDepthFor(reducedNodes) + 1);
                             Node.Top top = new Node.Top(reducedNodes, topScore);
-                            if (!uniqueTops.contains(top)) {
+                            if (!uniqueTopHashes.contains(top.uniqueHash)) {
                                 nextSentences.add(top);
-                                uniqueTops.add(top);
+                                uniqueTopHashes.add(top.uniqueHash);
                             }
+                            var++;
                         }
                     }
                 }
@@ -89,8 +96,14 @@ public class SimpleParser extends Parser {
                 }
             }
             sentences = nextSentences;
+            Collections.sort(sentences, Node.scoreComparator());
+            wave++;
         }
 
+        // System.out.println(wave);
+        // System.out.println(var);
+        // System.out.println(uniqueTopHashes.size());
+        // System.out.println(results.size());
         Collections.sort(results, Node.scoreComparator());
         return results;
     }
@@ -136,7 +149,11 @@ public class SimpleParser extends Parser {
         defaultRules.add("NP", "NP PP", 9);
         defaultRules.add("VP", "VP PP", 9);
         defaultRules.add("PP", "PREP NP", 8);
-        defaultRules.add("NP", "NP,nomn NP,gent", 8);
+        defaultRules.add("PP", "PP LATN", 8);
+        defaultRules.add("PP", "PP NUMB", 8);
+        defaultRules.add("PP", "PREP LATN", 8);
+        defaultRules.add("PP", "PREP NUMB", 8);
+        defaultRules.add("NP", "$NP,nomn @NP,gent", 8);
         defaultRules.add("NP", "NP @LATN", 5);
         defaultRules.add("NP", "NP @NUMB", 5);
         defaultRules.add("NP", "@LATN NP", 4);
@@ -149,7 +166,7 @@ public class SimpleParser extends Parser {
         defaultRules.add("NP", "NOUN,accs", 1);
         defaultRules.add("NP", "NOUN", 1);
         defaultRules.add("NP,nomn,sing", "LATN", 1);
-        defaultRules.add("NP", "ADJF", 1);
+        // defaultRules.add("NP", "ADJF", 1);
         defaultRules.add("VP", "INFN", 1);
         defaultRules.add("VP", "VERB", 1);
     };
