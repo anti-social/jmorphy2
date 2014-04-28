@@ -74,20 +74,6 @@ public class Node {
         return word;
     }
 
-    public boolean match(ImmutableSet<String> grammemeValues, String word) {
-        if (grammemeValues != null) {
-            if (!this.grammemeValues.containsAll(grammemeValues)) {
-                return false;
-            }
-        }
-        if (word != null) {
-            if (!word.equals(this.word)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static float sumScoreFor(List<Node> nodes) {
         float score = 0.0f;
         for (Node n : nodes) {

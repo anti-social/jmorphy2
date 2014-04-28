@@ -104,12 +104,22 @@ public class Rule {
 
         public NodeMatcher(ImmutableSet<String> grammemeValues, String word, int flags) {
             this.grammemeValues = grammemeValues;
-            this.word = word;
+            this.word = word == null ? null : word.toLowerCase();
             this.flags = flags;
         }
 
         public boolean match(Node node) {
-            return node.match(grammemeValues, word);
+            if (grammemeValues != null) {
+                if (!node.grammemeValues.containsAll(grammemeValues)) {
+                    return false;
+                }
+            }
+            if (word != null) {
+                if (!word.equals(node.word.toLowerCase())) {
+                    return false;
+                }
+            }
+            return true;
         }
     };
 }
