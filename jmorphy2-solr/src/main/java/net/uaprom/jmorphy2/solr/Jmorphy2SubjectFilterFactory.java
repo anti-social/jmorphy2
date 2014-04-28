@@ -29,7 +29,9 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
     public static final String TAGGER_RULES_PATH_ATTR = "taggerRules";
+    public static final String TAGGER_THRESHOLD_ATTR = "taggerThreshold";
     public static final String PARSER_RULES_PATH_ATTR = "parserRules";
+    public static final String PARSER_THRESHOLD_ATTR = "parserThreshold";
     public static final String EXTRACT_ATTR = "extract";
     public static final String MAX_SENTENCE_LENGTH_ATTR = "maxSentenceLength";
     
@@ -40,7 +42,9 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     private final String dictPath;
     private final String replacesPath;
     private final String taggerRulesPath;
+    private final int taggerThreshold;
     private final String parserRulesPath;
+    private final int parserThreshold;
     private final String extract;
     private final int maxSentenceLength;
 
@@ -53,10 +57,16 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
             dictPath = DEFAULT_DICT_PATH;
         }
 
+        // morph analyzer
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
+        // tagger
         this.taggerRulesPath = args.get(TAGGER_RULES_PATH_ATTR);
+        this.taggerThreshold = getInt(args, TAGGER_THRESHOLD_ATTR, SimpleTagger.DEFAULT_THRESHOLD);
+        // parser
         this.parserRulesPath = args.get(PARSER_RULES_PATH_ATTR);
+        this.parserThreshold = getInt(args, TAGGER_THRESHOLD_ATTR, SimpleParser.DEFAULT_THRESHOLD);
+        // subject extractor
         this.extract = args.get(EXTRACT_ATTR);
         this.maxSentenceLength = getInt(args, MAX_SENTENCE_LENGTH_ATTR, DEFAULT_MAX_SENTENCE_LENGTH);
     }
@@ -68,8 +78,8 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
         }
 
         MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
-        Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)));
-        Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)));
+        Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)), taggerThreshold);
+        Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)), parserThreshold);
         subjExtractor = new SubjectExtractor(parser, extract, true);
     }
 

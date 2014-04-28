@@ -18,17 +18,23 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
 public class SimpleTagger extends Tagger {
-    private final Ruleset rules;
+    protected final Ruleset rules;
+    private final int threshold;
 
-    public static final int THRESHOLD = 1000;
+    public static final int DEFAULT_THRESHOLD = 1000;
 
     public SimpleTagger(MorphAnalyzer morph) {
         this(morph, defaultRules);
     }
 
     public SimpleTagger(MorphAnalyzer morph, Ruleset rules) {
+        this(morph, rules, DEFAULT_THRESHOLD);
+    }
+
+    public SimpleTagger(MorphAnalyzer morph, Ruleset rules, int threshold) {
         super(morph);
         this.rules = rules;
+        this.threshold = threshold;
     }
 
     public List<Node.Top> tagAll(String[] tokens) throws IOException {
@@ -78,7 +84,7 @@ public class SimpleTagger extends Tagger {
             reducedNodes.add(nodes.get(0));
         }
 
-        if (!reducedNodes.isEmpty() && results.size() > THRESHOLD) {
+        if (!reducedNodes.isEmpty() && results.size() > threshold) {
             reducedNodes = reducedNodes.subList(0, 1);
         }
 

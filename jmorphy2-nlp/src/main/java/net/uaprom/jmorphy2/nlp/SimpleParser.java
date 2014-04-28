@@ -23,18 +23,24 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 public class SimpleParser extends Parser {
     protected final Ruleset rules;
+    private final int threshold;
 
     protected final Set<String> allowedGrammemeValues;
 
-    public static final int MAX_SENTENCES = 100;
+    public static final int DEFAULT_THRESHOLD = 100;
 
     public SimpleParser(MorphAnalyzer morph, Tagger tagger) throws IOException {
         this(morph, tagger, defaultRules);
     }
       
     public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules) throws IOException {
+        this(morph, tagger, defaultRules, DEFAULT_THRESHOLD);
+    }
+      
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules, int threshold) throws IOException {
         super(morph, tagger);
         this.rules = rules;
+        this.threshold = threshold;
         this.allowedGrammemeValues = Sets.union(getGrammemeValuesFor(Tag.CASE),
                                                 getGrammemeValuesFor(Tag.NUMBER));
     }
@@ -66,8 +72,7 @@ public class SimpleParser extends Parser {
         
         while (!sentences.isEmpty()) {
             List<Node.Top> nextSentences = new ArrayList<Node.Top>();
-            List<Node.Top> cutSentences = sentences.subList(0, Math.min(MAX_SENTENCES, sentences.size()));
-            for (Node.Top sent : cutSentences) {
+            for (Node.Top sent : sentences) {
                 boolean hasMatchedRules = false;
                 ImmutableList<Node> nodes = sent.getChildren();
                 int nodesSize = sent.getChildrenSize();
@@ -86,7 +91,7 @@ public class SimpleParser extends Parser {
                                 nextSentences.add(top);
                                 uniqueTopHashes.add(top.uniqueHash);
                             }
-                            var++;
+                            // var++;
                         }
                     }
                 }
@@ -95,9 +100,9 @@ public class SimpleParser extends Parser {
                     results.add(sent);
                 }
             }
-            sentences = nextSentences;
-            Collections.sort(sentences, Node.scoreComparator());
-            wave++;
+            Collections.sort(nextSentences, Node.scoreComparator());
+            sentences = nextSentences.subList(0, Math.min(threshold, nextSentences.size()));
+            // wave++;
         }
 
         // System.out.println(wave);

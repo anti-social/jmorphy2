@@ -20,7 +20,7 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 @RunWith(JUnit4.class)
 public class SubjectExtractorBenchmark extends SubjectExtractorTest {
     private static final String PHRASES_RESOURCE = "/phrases.txt";
-    private static final int DEFAULT_REPEATS = 2;
+    private static final int DEFAULT_REPEATS = 5;
 
     private List<String[]> phrases;
 
