@@ -22,6 +22,7 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
+    public static final String CACHE_SIZE_ATTR = "cacheSize";
     public static final String INCLUDE_TAGS_ATTR = "includeTags";
     public static final String INCLUDE_UNKNOWN_ATTR = "includeUnknown";
     
@@ -30,6 +31,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     private MorphAnalyzer morph;
     private final String dictPath;
     private final String replacesPath;
+    private final int cacheSize;
     private final List<Set<String>> includeTags;
     private final boolean includeUnknown;
 
@@ -57,6 +59,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
 
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
+        this.cacheSize = getInt(args, CACHE_SIZE_ATTR, MorphAnalyzer.DEFAULT_CACHE_SIZE);
         this.includeTags = includeTags;
         this.includeUnknown = getBoolean(args, INCLUDE_UNKNOWN_ATTR, true);
     }
@@ -67,7 +70,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
+        morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars, cacheSize);
     }
 
     public TokenStream create(TokenStream tokenStream) {

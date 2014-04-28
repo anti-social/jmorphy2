@@ -32,7 +32,7 @@ public class MorphAnalyzer {
     // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
     private static final String DICT_PATH_VAR = "dictPath";
 
-    private static final int DEFAULT_CACHE_SIZE = 10000;
+    public static final int DEFAULT_CACHE_SIZE = 10000;
 
     public MorphAnalyzer() throws IOException {
         this(System.getProperty(DICT_PATH_VAR), null);
