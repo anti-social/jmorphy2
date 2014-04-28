@@ -33,7 +33,7 @@ public class SimpleParserTest extends _BaseTestCase {
         initialized = true;
     }
 
-    @Test
+    // @Test
     public void test() throws IOException {
         // System.out.println(parser.parse("Набор кухонной посуды из нержавеющей стали CALVE CL 1081".split(" ")).prettyToString(true));
 
