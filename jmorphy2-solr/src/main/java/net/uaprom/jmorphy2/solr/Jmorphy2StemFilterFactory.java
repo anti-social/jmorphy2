@@ -22,14 +22,16 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
-    public static final String TAG_LIST_ATTR = "tagList";
+    public static final String INCLUDE_TAGS_ATTR = "includeTags";
+    public static final String INCLUDE_UNKNOWN_ATTR = "includeUnknown";
     
     public static final String DEFAULT_DICT_PATH = "pymorphy2_dicts";
 
     private MorphAnalyzer morph;
     private final String dictPath;
     private final String replacesPath;
-    private final List<Set<String>> tagList;
+    private final List<Set<String>> includeTags;
+    private final boolean includeUnknown;
 
     public Jmorphy2StemFilterFactory(Map<String,String> args) {
         super(args);
@@ -40,13 +42,13 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             dictPath = DEFAULT_DICT_PATH;
         }
 
-        String tagListStr = args.get(TAG_LIST_ATTR);
-        List<Set<String>> tagList = null;
-        if (tagListStr != null) {
-            tagList = new ArrayList<Set<String>>();
-            for (String tagStr : tagListStr.split(" ")) {
+        String includeTagsStr = args.get(INCLUDE_TAGS_ATTR);
+        List<Set<String>> includeTags = null;
+        if (includeTags != null) {
+            includeTags = new ArrayList<Set<String>>();
+            for (String tagStr : includeTagsStr.split(" ")) {
                 Set<String> grammemeValues = new HashSet<String>();
-                tagList.add(grammemeValues);
+                includeTags.add(grammemeValues);
                 for (String grammemeStr : tagStr.split(",")) {
                     grammemeValues.add(grammemeStr);
                 }
@@ -55,7 +57,8 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
 
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
-        this.tagList = tagList;
+        this.includeTags = includeTags;
+        this.includeUnknown = getBoolean(args, INCLUDE_UNKNOWN_ATTR, true);
     }
 
     public void inform(ResourceLoader loader) throws IOException {
@@ -68,7 +71,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     }
 
     public TokenStream create(TokenStream tokenStream) {
-        return new Jmorphy2StemFilter(tokenStream, morph, tagList);
+        return new Jmorphy2StemFilter(tokenStream, morph, includeTags, includeUnknown);
     }
 
     @SuppressWarnings("unchecked")

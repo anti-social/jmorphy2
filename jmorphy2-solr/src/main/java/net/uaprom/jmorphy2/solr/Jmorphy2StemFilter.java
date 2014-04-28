@@ -22,19 +22,17 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
 
     private final MorphAnalyzer morph;
-    private final List<Set<String>> tagList;
+    private final List<Set<String>> includeTags;
+    private final boolean includeUnknown;
         
     private List<String> normalForms;
     private State savedState;
      
-    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph) {
-        this(input, morph, null);
-    }
-    
-    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> tagList) {
+    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown) {
         super(input);
         this.morph = morph;
-        this.tagList = tagList;
+        this.includeTags = includeTags;
+        this.includeUnknown = includeUnknown;
     }
         
     @Override
@@ -56,7 +54,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
             normalForms = getNormalForms(termAtt);
 
             if (normalForms.isEmpty()) {
-                if (tagList != null) {
+                if (includeTags != null && !includeUnknown) {
                     // unknown word, filter it
                     continue;
                 }
@@ -87,7 +85,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
         
         List<Parsed> parseds = morph.parse(token);
 
-        if (tagList == null) {
+        if (includeTags == null) {
             for (Parsed p : parseds) {
                 if (!uniqueNormalForms.contains(p.normalForm)) {
                     normalForms.add(p.normalForm);
@@ -98,7 +96,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
         }
 
         for (Parsed p : parseds) {
-            for (Set<String> grammemeValues : tagList) {
+            for (Set<String> grammemeValues : includeTags) {
                 if (p.tag.containsAllValues(grammemeValues)) {
                     if (!uniqueNormalForms.contains(p.normalForm)) {
                         normalForms.add(p.normalForm);

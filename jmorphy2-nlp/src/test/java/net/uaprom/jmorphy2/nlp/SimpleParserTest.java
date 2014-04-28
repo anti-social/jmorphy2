@@ -33,7 +33,7 @@ public class SimpleParserTest extends _BaseTestCase {
         initialized = true;
     }
 
-    // @Test
+    @Test
     public void test() throws IOException {
         // System.out.println(parser.parse("Набор кухонной посуды из нержавеющей стали CALVE CL 1081".split(" ")).prettyToString(true));
 
@@ -46,7 +46,8 @@ public class SimpleParserTest extends _BaseTestCase {
         // List<Node.Top> sents = parser.parseAll("Кнопка вызова официанта".split(" "));
         // List<Node.Top> sents = parser.parseAll("Видеокарта ATI Radeon HD5770 1Gb GDDR5 SAPPHIRE 11163 02 20R".split(" "));
         // List<Node.Top> sents = parser.parseAll("Масляной пилинг для рук Манго маракуйя 100 мл".split(" "));
-        List<Node.Top> sents = parser.parseAll("Продам МАЗ 5551 самосвал".split(" "));
+        // List<Node.Top> sents = parser.parseAll("Продам МАЗ 5551 самосвал".split(" "));
+        List<Node.Top> sents = parser.parseAll("30 PIN ADAPTOR FOR IPHONE 5".split(" "));
         for (Node.Top sent : sents) {
             System.out.println(sent.prettyToString());
         }
