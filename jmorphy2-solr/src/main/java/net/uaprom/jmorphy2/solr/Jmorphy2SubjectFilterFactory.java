@@ -28,6 +28,7 @@ import net.uaprom.jmorphy2.nlp.SubjectExtractor;
 public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
+    public static final String CACHE_SIZE_ATTR = "cacheSize";
     public static final String TAGGER_RULES_PATH_ATTR = "taggerRules";
     public static final String TAGGER_THRESHOLD_ATTR = "taggerThreshold";
     public static final String PARSER_RULES_PATH_ATTR = "parserRules";
@@ -41,6 +42,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
     private SubjectExtractor subjExtractor;
     private final String dictPath;
     private final String replacesPath;
+    private final int cacheSize;
     private final String taggerRulesPath;
     private final int taggerThreshold;
     private final String parserRulesPath;
@@ -60,6 +62,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
         // morph analyzer
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
+        this.cacheSize = getInt(args, CACHE_SIZE_ATTR, MorphAnalyzer.DEFAULT_CACHE_SIZE);
         // tagger
         this.taggerRulesPath = args.get(TAGGER_RULES_PATH_ATTR);
         this.taggerThreshold = getInt(args, TAGGER_THRESHOLD_ATTR, SimpleTagger.DEFAULT_THRESHOLD);
@@ -77,7 +80,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars);
+        MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars, cacheSize);
         Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)), taggerThreshold);
         Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)), parserThreshold);
         subjExtractor = new SubjectExtractor(parser, extract, true);

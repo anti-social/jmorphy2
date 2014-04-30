@@ -26,7 +26,10 @@ public class Jmorphy2SubjectFilter extends TokenFilter {
     private final int maxSentenceLength;
 
     private Iterator<SubjectExtractor.Token> subjTokensIterator = null;
+    // private Iterator<Integer> posIncIterator = null;
     private List<State> savedStates = null;
+
+    private int prevIndex = -1;
     
     private static final Logger logger = LoggerFactory.getLogger(Jmorphy2SubjectFilter.class);
 
@@ -44,21 +47,27 @@ public class Jmorphy2SubjectFilter extends TokenFilter {
     public void reset() throws IOException {
         super.reset();
         subjTokensIterator = null;
+        // posIncIterator = null;
         savedStates = null;
+        prevIndex = -1;
     }
 
     @Override
     public final boolean incrementToken() throws IOException {
         if (subjTokensIterator == null) {
             List<String> terms = new ArrayList<String>(maxSentenceLength);
+            // List<Integer> positions = new ArrayList<Integer>(maxSentenceLength);
             savedStates = new ArrayList<State>(maxSentenceLength);
             while (terms.size() < maxSentenceLength && input.incrementToken()) {
                 if (keywordAtt.isKeyword()) {
                     continue;
                 }
                 terms.add(new String(termAtt.buffer(), 0, termAtt.length()));
+                // positions.add(posIncAtt.getPositionIncrement());
                 savedStates.add(captureState());
             }
+            // System.out.println(terms);
+            // (new Throwable()).printStackTrace(System.out);
             List<SubjectExtractor.Token> subjTerms =
                 subjExtractor.extractTokens(terms.toArray(new String[0]));
             subjTokensIterator = subjTerms.iterator();
@@ -75,5 +84,7 @@ public class Jmorphy2SubjectFilter extends TokenFilter {
         restoreState(savedStates.get(token.index));
         termAtt.copyBuffer(token.word.toCharArray(), 0, token.word.length());
         termAtt.setLength(token.word.length());
+        posIncAtt.setPositionIncrement(posIncAtt.getPositionIncrement() - 1 + token.index - prevIndex);
+        prevIndex = token.index;
     }
 }

@@ -77,7 +77,7 @@ public class Jmorphy2SubjectFilterTest extends _BaseTestCase {
         assertAnalyzesTo(analyzer,
                          "теплые перчатки",
                          Arrays.asList(new String[]{"перчатка"}),
-                         Arrays.asList(new Integer[]{1}));
+                         Arrays.asList(new Integer[]{2}));
         assertAnalyzesTo(analyzer,
                          "магнит на холодильник",
                          Arrays.asList(new String[]{"магнит"}),
@@ -85,7 +85,7 @@ public class Jmorphy2SubjectFilterTest extends _BaseTestCase {
         assertAnalyzesTo(analyzer,
                          "чехол кожаный 5 for iphone 4",
                          Arrays.asList(new String[]{"чехол", "5"}),
-                         Arrays.asList(new Integer[]{1, 1}));
+                         Arrays.asList(new Integer[]{1, 2}));
     }
 
     private void assertAnalyzesTo(Analyzer analyzer, String sent, List<String> expectedTokens, List<Integer> expectedPositions) throws IOException {

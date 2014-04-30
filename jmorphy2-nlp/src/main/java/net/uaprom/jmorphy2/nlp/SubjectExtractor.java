@@ -61,10 +61,12 @@ public class SubjectExtractor {
     }
 
     public List<Token> extractTokens(Node.Top sent) {
-        return extractTokens(sent, 0, false, false);
+        List<Token> results = new ArrayList<Token>();
+        fetchTokens(results, sent, 0, false, false);
+        return results;
     }
 
-    private List<Token> extractTokens(Node node, int index, boolean enabled, boolean disabled) {
+    private int fetchTokens(List<Token> results, Node node, int index, boolean enabled, boolean disabled) {
         if (match(enableExtractionValues, node.grammemeValues)) {
             enabled = true;
         }
@@ -72,22 +74,22 @@ public class SubjectExtractor {
             disabled = true;
         }
 
-        List<Token> subjTokens = new ArrayList<Token>();
         if (node.isLeaf()) {
             if (enabled && !disabled && match(subjValues, node.grammemeValues)) {
                 if (normalize && node.parsed != null) {
-                    subjTokens.add(new Token(node.parsed.normalForm, index));
+                    results.add(new Token(node.parsed.normalForm, index));
                 } else {
-                    subjTokens.add(new Token(node.word, index));
+                    results.add(new Token(node.word, index));
                 }
-                index++;
             }
-        } else {
-            for (Node child : node.getChildren()) {
-                subjTokens.addAll(extractTokens(child, index, enabled, disabled));
-            }
+            return 1;
         }
-        return subjTokens;
+        
+        int ixInc = 0;
+        for (Node child : node.getChildren()) {
+            ixInc += fetchTokens(results, child, index + ixInc, enabled, disabled);
+        }
+        return ixInc;
     }
 
     private boolean match(List<Set<String>> matchValues, Set<String> values) {
