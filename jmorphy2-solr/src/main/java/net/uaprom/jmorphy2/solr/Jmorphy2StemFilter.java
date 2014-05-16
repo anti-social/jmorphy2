@@ -54,12 +54,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
             normalForms = getNormalForms(termAtt);
 
             if (normalForms.isEmpty()) {
-                if (includeTags != null && !includeUnknown) {
-                    // unknown word, filter it
-                    continue;
-                }
-                // we do not know this word, return it unchanged
-                return true;
+                continue;
             }
 
             String stem = normalForms.remove(0);
@@ -85,27 +80,31 @@ public class Jmorphy2StemFilter extends TokenFilter {
         
         List<Parsed> parseds = morph.parse(token);
 
-        if (includeTags == null) {
+        if (parseds.isEmpty()) {
+            if (includeUnknown) {
+                normalForms.add(token);
+            }
+        } else if (includeTags == null) {
             for (Parsed p : parseds) {
                 if (!uniqueNormalForms.contains(p.normalForm)) {
                     normalForms.add(p.normalForm);
                     uniqueNormalForms.add(p.normalForm);
                 }
             }
-            return normalForms;
-        }
-
-        for (Parsed p : parseds) {
-            for (Set<String> grammemeValues : includeTags) {
-                if (p.tag.containsAllValues(grammemeValues)) {
-                    if (!uniqueNormalForms.contains(p.normalForm)) {
-                        normalForms.add(p.normalForm);
-                        uniqueNormalForms.add(p.normalForm);
-                        break;
+        } else {
+            for (Parsed p : parseds) {
+                for (Set<String> grammemeValues : includeTags) {
+                    if (p.tag.containsAllValues(grammemeValues)) {
+                        if (!uniqueNormalForms.contains(p.normalForm)) {
+                            normalForms.add(p.normalForm);
+                            uniqueNormalForms.add(p.normalForm);
+                            break;
+                        }
                     }
                 }
             }
         }
+
         return normalForms;
     }
 }

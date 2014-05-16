@@ -46,7 +46,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
 
         String includeTagsStr = args.get(INCLUDE_TAGS_ATTR);
         List<Set<String>> includeTags = null;
-        if (includeTags != null) {
+        if (includeTagsStr != null) {
             includeTags = new ArrayList<Set<String>>();
             for (String tagStr : includeTagsStr.split(" ")) {
                 Set<String> grammemeValues = new HashSet<String>();
