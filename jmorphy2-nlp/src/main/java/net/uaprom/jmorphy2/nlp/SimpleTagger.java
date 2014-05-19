@@ -31,6 +31,10 @@ public class SimpleTagger extends Tagger {
         this(morph, rules, DEFAULT_THRESHOLD);
     }
 
+    public SimpleTagger(MorphAnalyzer morph, int threshold) {
+        this(morph, defaultRules, threshold);
+    }
+
     public SimpleTagger(MorphAnalyzer morph, Ruleset rules, int threshold) {
         super(morph);
         this.rules = rules;

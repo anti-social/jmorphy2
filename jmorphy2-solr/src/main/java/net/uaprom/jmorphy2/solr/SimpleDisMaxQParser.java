@@ -37,20 +37,6 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
     }
 
     @Override
-    protected Query getUserQuery(String userQuery,
-                                 SolrPluginUtils.DisjunctionMaxQueryParser up,
-                                 SolrParams solrParams)
-        throws SyntaxError {
-
-        // System.out.println(">>> getUserQuery");
-        // System.out.println(userQuery);
-        Query q = super.getUserQuery(userQuery, up, solrParams);
-        // System.out.println(q);
-        // System.out.println("<<< getUserQuery");
-        return q;
-    }
-
-    @Override
     protected SolrPluginUtils.DisjunctionMaxQueryParser
         getParser(Map<String, Float> fields,
                   String paramName,
@@ -73,8 +59,6 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
     private static class SimpleDisjunctionMaxQueryParser extends SolrPluginUtils.DisjunctionMaxQueryParser {
         public SimpleDisjunctionMaxQueryParser(QParser qp, String defaultField) {
             super(qp, defaultField);
-            // System.out.println("SimpleDisjunctionMaxQueryParser");
-            // System.out.println(defaultField);
         }
 
         private static class FieldTerms {
@@ -90,21 +74,21 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
             public void addTerm(BytesRef bytes) {
                 this.terms.add(bytes);
             }
+
+            @Override
+            public String toString() {
+                return String.format("field: %s, terms: %s, boost: %s", field, terms.size(), boost);
+            }
         };
 
         @Override
         public Query parse(String queryText) throws SyntaxError {
-            // System.out.println(">>> parse");
-            // System.out.println(queryText);
             int maxPos = 0;
             Map<Integer,List<FieldTerms>> allTerms = new HashMap<Integer,List<FieldTerms>>();
-            // Map<Integer,List<BooleanQuery>> booleanQueries = new HashMap<Integer,List<BooleanQuery>>();
+
             for (String aliasedField : aliases.keySet()) {
                 Alias alias = aliases.get(aliasedField);
                 for (String field : alias.fields.keySet()) {
-                    // System.out.println(field);
-                    // System.out.println(alias.fields);
-                    // System.out.println(alias.fields.get(field));
                     Float boost = alias.fields.get(field);
                     TokenStream source = null;
                     try {
@@ -119,34 +103,19 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
 
                         int pos = 0;
                         FieldTerms curTerms = null;
-                        // BooleanQuery curQuery = null;
                         buffer.reset();
                         while (source.incrementToken()) {
                             termAtt.fillBytesRef();
                             int posInc = posIncAtt.getPositionIncrement();
-                            if (curTerms == null || posInc != 0) {
-                                curTerms = new FieldTerms(field, boost);
-                            }
-                            BytesRef term = BytesRef.deepCopyOf(bytes);
-                            // System.out.println(term.utf8ToString());
-                            curTerms.addTerm(term);
                             pos += posInc;
                             if (!allTerms.containsKey(pos)) {
-                                allTerms.put(pos, new ArrayList<FieldTerms>(1));
+                                allTerms.put(pos, new ArrayList<FieldTerms>());
                             }
-                            allTerms.get(pos).add(curTerms);
-
-                            // if (posInc == 0 && curQuery != null) {
-                            //     curQuery = newBooleanQuery(true);
-                            //     curQuery.add();
-                            // } else {
-                            //     curQuery = newTermQuery(new Term(field, BytesRef.deepCopyOf(bytes)));
-                            // }
-                            // pos += posInc;
-                            // if (!booleanQueries.contains(pos)) {
-                            //     booleanQuery.put(pos, new ArrayList<BooleanQuery>(1));
-                            // }
-                            // booleanQueries.get(pos).add(curQuery);
+                            if (curTerms == null || posInc != 0) {
+                                curTerms = new FieldTerms(field, boost);
+                                allTerms.get(pos).add(curTerms);
+                            }
+                            curTerms.addTerm(BytesRef.deepCopyOf(bytes));
                         }
 
                         maxPos = pos > maxPos ? pos : maxPos;
@@ -179,26 +148,6 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
                 
                 q.add(queryForTerm, BooleanClause.Occur.SHOULD);
             }
-
-            // Query q = super.parse(queryText);
-            // System.out.println(q);
-            return q;
-        }
-
-        @Override
-        protected Query getFieldQuery(String field, String queryText, boolean quoted)
-            throws SyntaxError {
-
-            // System.out.println(">>> getFieldQuery");
-            // for (Map.Entry<String,Alias> e : aliases.entrySet()) {
-            //     System.out.println(String.format("%s: %s", e.getKey(), e.getValue().fields));
-            // }
-            // System.out.println(field);
-            // System.out.println(queryText);
-            // System.out.println(getAnalyzer());
-            Query q = super.getFieldQuery(field, queryText, quoted);
-            // System.out.println(q);
-            // System.out.println("<<< getFieldQuery");
 
             return q;
         }

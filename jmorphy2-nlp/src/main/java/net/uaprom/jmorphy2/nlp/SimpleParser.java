@@ -34,7 +34,11 @@ public class SimpleParser extends Parser {
     }
       
     public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules) throws IOException {
-        this(morph, tagger, defaultRules, DEFAULT_THRESHOLD);
+        this(morph, tagger, rules, DEFAULT_THRESHOLD);
+    }
+      
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, int threshold) throws IOException {
+        this(morph, tagger, defaultRules, threshold);
     }
       
     public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules, int threshold) throws IOException {

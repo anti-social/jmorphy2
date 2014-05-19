@@ -23,7 +23,7 @@ public class SubjectExtractorTest extends _BaseTestCase {
             return;
         }
         initMorphAnalyzer();
-        Parser parser = new SimpleParser(morph, new SimpleTagger(morph));
+        Parser parser = new SimpleParser(morph, new SimpleTagger(morph), 100);
         subjExtractor =
             new SubjectExtractor(parser,
                                  "+NP,nomn +NP,accs -PP -Geox NOUN,nomn NOUN,accs LATN NUMB",
@@ -33,6 +33,9 @@ public class SubjectExtractorTest extends _BaseTestCase {
 
     @Test
     public void testExtractSubject() throws IOException {
+        assertEquals(Arrays.asList("игрушка", "Lava", "кукла", "майя"),
+                     subjExtractor.extract("мягкая муз игрушка Lava кукла майя в красном платье".split(" ")));
+
         assertEquals(Arrays.asList(new String[]{"сапог"}),
                      subjExtractor.extract(new String[]{"женские", "сапоги"}));
 
