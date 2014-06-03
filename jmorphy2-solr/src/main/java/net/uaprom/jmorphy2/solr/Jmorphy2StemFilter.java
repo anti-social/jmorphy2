@@ -25,8 +25,9 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private final List<Set<String>> includeTags;
     private final boolean includeUnknown;
         
-    private List<String> normalForms;
-    private State savedState;
+    private List<String> normalForms = null;
+    private State savedState = null;
+    private boolean first = true;
      
     public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown) {
         super(input);
@@ -65,6 +66,10 @@ public class Jmorphy2StemFilter extends TokenFilter {
                 savedState = captureState();
             }
 
+            if (first && posIncAtt.getPositionIncrement() == 0) {
+                posIncAtt.setPositionIncrement(1);
+                first = false;
+            }
             return true;
         }
         return false;
