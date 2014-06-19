@@ -66,8 +66,10 @@ public class Jmorphy2StemFilter extends TokenFilter {
                 savedState = captureState();
             }
 
-            if (first && posIncAtt.getPositionIncrement() == 0) {
-                posIncAtt.setPositionIncrement(1);
+            if (first) {
+                if (posIncAtt.getPositionIncrement() == 0) {
+                    posIncAtt.setPositionIncrement(1);
+                }
                 first = false;
             }
             return true;
