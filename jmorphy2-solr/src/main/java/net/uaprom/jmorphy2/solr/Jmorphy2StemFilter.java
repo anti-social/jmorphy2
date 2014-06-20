@@ -35,6 +35,13 @@ public class Jmorphy2StemFilter extends TokenFilter {
         this.includeTags = includeTags;
         this.includeUnknown = includeUnknown;
     }
+
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        normalForms = null;
+        first = true;
+    }
         
     @Override
     public boolean incrementToken() throws IOException {
