@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -24,16 +25,19 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private final MorphAnalyzer morph;
     private final List<Set<String>> includeTags;
     private final boolean includeUnknown;
+    private final boolean enablePositionIncrements;
         
-    private List<String> normalForms = null;
+    private Iterator<String> normalForms = null;
     private State savedState = null;
     private boolean first = true;
+    private int skippedPositions = 0;
      
     public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown) {
         super(input);
         this.morph = morph;
         this.includeTags = includeTags;
         this.includeUnknown = includeUnknown;
+        this.enablePositionIncrements = true;
     }
 
     @Override
@@ -41,47 +45,38 @@ public class Jmorphy2StemFilter extends TokenFilter {
         super.reset();
         normalForms = null;
         first = true;
+        skippedPositions = 0;
     }
-        
+
     @Override
-    public boolean incrementToken() throws IOException {
-        if (normalForms != null && !normalForms.isEmpty()) {
-            String nextStem = normalForms.remove(0);
-            restoreState(savedState);
-            posIncAtt.setPositionIncrement(0);
-            termAtt.copyBuffer(nextStem.toCharArray(), 0, nextStem.length());
-            termAtt.setLength(nextStem.length());
-            return true;
-        }
+    public final boolean incrementToken() throws IOException {
+        if (normalForms == null || !normalForms.hasNext()) {
+            skippedPositions = 0;
 
-        while (input.incrementToken()) {
-            if (keywordAtt.isKeyword()) {
-                return true;
-            }
-
-            normalForms = getNormalForms(termAtt);
-
-            if (normalForms.isEmpty()) {
-                continue;
-            }
-
-            String stem = normalForms.remove(0);
-            termAtt.copyBuffer(stem.toCharArray(), 0, stem.length());
-            termAtt.setLength(stem.length());
-
-            if (!normalForms.isEmpty()) {
-                savedState = captureState();
-            }
-
-            if (first) {
-                if (posIncAtt.getPositionIncrement() == 0) {
-                    posIncAtt.setPositionIncrement(1);
+            while (input.incrementToken()) {
+                if (keywordAtt.isKeyword()) {
+                    return true;
                 }
-                first = false;
+
+                savedState = null;
+                normalForms = getNormalForms(termAtt).iterator();
+
+                if (normalForms.hasNext()) {
+                    setTerm(normalForms.next());
+                    if (normalForms.hasNext()) {
+                        savedState = captureState();
+                    }
+                    return true;
+                }
+
+                skippedPositions += posIncAtt.getPositionIncrement();
             }
-            return true;
+
+            return false;
         }
-        return false;
+
+        setTerm(normalForms.next());
+        return true;
     }
 
     private List<String> getNormalForms(CharTermAttribute termAtt) throws IOException {
@@ -121,4 +116,25 @@ public class Jmorphy2StemFilter extends TokenFilter {
 
         return normalForms;
     }
+
+    private void setTerm(String stem) {
+        if (savedState != null) {
+            restoreState(savedState);
+        }
+
+        termAtt.copyBuffer(stem.toCharArray(), 0, stem.length());
+        termAtt.setLength(stem.length());
+
+        if (enablePositionIncrements) {
+            posIncAtt.setPositionIncrement(posIncAtt.getPositionIncrement() + skippedPositions);
+        } else {
+            if (first) {
+                if (posIncAtt.getPositionIncrement() == 0) {
+                    posIncAtt.setPositionIncrement(1);
+                }
+                first = false;
+            }
+        }
+    }
 }
+
