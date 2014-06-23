@@ -6,11 +6,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Arrays;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 
 import net.uaprom.jmorphy2.nlp.Ruleset;
 import net.uaprom.jmorphy2.nlp.Tagger;
@@ -44,9 +47,15 @@ public class Jmorphy2SubjectFilterTest extends BaseFilterTestCase {
                                  true);
     }
 
-    @Override
-    protected TokenFilter getTokenFilter(TokenStream source) {
-        return new Jmorphy2SubjectFilter(source, subjExtractor);
+    protected Analyzer getAnalyzer() {
+        return new Analyzer() {
+            @Override
+            protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+                Tokenizer source = new WhitespaceTokenizer(LUCENE_VERSION, reader);
+                TokenFilter filter = new Jmorphy2SubjectFilter(source, subjExtractor);
+                return new TokenStreamComponents(source, filter);
+            }
+        };
     }
 
     @Test

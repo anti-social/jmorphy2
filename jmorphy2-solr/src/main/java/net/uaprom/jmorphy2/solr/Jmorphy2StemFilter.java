@@ -33,11 +33,15 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private int skippedPositions = 0;
      
     public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown) {
+        this(input, morph, includeTags, includeUnknown, true);
+    }
+
+    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown, boolean enablePositionIncrements) {
         super(input);
         this.morph = morph;
         this.includeTags = includeTags;
         this.includeUnknown = includeUnknown;
-        this.enablePositionIncrements = true;
+        this.enablePositionIncrements = enablePositionIncrements;
     }
 
     @Override
@@ -58,14 +62,14 @@ public class Jmorphy2StemFilter extends TokenFilter {
                     return true;
                 }
 
-                savedState = null;
                 normalForms = getNormalForms(termAtt).iterator();
 
                 if (normalForms.hasNext()) {
-                    setTerm(normalForms.next());
+                    setTerm(normalForms.next(), posIncAtt.getPositionIncrement());
                     if (normalForms.hasNext()) {
                         savedState = captureState();
                     }
+                    skippedPositions = 0;
                     return true;
                 }
 
@@ -75,7 +79,8 @@ public class Jmorphy2StemFilter extends TokenFilter {
             return false;
         }
 
-        setTerm(normalForms.next());
+        restoreState(savedState);
+        setTerm(normalForms.next(), 0);
         return true;
     }
 
@@ -117,24 +122,21 @@ public class Jmorphy2StemFilter extends TokenFilter {
         return normalForms;
     }
 
-    private void setTerm(String stem) {
-        if (savedState != null) {
-            restoreState(savedState);
-        }
-
+    private void setTerm(String stem, int posInc) {
         termAtt.copyBuffer(stem.toCharArray(), 0, stem.length());
         termAtt.setLength(stem.length());
 
         if (enablePositionIncrements) {
-            posIncAtt.setPositionIncrement(posIncAtt.getPositionIncrement() + skippedPositions);
+            posIncAtt.setPositionIncrement(posInc + skippedPositions);
         } else {
             if (first) {
-                if (posIncAtt.getPositionIncrement() == 0) {
+                if (posInc == 0) {
                     posIncAtt.setPositionIncrement(1);
                 }
                 first = false;
+            } else {
+                posIncAtt.setPositionIncrement(posInc);
             }
         }
     }
 }
-
