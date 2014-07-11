@@ -23,6 +23,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
 
     private final MorphAnalyzer morph;
+    private final List<Set<String>> excludeTags;
     private final List<Set<String>> includeTags;
     private final boolean includeUnknown;
     private final boolean enablePositionIncrements;
@@ -32,18 +33,32 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private boolean first = true;
     private int skippedPositions = 0;
      
-    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown) {
-        this(input, morph, includeTags, includeUnknown, true);
+    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph) {
+        this(input, morph, null, null, true, true);
     }
 
-    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags, boolean includeUnknown, boolean enablePositionIncrements) {
+    public Jmorphy2StemFilter(TokenStream input,
+                              MorphAnalyzer morph,
+                              List<Set<String>> excludeTags,
+                              List<Set<String>> includeTags,
+                              boolean includeUnknown) {
+        this(input, morph, excludeTags, includeTags, includeUnknown, true);
+    }
+
+    public Jmorphy2StemFilter(TokenStream input,
+                              MorphAnalyzer morph,
+                              List<Set<String>> excludeTags,
+                              List<Set<String>> includeTags,
+                              boolean includeUnknown,
+                              boolean enablePositionIncrements) {
         super(input);
         this.morph = morph;
+        this.excludeTags = excludeTags;
         this.includeTags = includeTags;
         this.includeUnknown = includeUnknown;
         this.enablePositionIncrements = enablePositionIncrements;
     }
-
+    
     @Override
     public void reset() throws IOException {
         super.reset();
@@ -98,23 +113,34 @@ public class Jmorphy2StemFilter extends TokenFilter {
             if (includeUnknown) {
                 normalForms.add(token);
             }
-        } else if (includeTags == null) {
-            for (Parsed p : parseds) {
-                if (!uniqueNormalForms.contains(p.normalForm)) {
-                    normalForms.add(p.normalForm);
-                    uniqueNormalForms.add(p.normalForm);
-                }
-            }
         } else {
             for (Parsed p : parseds) {
-                for (Set<String> grammemeValues : includeTags) {
-                    if (p.tag.containsAllValues(grammemeValues)) {
-                        if (!uniqueNormalForms.contains(p.normalForm)) {
-                            normalForms.add(p.normalForm);
-                            uniqueNormalForms.add(p.normalForm);
+                boolean shouldAdd = false;
+                if (includeTags != null) {
+                    for (Set<String> includeGrammemeValues : includeTags) {
+                        if (p.tag.containsAllValues(includeGrammemeValues)) {
+                            shouldAdd = true;
                             break;
                         }
                     }
+                } else if (excludeTags != null) {
+                    boolean shouldExclude = false;
+                    for (Set<String> excludeGrammemeValues : excludeTags) {
+                        if (p.tag.containsAllValues(excludeGrammemeValues)) {
+                            shouldExclude = true;
+                            break;
+                        }
+                    }
+                    if (!shouldExclude) {
+                        shouldAdd = true;
+                    }
+                } else {
+
+                }
+
+                if (shouldAdd && !uniqueNormalForms.contains(p.normalForm)) {
+                    normalForms.add(p.normalForm);
+                    uniqueNormalForms.add(p.normalForm);
                 }
             }
         }

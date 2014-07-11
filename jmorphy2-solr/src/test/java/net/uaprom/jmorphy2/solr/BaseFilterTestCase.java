@@ -18,7 +18,10 @@ import net.uaprom.jmorphy2.test._BaseTestCase;
 public class BaseFilterTestCase extends _BaseTestCase {
     protected static final Version LUCENE_VERSION = Version.LUCENE_47;
 
-    protected void assertAnalyzesTo(Analyzer analyzer, String sent, List<String> expectedTokens, List<Integer> expectedPositions) throws IOException {
+    protected void assertAnalyzesTo(Analyzer analyzer,
+                                    String sent,
+                                    List<String> expectedTokens,
+                                    List<Integer> expectedPositions) throws IOException {
         TokenStream ts = analyzer.tokenStream("dummy", sent);
         CharTermAttribute termAtt = ts.getAttribute(CharTermAttribute.class);
         PositionIncrementAttribute posIncAtt = ts.getAttribute(PositionIncrementAttribute.class);

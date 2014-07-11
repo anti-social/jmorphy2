@@ -23,6 +23,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     public static final String DICT_PATH_ATTR = "dict";
     public static final String REPLACES_PATH_ATTR = "replaces";
     public static final String CACHE_SIZE_ATTR = "cacheSize";
+    public static final String EXCLUDE_TAGS_ATTR = "excludeTags";
     public static final String INCLUDE_TAGS_ATTR = "includeTags";
     public static final String INCLUDE_UNKNOWN_ATTR = "includeUnknown";
     public static final String ENABLE_POSITION_INCREMENTS_ATTR = "enablePositionIncrements";
@@ -33,6 +34,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     private final String dictPath;
     private final String replacesPath;
     private final int cacheSize;
+    private final List<Set<String>> excludeTags;
     private final List<Set<String>> includeTags;
     private final boolean includeUnknown;
     private final boolean enablePositionIncrements;
@@ -46,23 +48,11 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             dictPath = DEFAULT_DICT_PATH;
         }
 
-        String includeTagsStr = args.get(INCLUDE_TAGS_ATTR);
-        List<Set<String>> includeTags = null;
-        if (includeTagsStr != null) {
-            includeTags = new ArrayList<Set<String>>();
-            for (String tagStr : includeTagsStr.split(" ")) {
-                Set<String> grammemeValues = new HashSet<String>();
-                includeTags.add(grammemeValues);
-                for (String grammemeStr : tagStr.split(",")) {
-                    grammemeValues.add(grammemeStr);
-                }
-            }
-        }
-
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
         this.cacheSize = getInt(args, CACHE_SIZE_ATTR, MorphAnalyzer.DEFAULT_CACHE_SIZE);
-        this.includeTags = includeTags;
+        this.excludeTags = parseTags(args.get(EXCLUDE_TAGS_ATTR));
+        this.includeTags = parseTags(args.get(INCLUDE_TAGS_ATTR));
         this.includeUnknown = getBoolean(args, INCLUDE_UNKNOWN_ATTR, true);
         this.enablePositionIncrements = getBoolean(args, ENABLE_POSITION_INCREMENTS_ATTR, true);
     }
@@ -77,11 +67,32 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     }
 
     public TokenStream create(TokenStream tokenStream) {
-        return new Jmorphy2StemFilter(tokenStream, morph, includeTags, includeUnknown, enablePositionIncrements);
+        return new Jmorphy2StemFilter(tokenStream,
+                                      morph,
+                                      excludeTags,
+                                      includeTags,
+                                      includeUnknown,
+                                      enablePositionIncrements);
+    }
+
+    private List<Set<String>> parseTags(String tagsStr) {
+        List<Set<String>> parsedTags = null;
+        if (tagsStr != null) {
+            parsedTags = new ArrayList<Set<String>>();
+            for (String tagStr : tagsStr.split(" ")) {
+                Set<String> grammemeValues = new HashSet<String>();
+                parsedTags.add(grammemeValues);
+                for (String grammemeStr : tagStr.split(",")) {
+                    grammemeValues.add(grammemeStr);
+                }
+            }
+        }
+
+        return parsedTags;
     }
 
     @SuppressWarnings("unchecked")
-    private Map<Character,String> parseReplaces(InputStream stream) throws IOException {
+    public static Map<Character,String> parseReplaces(InputStream stream) throws IOException {
         Map<Character,String> replaceChars = new HashMap<Character,String>();
         for (Map.Entry<String,String> entry : ((Map<String,String>) JSONUtils.parseJSON(stream)).entrySet()) {
             String c = entry.getKey();

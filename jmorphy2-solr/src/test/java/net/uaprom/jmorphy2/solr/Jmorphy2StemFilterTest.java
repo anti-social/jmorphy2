@@ -42,7 +42,7 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
             @Override
             protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
                 Tokenizer source = new WhitespaceTokenizer(LUCENE_VERSION, reader);
-                TokenFilter filter = new Jmorphy2StemFilter(source, morph, includeTags, true, enablePositionIncrements);
+                TokenFilter filter = new Jmorphy2StemFilter(source, morph, null, includeTags, true, enablePositionIncrements);
                 return new TokenStreamComponents(source, filter);
             }
         };
