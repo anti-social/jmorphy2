@@ -135,7 +135,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
                         shouldAdd = true;
                     }
                 } else {
-
+                    shouldAdd = true;
                 }
 
                 if (shouldAdd && !uniqueNormalForms.contains(p.normalForm)) {
