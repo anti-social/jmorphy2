@@ -75,7 +75,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
                                       enablePositionIncrements);
     }
 
-    private List<Set<String>> parseTags(String tagsStr) {
+    public static List<Set<String>> parseTags(String tagsStr) {
         List<Set<String>> parsedTags = null;
         if (tagsStr != null) {
             parsedTags = new ArrayList<Set<String>>();

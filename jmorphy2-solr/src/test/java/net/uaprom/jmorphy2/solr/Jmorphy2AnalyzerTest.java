@@ -16,6 +16,7 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
@@ -36,31 +37,31 @@ public class Jmorphy2AnalyzerTest extends BaseFilterTestCase {
 
         assertAnalyzesTo(analyzer,
                          "",
-                         Arrays.asList(new String[0]),
-                         Arrays.asList(new Integer[0]));
+                         new String[0],
+                         new int[0]);
         assertAnalyzesTo(analyzer,
                          "тест стеммера",
-                         Arrays.asList(new String[]{"тест", "тесто", "стеммера"}),
-                         Arrays.asList(new Integer[]{1, 0, 1}));
+                         new String[]{"тест", "тесто", "стеммера"},
+                         new int[]{1, 0, 1});
         assertAnalyzesTo(analyzer,
                          "iphone",
-                         Arrays.asList(new String[]{"iphone"}),
-                         Arrays.asList(new Integer[]{1}));
+                         new String[]{"iphone"},
+                         new int[]{1});
         assertAnalyzesTo(analyzer,
                          "теплые перчатки",
-                         Arrays.asList(new String[]{"тёплый", "перчатка"}),
-                         Arrays.asList(new Integer[]{1, 1}));
+                         new String[]{"тёплый", "перчатка"},
+                         new int[]{1, 1});
         assertAnalyzesTo(analyzer,
                          "магнит на холодильник",
-                         Arrays.asList(new String[]{"магнит", "холодильник"}),
-                         Arrays.asList(new Integer[]{1, 2}));
+                         new String[]{"магнит", "холодильник"},
+                         new int[]{1, 2});
         assertAnalyzesTo(analyzer,
                          "купить технику",
-                         Arrays.asList(new String[]{"купить", "техника", "техник"}),
-                         Arrays.asList(new Integer[]{1, 1, 0}));
+                         new String[]{"купить", "техника", "техник"},
+                         new int[]{1, 1, 0});
         assertAnalyzesTo(analyzer,
                          "мы любим Украину",
-                         Arrays.asList(new String[]{"любим", "любимый", "любить", "украина"}),
-                         Arrays.asList(new Integer[]{2, 0, 0, 1}));
+                         new String[]{"любим", "любимый", "любить", "украина"},
+                         new int[]{2, 0, 0, 1});
     }
 }

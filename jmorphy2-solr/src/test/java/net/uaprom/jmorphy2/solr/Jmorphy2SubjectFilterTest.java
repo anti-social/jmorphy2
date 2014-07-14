@@ -14,6 +14,7 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
+import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
 import net.uaprom.jmorphy2.nlp.Ruleset;
 import net.uaprom.jmorphy2.nlp.Tagger;
@@ -64,23 +65,23 @@ public class Jmorphy2SubjectFilterTest extends BaseFilterTestCase {
 
         assertAnalyzesTo(analyzer,
                          "",
-                         Arrays.asList(new String[0]),
-                         Arrays.asList(new Integer[0]));
+                         new String[0],
+                         new int[0]);
         assertAnalyzesTo(analyzer,
                          "iphone",
-                         Arrays.asList(new String[]{"iphone"}),
-                         Arrays.asList(new Integer[]{1}));
+                         new String[]{"iphone"},
+                         new int[]{1});
         assertAnalyzesTo(analyzer,
                          "теплые перчатки",
-                         Arrays.asList(new String[]{"перчатка"}),
-                         Arrays.asList(new Integer[]{2}));
+                         new String[]{"перчатка"},
+                         new int[]{2});
         assertAnalyzesTo(analyzer,
                          "магнит на холодильник",
-                         Arrays.asList(new String[]{"магнит"}),
-                         Arrays.asList(new Integer[]{1}));
+                         new String[]{"магнит"},
+                         new int[]{1});
         assertAnalyzesTo(analyzer,
                          "чехол кожаный 5 for iphone 4",
-                         Arrays.asList(new String[]{"чехол", "5"}),
-                         Arrays.asList(new Integer[]{1, 2}));
+                         new String[]{"чехол", "5"},
+                         new int[]{1, 2});
     }
 }
