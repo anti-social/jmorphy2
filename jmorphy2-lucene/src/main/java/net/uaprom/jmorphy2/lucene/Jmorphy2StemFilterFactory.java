@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.solr;
+package net.uaprom.jmorphy2.lucene;
 
 import java.io.File;
 import java.io.InputStream;
@@ -63,7 +63,7 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars, cacheSize);
+        morph = new MorphAnalyzer(new LuceneFileLoader(loader, dictPath), replaceChars, cacheSize);
     }
 
     public TokenStream create(TokenStream tokenStream) {

@@ -10,6 +10,7 @@
     <module>dawg</module>
     <module>jmorphy2-core</module>
     <module>jmorphy2-nlp</module>
+    <module>jmorphy2-lucene</module>
     <module>jmorphy2-solr</module>
   </modules>
 

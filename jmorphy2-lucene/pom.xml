@@ -9,10 +9,10 @@
   </parent>
 
   <groupId>net.uaprom.jmorphy2</groupId>
-  <artifactId>jmorphy2-solr</artifactId>
+  <artifactId>jmorphy2-lucene</artifactId>
   <version>0.1</version>
 
-  <name>Solr stemmer and tagger based on jmorphy2</name>
+  <name>Stemmer and tagger based on jmorphy2 for Lucene</name>
 
   <properties>
     <lucene.version>4.9.0</lucene.version>
@@ -20,14 +20,33 @@
 
   <dependencies>
     <dependency>
-	  <groupId>org.apache.solr</groupId>
-	  <artifactId>solr-core</artifactId>
+	  <groupId>org.apache.lucene</groupId>
+	  <artifactId>lucene-test-framework</artifactId>
 	  <version>${lucene.version}</version>
+      <scope>test</scope>
     </dependency>
+    <dependency>
+	  <groupId>org.apache.lucene</groupId>
+	  <artifactId>lucene-core</artifactId>
+	  <version>${lucene.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    
 
     <dependency>
 	  <groupId>net.uaprom.jmorphy2</groupId>
-	  <artifactId>jmorphy2-lucene</artifactId>
+	  <artifactId>jmorphy2-core</artifactId>
+	  <version>0.1</version>
+    </dependency>
+    <dependency>
+	  <groupId>net.uaprom.jmorphy2</groupId>
+	  <artifactId>jmorphy2-nlp</artifactId>
 	  <version>0.1</version>
     </dependency>
 
@@ -57,7 +76,7 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
-              <includeArtifactIds>dawg,jmorphy2-core,jmorphy2-nlp,jmorphy2-lucene</includeArtifactIds>
+              <includeArtifactIds>dawg,jmorphy2-core,jmorphy2-nlp</includeArtifactIds>
             </configuration>
           </execution>
         </executions>

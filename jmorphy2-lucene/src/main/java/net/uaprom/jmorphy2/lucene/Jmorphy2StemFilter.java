@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.solr;
+package net.uaprom.jmorphy2.lucene;
 
 import java.io.IOException;
 import java.util.Set;

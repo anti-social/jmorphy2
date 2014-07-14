@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.solr;
+package net.uaprom.jmorphy2.lucene;
 
 import java.io.File;
 import java.io.InputStream;
@@ -80,7 +80,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        MorphAnalyzer morph = new MorphAnalyzer(new SolrFileLoader(loader, dictPath), replaceChars, cacheSize);
+        MorphAnalyzer morph = new MorphAnalyzer(new LuceneFileLoader(loader, dictPath), replaceChars, cacheSize);
         Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)), taggerThreshold);
         Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)), parserThreshold);
         subjExtractor = new SubjectExtractor(parser, extract, true);

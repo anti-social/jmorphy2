@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.solr;
+package net.uaprom.jmorphy2.lucene;
 
 import org.junit.Test;
 import org.junit.Before;

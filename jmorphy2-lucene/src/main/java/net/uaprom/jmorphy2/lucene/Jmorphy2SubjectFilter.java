@@ -1,4 +1,4 @@
-package net.uaprom.jmorphy2.solr;
+package net.uaprom.jmorphy2.lucene;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,9 +10,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.KeywordAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.uaprom.jmorphy2.nlp.SubjectExtractor;
 
@@ -31,8 +28,6 @@ public class Jmorphy2SubjectFilter extends TokenFilter {
 
     private int prevIndex = -1;
     
-    private static final Logger logger = LoggerFactory.getLogger(Jmorphy2SubjectFilter.class);
-
     public Jmorphy2SubjectFilter(TokenStream input, SubjectExtractor subjExtractor) {
         this(input, subjExtractor, Jmorphy2SubjectFilterFactory.DEFAULT_MAX_SENTENCE_LENGTH);
     }
