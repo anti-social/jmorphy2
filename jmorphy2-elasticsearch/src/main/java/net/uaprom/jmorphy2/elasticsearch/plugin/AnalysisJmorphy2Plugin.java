@@ -2,13 +2,12 @@ package net.uaprom.jmorphy2.elasticsearch.plugin;
 
 import java.util.Collection;
 
-// import com.google.common.collect.ImmutableList;
 import org.elasticsearch.common.collect.ImmutableList;
 
-import org.elasticsearch.plugins.AbstractPlugin;
-import org.elasticsearch.common.inject.Module;
-import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.index.analysis.AnalysisModule;
+import org.elasticsearch.common.inject.Module;
+// import org.elasticsearch.common.component.LifecycleComponent;
+import org.elasticsearch.plugins.AbstractPlugin;
 
 // import net.uaprom.jmorphy2.elasticsearch.index.Jmorphy2AnalysisBinderProcessor;
 import net.uaprom.jmorphy2.elasticsearch.index.Jmorphy2StemTokenFilterFactory;
