@@ -12,6 +12,7 @@
     <module>jmorphy2-nlp</module>
     <module>jmorphy2-lucene</module>
     <module>jmorphy2-solr</module>
+    <module>jmorphy2-elasticsearch</module>
   </modules>
 
   <dependencies>
