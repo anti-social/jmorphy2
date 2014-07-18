@@ -33,7 +33,7 @@ public class Jmorphy2SubjectFilterTest extends BaseFilterTestCase {
 
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
+        init();
 
         Tagger tagger =
             new SimpleTagger(morph,

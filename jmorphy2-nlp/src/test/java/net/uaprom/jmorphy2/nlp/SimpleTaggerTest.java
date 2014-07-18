@@ -11,11 +11,13 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
+import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.Jmorphy2TestsHelpers;
 
 
 @RunWith(JUnit4.class)
-public class SimpleTaggerTest extends _BaseTestCase {
+public class SimpleTaggerTest {
+    private MorphAnalyzer morph;
     private SimpleTagger tagger;
     private boolean initialized = false;
 
@@ -26,7 +28,7 @@ public class SimpleTaggerTest extends _BaseTestCase {
         if (initialized) {
             return;
         }
-        initMorphAnalyzer();
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
         tagger = new SimpleTagger(morph,
                                   new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE)));
         initialized = true;

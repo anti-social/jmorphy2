@@ -12,20 +12,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
-
 
 @RunWith(JUnit4.class)
-public class MorphAnalyzerBenchmark extends _BaseTestCase {
+public class MorphAnalyzerBenchmark {
     private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
     private static final int DEFAULT_REPEATS = 20;
 
+    private MorphAnalyzer morph;
     private List<WordCount> words;
+    private boolean initialized = false;
 
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
-        loadWords(WORDS_FREQ_RESOURCE);
+        if (!initialized) {
+            Jmorphy2TestsHelpers.newMorphAnalyzer();
+            loadWords(WORDS_FREQ_RESOURCE);
+        }
     }
 
     @Test

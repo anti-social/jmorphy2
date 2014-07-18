@@ -13,14 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
-
 
 @RunWith(JUnit4.class)
-public class MorphAnalyzerTest extends _BaseTestCase {
+public class MorphAnalyzerTest {
+    private MorphAnalyzer morph;
+    private boolean initialized = false;
+
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
+        if (!initialized) {
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
+        }
     }
 
     @Test

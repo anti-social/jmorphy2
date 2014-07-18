@@ -7,16 +7,18 @@ import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
+import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.Jmorphy2TestsHelpers;
 
 
 @RunWith(JUnit4.class)
-public class SimpleParserBenchmark extends _BaseTestCase {
+public class SimpleParserBenchmark {
+    private MorphAnalyzer morph;
     private Parser parser;
 
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
         parser = new SimpleParser(morph, new SimpleTagger(morph));
     }
 

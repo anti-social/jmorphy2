@@ -9,11 +9,13 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.List;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
+import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.Jmorphy2TestsHelpers;
 
 
 @RunWith(JUnit4.class)
-public class SimpleParserTest extends _BaseTestCase {
+public class SimpleParserTest {
+    private MorphAnalyzer morph;
     private Parser parser;
     private boolean initialized = false;
 
@@ -25,7 +27,7 @@ public class SimpleParserTest extends _BaseTestCase {
         if (initialized) {
             return;
         }
-        initMorphAnalyzer();
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
         parser = new SimpleParser(morph,
                                   new SimpleTagger(morph,
                                                    new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE))),

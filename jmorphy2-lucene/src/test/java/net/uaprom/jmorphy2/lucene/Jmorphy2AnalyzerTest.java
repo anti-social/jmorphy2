@@ -21,14 +21,12 @@ import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesT
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
-
 
 @RunWith(JUnit4.class)
 public class Jmorphy2AnalyzerTest extends BaseFilterTestCase {
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
+        init();
     }
 
     @Test

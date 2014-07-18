@@ -9,11 +9,13 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Arrays;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
+import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.Jmorphy2TestsHelpers;
 
 
 @RunWith(JUnit4.class)
-public class SubjectExtractorTest extends _BaseTestCase {
+public class SubjectExtractorTest {
+    private MorphAnalyzer morph;
     protected SubjectExtractor subjExtractor;
     private boolean initialized = false;
 
@@ -22,7 +24,7 @@ public class SubjectExtractorTest extends _BaseTestCase {
         if (initialized) {
             return;
         }
-        initMorphAnalyzer();
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
         Parser parser = new SimpleParser(morph, new SimpleTagger(morph), 100);
         subjExtractor =
             new SubjectExtractor(parser,

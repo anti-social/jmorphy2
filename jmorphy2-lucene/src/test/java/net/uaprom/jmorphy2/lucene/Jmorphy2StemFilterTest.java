@@ -21,8 +21,6 @@ import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesT
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
-
 
 @RunWith(JUnit4.class)
 public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
@@ -35,7 +33,7 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
 
     @Before
     public void setUp() throws IOException {
-        initMorphAnalyzer();
+        init();
     }
 
     protected Analyzer getAnalyzer(final boolean enablePositionIncrements) {

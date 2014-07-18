@@ -97,7 +97,7 @@
               <outputDirectory>${project.build.directory}/test-classes/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts</outputDirectory>
               <resources>          
                 <resource>
-                  <directory>${project.build.directory}/test-classes/pymorphy2_dicts</directory>
+                  <directory>../jmorphy2-core/src/test/resources/pymorphy2_dicts</directory>
                 </resource>
               </resources>              
             </configuration>            

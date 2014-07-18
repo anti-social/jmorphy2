@@ -37,7 +37,6 @@
       <version>${lucene.version}</version>
       <scope>compile</scope>
     </dependency>
-    
 
     <dependency>
 	  <groupId>net.uaprom.jmorphy2</groupId>
@@ -48,6 +47,13 @@
 	  <groupId>net.uaprom.jmorphy2</groupId>
 	  <artifactId>jmorphy2-nlp</artifactId>
 	  <version>0.1</version>
+    </dependency>
+    <dependency>
+	  <groupId>net.uaprom.jmorphy2</groupId>
+	  <artifactId>jmorphy2-core</artifactId>
+	  <version>0.1</version>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

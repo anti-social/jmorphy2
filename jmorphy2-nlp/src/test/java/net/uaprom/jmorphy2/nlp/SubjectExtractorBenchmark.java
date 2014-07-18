@@ -14,8 +14,6 @@ import java.util.ArrayList;
 
 import com.google.common.base.Joiner;
 
-import net.uaprom.jmorphy2.test._BaseTestCase;
-
 
 @RunWith(JUnit4.class)
 public class SubjectExtractorBenchmark extends SubjectExtractorTest {
