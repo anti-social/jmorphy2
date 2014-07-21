@@ -95,12 +95,12 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/test-classes/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts</outputDirectory>
-              <resources>          
+              <resources>
                 <resource>
                   <directory>../jmorphy2-core/src/test/resources/pymorphy2_dicts</directory>
                 </resource>
-              </resources>              
-            </configuration>            
+              </resources>
+            </configuration>
           </execution>
         </executions>
       </plugin>
