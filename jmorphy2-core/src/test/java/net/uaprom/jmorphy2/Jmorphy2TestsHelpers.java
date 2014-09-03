@@ -1,6 +1,5 @@
 package net.uaprom.jmorphy2;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -24,7 +23,7 @@ public class Jmorphy2TestsHelpers {
         return new MorphAnalyzer(new FileLoader() {
                 @Override
                 public InputStream getStream(String filename) throws IOException {
-                    return getClass().getResourceAsStream((new File(DICT_PATH, filename)).getPath());
+                    return getClass().getResourceAsStream(DICT_PATH + "/" + filename);
                 }
             },
             replaceChars,

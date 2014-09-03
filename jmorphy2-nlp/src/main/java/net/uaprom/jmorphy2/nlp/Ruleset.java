@@ -36,7 +36,7 @@ public class Ruleset {
     public Ruleset() {}
 
     public Ruleset(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
         String line, row = "";
         while ((line = reader.readLine()) != null) {
             line = line.trim();
