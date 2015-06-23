@@ -25,7 +25,7 @@ public class MorphAnalyzerBenchmark {
     @Before
     public void setUp() throws IOException {
         if (!initialized) {
-            Jmorphy2TestsHelpers.newMorphAnalyzer();
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
             loadWords(WORDS_FREQ_RESOURCE);
         }
     }

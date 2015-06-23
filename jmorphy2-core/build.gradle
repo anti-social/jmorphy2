@@ -8,6 +8,10 @@ dependencies {
     compile project(':dawg')
 }
 
+task benchmark(type: Test) {
+    include '**/*Benchmark*'
+}
+
 task fetch_pymorphy2_dicts() << {
     String pymorphy2_dicts_version = '2.4.390629.3649929'
     String pymorphy2_dicts_name = "pymorphy2-dicts-${pymorphy2_dicts_version}"
