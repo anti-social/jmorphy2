@@ -1,0 +1,49 @@
+description = 'Java port of pymorphy2'
+
+dependencies {
+    compile 'commons-io:commons-io:2.4'
+    compile 'org.noggit:noggit:0.5'
+    compile 'com.google.guava:guava:16.0.1'
+
+    compile project(':dawg')
+}
+
+task fetch_pymorphy2_dicts() << {
+    String pymorphy2_dicts_version = '2.4.390629.3649929'
+    String pymorphy2_dicts_name = "pymorphy2-dicts-${pymorphy2_dicts_version}"
+    String pymorphy2_dicts_filename = "${pymorphy2_dicts_name}.zip"
+    String pymorphy2_dicts_md5sum = '367420f7b21c77db1d5d73810e8ba2cd'
+    String pymorphy2_dicts_url = "https://pypi.python.org/packages/source/p/pymorphy2-dicts/${pymorphy2_dicts_filename}?md5=${pymorphy2_dicts_md5sum}"
+
+    def resources_path = sourceSets.test.resources.getSrcDirs().iterator()[0]
+    def pymorphy2_dicts_dir = new File("${resources_path}/pymorphy2_dicts")
+    if (!pymorphy2_dicts_dir.exists()) {
+        def pymorphy2_dicts_file = new File("${resources_path}/${pymorphy2_dicts_filename}")
+        if (!pymorphy2_dicts_file.exists()) {
+            println 'Downloading pymorphy2 dicts...'
+            new URL(pymorphy2_dicts_url).withInputStream{ i -> pymorphy2_dicts_file.withOutputStream{ it << i }}
+        }
+        println 'Unpacking pymorphy2 dicts...'
+        pymorphy2_dicts_dir.mkdirs()
+        copy {
+            from zipTree(pymorphy2_dicts_file)
+            into pymorphy2_dicts_dir
+            includeEmptyDirs = false
+            eachFile { FileCopyDetails fcp ->
+               String zip_root_path = "${pymorphy2_dicts_name}/pymorphy2_dicts/data/"
+               Integer strip_segments = zip_root_path.length() - zip_root_path.replace('/', '').length()
+               if (fcp.relativePath.pathString.startsWith(zip_root_path)) {
+                   fcp.relativePath = new RelativePath(
+                       !fcp.file.isDirectory(),
+                       fcp.relativePath.segments[strip_segments..-1] as String[]
+                   )
+               }
+               else {
+                   fcp.exclude()
+               }
+            }
+        }
+    }
+}
+
+processTestResources.dependsOn fetch_pymorphy2_dicts
