@@ -21,5 +21,5 @@ processTestResources {
 task copyDependencies(type: Copy) {
    from configurations.runtime
    into 'build/dependencies'
-   // dawg,jmorphy2-core,jmorphy2-nlp,jmorphy2-lucene,guava,noggit,commons-io,commons-codec
+   include 'dawg-*.jar', 'jmorphy2-core-*.jar', 'jmorphy2-nlp-*.jar', 'jmorphy2-lucene-*.jar', 'guava-*.jar', 'noggit-*.jar', 'commons-io-*.jar', 'commons-codec-*.jar'
 }
