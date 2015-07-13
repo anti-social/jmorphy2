@@ -14,10 +14,6 @@
 
   <name>Stemmer and tagger based on jmorphy2 for Lucene</name>
 
-  <properties>
-    <lucene.version>4.9.0</lucene.version>
-  </properties>
-
   <dependencies>
     <dependency>
 	  <groupId>org.apache.lucene</groupId>
