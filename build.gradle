@@ -5,6 +5,8 @@ subprojects {
 
     sourceCompatibility = '1.7'
 
+    compileJava.options.encoding = 'UTF-8'
+
     ext {
         elasticsearchVersion = '1.3.2'
         luceneVersion = '4.9.0'
