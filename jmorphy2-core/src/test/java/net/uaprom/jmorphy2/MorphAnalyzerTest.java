@@ -53,13 +53,13 @@ public class MorphAnalyzerTest {
                       morph.parse("лошарики"));
 
         // unknown word
-        assertParseds("псевдокошка:NOUN,anim,femn sing,nomn:псевдокошка:кошка:0.7999999\n" +
-                      "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1999999",
+        assertParseds("псевдокошка:NOUN,anim,femn sing,nomn:псевдокошка:кошка:0.8333333\n" +
+                      "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1666666",
                       morph.parse("псевдокошка"));
 
-        assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.8\n" +
-                      "снега:NOUN,inan,masc plur,nomn:снег:снега:0.1\n" +
-                      "снега:NOUN,inan,masc plur,accs:снег:снега:0.1\n",
+        assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.818181\n" +
+                      "снега:NOUN,inan,masc plur,nomn:снег:снега:0.090909\n" +
+                      "снега:NOUN,inan,masc plur,accs:снег:снега:0.090909\n",
                       morph.parse("снега"));
 
         // gen2, loct, loc2

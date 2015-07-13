@@ -78,10 +78,10 @@
                 <configuration>
                   <target name="download-pymorphy2-dicts" unless="${pymorphy2.dicts.exist}">
                     <!-- download pymorphy2 dicts, unpack and move -->
-                    <property name="pymorphy2.dicts.version" value="2.4.390629.3649929"/>
+                    <property name="pymorphy2.dicts.version" value="2.4.393442.3710985"/>
                     <property name="pymorphy2.dicts.name" value="pymorphy2-dicts-${pymorphy2.dicts.version}"/>
-                    <property name="pymorphy2.dicts.filename" value="${pymorphy2.dicts.name}.zip"/>
-                    <property name="pymorphy2.dicts.md5sum" value="367420f7b21c77db1d5d73810e8ba2cd"/>
+                    <property name="pymorphy2.dicts.filename" value="${pymorphy2.dicts.name}.tar.gz"/>
+                    <property name="pymorphy2.dicts.md5sum" value="6757bf0b4c1b935b83f31d9bc6bce267"/>
                     <property name="pymorphy2.dicts.url" value="https://pypi.python.org/packages/source/p/pymorphy2-dicts/${pymorphy2.dicts.filename}?md5=${pymorphy2.dicts.md5sum}"/>
                     <property name="outDir" value="${basedir}/src/test/resources"/>
                     <property name="pymorphy2.dicts.exist" value="${pymorphy2.dicts.exist}"/>
@@ -92,15 +92,16 @@
                          dest="${outDir}"
                          verbose="true"
                          usetimestamp="true"/>
-                    <unzip src="${outDir}/${pymorphy2.dicts.filename}"
-                           dest="${outDir}/pymorphy2_dicts">
+                    <untar src="${outDir}/${pymorphy2.dicts.filename}"
+                           dest="${outDir}/pymorphy2_dicts"
+                           compression="gzip">
                       <patternset>
                         <include name="${pymorphy2.dicts.name}/pymorphy2_dicts/data/*"/>
                       </patternset>
                       <mapper>
                         <globmapper from="${pymorphy2.dicts.name}/pymorphy2_dicts/data/*" to="*"/>
                       </mapper>
-                    </unzip>
+                    </untar>
                     <!-- <delete file="${outDir}/${pymorphy2.dicts.filename}"/> -->
                   </target>
                 </configuration>
