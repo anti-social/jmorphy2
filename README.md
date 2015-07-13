@@ -18,16 +18,16 @@ gradle build
 Elasticsearch
 =============
 
-Copy jmorphy2 jars and dependencies inro elasticsearch distribution `lib` directory:
+Copy jmorphy2 jars and dependencies into elasticsearch distribution `lib` directory:
 
 ```sh
 # replace with real path to your elasticsearch distribution
 export path_to_es_distrib=/path/to/es/distrib
 
-# mvn
+# if mvn
 cp jmorphy2-elasticsearch/target/*.jar ${path_to_es_distrib}/lib/
 cp jmorphy2-elasticsearch/target/lib/*.jar ${path_to_es_distrib}/lib/
-# gradle
+# elif gradle
 gradle copyDependencies
 cp jmorphy2-elasticsearch/build/libs/*.jar ${path_to_es_distrib}/lib/
 cp jmorphy2-elasticsearch/build/dependencies/*.jar ${path_to_es_distrib}/lib/
