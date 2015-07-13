@@ -11,9 +11,9 @@ dependencies {
     testCompile project(':jmorphy2-core').sourceSets.test.output
 }
 
-processTestResources {
+processTestResources << {
     copy {
-        from '../jmorphy2-core/src/test/resources/pymorphy2_dicts'
+        from "${project(':jmorphy2-core').sourceSets['test'].output.resourcesDir}/pymorphy2_dicts"
         into "${sourceSets['test'].output.resourcesDir}/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts"
     }
 }
