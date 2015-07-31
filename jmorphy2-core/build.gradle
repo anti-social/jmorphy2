@@ -10,6 +10,10 @@ dependencies {
 
 task benchmark(type: Test) {
     include '**/*Benchmark*'
+    outputs.upToDateWhen { false }
+    testLogging {
+        showStandardStreams = true
+    }
 }
 
 task fetch_pymorphy2_dicts() << {
