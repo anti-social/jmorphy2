@@ -113,6 +113,24 @@ public class Tag {
         return true;
     }
 
+    public boolean containsAny(Collection<Grammeme> grammemes) {
+        for (Grammeme grammeme : grammemes) {
+            if (contains(grammeme)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean containsAnyValues(Collection<String> grammemeValues) {
+        for (String grammemeValue : grammemeValues) {
+            if (grammemes.contains(storage.getGrammeme(grammemeValue))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isProductive() {
         return Sets.intersection(getGrammemeValues(), NON_PRODUCTIVE_GRAMMEMES).isEmpty();
     }

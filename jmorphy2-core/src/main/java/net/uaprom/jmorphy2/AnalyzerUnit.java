@@ -3,6 +3,7 @@ package net.uaprom.jmorphy2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,16 @@ abstract class AnalyzerUnit {
     public abstract List<ParsedWord> parse(String word) throws IOException;
 
     public abstract List<ParsedWord> getLexeme(ParsedWord form);
+
+    public List<ParsedWord> inflect(ParsedWord form, Collection<Grammeme> requiredGrammemes, Collection<Grammeme> excludeGrammemes) {
+        List<ParsedWord> paradigm = new ArrayList<ParsedWord>();
+        for (ParsedWord p : getLexeme(form)) {
+            if (p.tag.containsAll(requiredGrammemes) && !p.tag.containsAny(excludeGrammemes)) {
+                paradigm.add(p);
+            }
+        }
+        return paradigm;
+    }
 
 
     // Concrete units
@@ -245,9 +256,6 @@ abstract class AnalyzerUnit {
             }
             return parseds;
         }
-
-        // @Override
-        // public List<ParsedWord> getLexeme(ParsedWord form) throws IOException {}
     };
 
     static public class UnknownPrefixUnit extends PrefixedUnit {

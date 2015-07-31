@@ -3,6 +3,7 @@ package net.uaprom.jmorphy2;
 import java.io.IOException;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -33,8 +34,13 @@ public class ParsedWord implements Comparable {
         return unit.getLexeme(this);
     }
 
-    // public List<ParsedWord> inflect(includeTags);
-    // public List<ParsedWord> inflect(includeTags, excludeTags);
+    public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes) {
+        return inflect(requiredGrammemes, null);
+    }
+
+    public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes, Collection<Grammeme> excludeGrammemes) {
+        return unit.inflect(this, requiredGrammemes, excludeGrammemes);
+    }
 
     @Override
     public boolean equals(Object obj) {

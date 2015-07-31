@@ -167,6 +167,24 @@ public class MorphAnalyzerTest {
         assertEquals(12, lexeme.size());
     }
 
+    @Test
+    public void test_inflect() throws IOException {
+        List<ParsedWord> parseds;
+        List<ParsedWord> paradigm;
+
+        parseds = morph.parse("красивого");
+        paradigm = parseds.get(0).inflect(Arrays.asList(morph.getGrammeme("ADJF"), morph.getGrammeme("femn")),
+                                          Arrays.asList(morph.getGrammeme("Supr")));
+        assertParseds("красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:1.0\n" +
+                      "красивой:ADJF,Qual femn,sing,gent:красивый:красивой:1.0\n" +
+                      "красивой:ADJF,Qual femn,sing,datv:красивый:красивой:1.0\n" +
+                      "красивую:ADJF,Qual femn,sing,accs:красивый:красивую:1.0\n" +
+                      "красивой:ADJF,Qual femn,sing,ablt:красивый:красивой:1.0\n" +
+                      "красивою:ADJF,Qual femn,sing,ablt,V-oy:красивый:красивою:1.0\n" +
+                      "красивой:ADJF,Qual femn,sing,loct:красивый:красивой:1.0",
+                      paradigm);
+    }
+
     private void assertParseds(String expectedString, List<ParsedWord> parseds) throws IOException {
         assertParseds(expectedString, parseds, true);
     }
