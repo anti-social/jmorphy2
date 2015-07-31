@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
 import net.uaprom.jmorphy2.Tag;
-import net.uaprom.jmorphy2.Parsed;
 import net.uaprom.jmorphy2.Grammeme;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 

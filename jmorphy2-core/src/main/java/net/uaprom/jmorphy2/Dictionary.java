@@ -3,8 +3,6 @@ package net.uaprom.jmorphy2;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.DataInputStream;
-import java.io.ByteArrayInputStream;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -128,7 +126,7 @@ public class Dictionary {
             Paradigm paradigm = paradigms[fp.paraId];
             String nf = buildNormalForm(paradigm, fp.idx, fp.key);
             Tag tag = buildTag(paradigm, fp.idx);
-            parseds.add(new Parsed(word, tag, nf, word, 1.0f));
+            parseds.add(new Parsed(word, tag, nf, word, fp));
         }
         
         return parseds;
@@ -156,28 +154,20 @@ public class Dictionary {
         return word.substring(prefix.length());
     }
 
-    public class WordsDAWG extends PayloadsDAWG {
-        public WordsDAWG(InputStream stream) throws IOException {
-            super(stream);
+    class Parsed {
+        public final String word;
+        public final Tag tag;
+        public final String normalForm;
+        public final String foundWord;
+        public final WordsDAWG.FoundParadigm foundParadigm;
+
+        public Parsed(String word, Tag tag, String normalForm, String foundWord, WordsDAWG.FoundParadigm foundParadigm) {
+            this.word = word;
+            this.tag = tag;
+            this.normalForm = normalForm;
+            this.foundWord = foundWord;
+            this.foundParadigm = foundParadigm;
         }
-
-        @Override
-        protected Payload newPayload(String key, byte[] value) throws IOException {
-            return new FoundParadigm(key, value);
-        }
-
-        public class FoundParadigm extends PayloadsDAWG.Payload {
-            public final short paraId;
-            public final short idx;
-
-            public FoundParadigm(String key, byte[] value) throws IOException {
-                super(key, value);
-
-                DataInput stream = new DataInputStream(new ByteArrayInputStream(this.value));
-                this.paraId = stream.readShort();
-                this.idx = stream.readShort();
-            }
-        };
     };
 
     class Paradigm {

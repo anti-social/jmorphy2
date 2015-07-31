@@ -10,14 +10,14 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
-import net.uaprom.jmorphy2.Parsed;
+import net.uaprom.jmorphy2.ParsedWord;
 
 
 public class Node {
     public final ImmutableSet<String> grammemeValues;
     public final String grammemeValuesStr;
     public final ImmutableList<Node> children;
-    public final Parsed parsed;
+    public final ParsedWord parsed;
     public final String word;
     public final float score;
     public final int maxDepth;
@@ -32,11 +32,11 @@ public class Node {
         this(grammemeValues, null, null, word, score);
     }
 
-    public Node(ImmutableSet<String> grammemeValues, Parsed parsed, float score) {
+    public Node(ImmutableSet<String> grammemeValues, ParsedWord parsed, float score) {
         this(grammemeValues, null, parsed, parsed.word, score);
     }
 
-    protected Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, Parsed parsed, String word, float score) {
+    protected Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, ParsedWord parsed, String word, float score) {
         if (grammemeValues == null) {
             throw new RuntimeException("grammemeValues must not be null");
         }

@@ -13,7 +13,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
-import net.uaprom.jmorphy2.Parsed;
+import net.uaprom.jmorphy2.ParsedWord;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
@@ -73,8 +73,8 @@ public class SimpleTagger extends Tagger {
         // parse word
         if (reducedNodes.isEmpty()) {
             Node tNode = nodes.get(0);
-            List<Parsed> parseds = morph.parse(tNode.word);
-            for (Parsed p : parseds) {
+            List<ParsedWord> parseds = morph.parse(tNode.word);
+            for (ParsedWord p : parseds) {
                 reducedNodes.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                           p,
                                           p.score));
@@ -124,9 +124,9 @@ public class SimpleTagger extends Tagger {
                 i += mRule.rightSize;
             } else {
                 Node tNode = tokenNodes.get(i);
-                List<Parsed> parseds = morph.parse(tNode.word);
+                List<ParsedWord> parseds = morph.parse(tNode.word);
                 if (!parseds.isEmpty()) {
-                    Parsed p = parseds.get(0);
+                    ParsedWord p = parseds.get(0);
                     nodesBuilder.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                               p,
                                               p.score));

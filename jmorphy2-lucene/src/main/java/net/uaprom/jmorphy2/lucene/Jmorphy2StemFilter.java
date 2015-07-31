@@ -13,7 +13,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.KeywordAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
-import net.uaprom.jmorphy2.Parsed;
+import net.uaprom.jmorphy2.ParsedWord;
 import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
@@ -107,14 +107,14 @@ public class Jmorphy2StemFilter extends TokenFilter {
         int termLength = termAtt.length();
         String token = new String(termBuffer, 0, termLength);
         
-        List<Parsed> parseds = morph.parse(token);
+        List<ParsedWord> parseds = morph.parse(token);
 
         if (parseds.isEmpty()) {
             if (includeUnknown) {
                 normalForms.add(token);
             }
         } else {
-            for (Parsed p : parseds) {
+            for (ParsedWord p : parseds) {
                 boolean shouldAdd = false;
                 if (includeTags != null) {
                     for (Set<String> includeGrammemeValues : includeTags) {

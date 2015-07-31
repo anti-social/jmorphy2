@@ -40,7 +40,7 @@ public class MorphAnalyzerBenchmark {
 
     public void benchParse(int repeats) throws IOException {
         long startTime = 0L, endTime = 0L;
-        // List<List<Parsed>> res = new ArrayList<List<Parsed>>(words.size());
+        // List<List<ParsedWord>> res = new ArrayList<List<ParsedWord>>(words.size());
 
         for (int i = 0; i < repeats; i++) {
             int ix = 0;

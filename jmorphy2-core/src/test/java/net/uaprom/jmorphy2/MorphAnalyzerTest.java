@@ -27,8 +27,8 @@ public class MorphAnalyzerTest {
     }
 
     @Test
-    public void test() throws IOException {
-        List<Parsed> parseds = morph.parse("красивого");
+    public void test_parse() throws IOException {
+        List<ParsedWord> parseds = morph.parse("красивого");
         Tag tag = parseds.get(0).tag;
         assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:красивого:0.5\n" +
                       "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:0.25\n" +
@@ -112,19 +112,20 @@ public class MorphAnalyzerTest {
                      morph.tag("красивого"));
     }
 
-    private void assertParseds(String expectedString, List<Parsed> parseds) throws IOException {
-        List<Parsed> expected = new ArrayList<Parsed>();
+    private void assertParseds(String expectedString, List<ParsedWord> parseds) throws IOException {
+        int i = 0;
         for (String s : expectedString.split("\n")) {
             if (s.equals("")) {
                 continue;
             }
             String[] parts = s.split(":");
-            expected.add(new Parsed(parts[0],
-                                    morph.getTag(parts[1]),
-                                    parts[2],
-                                    parts[3],
-                                    Float.parseFloat(parts[4])));
+            ParsedWord parsed = parseds.get(i);
+            assertEquals(parts[0], parsed.word);
+            assertEquals(morph.getTag(parts[1]), parsed.tag);
+            assertEquals(parts[2], parsed.normalForm);
+            assertEquals(parts[3], parsed.foundWord);
+            assertEquals(Float.parseFloat(parts[4]), parsed.score, ParsedWord.EPS);
+            i++;
         }
-        assertEquals(expected, parseds);
     }
 }
