@@ -118,18 +118,40 @@ public class Dictionary {
 
     public List<Parsed> parse(String word) throws IOException {
         List<String> normalForms = new ArrayList<String>();
-        List<PayloadsDAWG.Payload> items = words.similarItems(word, replaceChars);;
+        List<PayloadsDAWG.Payload> items = words.similarItems(word, replaceChars);
         List<Parsed> parseds = new ArrayList<Parsed>();
 
         for (PayloadsDAWG.Payload item : items) {
             WordsDAWG.FoundParadigm fp = (WordsDAWG.FoundParadigm) item;
             Paradigm paradigm = paradigms[fp.paraId];
-            String nf = buildNormalForm(paradigm, fp.idx, fp.key);
+            String normalForm = buildNormalForm(paradigm, fp.idx, fp.key);
             Tag tag = buildTag(paradigm, fp.idx);
-            parseds.add(new Parsed(word, tag, nf, word, fp));
+            parseds.add(new Parsed(word, tag, normalForm, fp));
         }
         
         return parseds;
+    }
+
+    public List<Parsed> getLexeme(WordsDAWG.FoundParadigm foundParadigm) {
+        List<Parsed> lexeme = new ArrayList<Parsed>();
+        Paradigm paradigm = paradigms[foundParadigm.paraId];
+        int paradigmSize = paradigm.size();
+        String stem = buildStem(paradigm,
+                                foundParadigm.idx,
+                                foundParadigm.key);
+        String normalForm = buildNormalForm(paradigm, foundParadigm.idx, foundParadigm.key);
+        for (short idx = 0; idx < paradigmSize; idx++) {
+            String prefix = paradigmPrefixes[paradigm.getStemPrefixId(idx)];
+            String suffix = suffixes[paradigm.getStemSuffixId(idx)];
+            String word = prefix + stem + suffix;
+            Tag tag = buildTag(paradigm, idx);
+            WordsDAWG.FoundParadigm fp = new WordsDAWG.FoundParadigm(word, foundParadigm.paraId, idx);
+            lexeme.add(new Parsed(word,
+                                  tag,
+                                  normalForm,
+                                  fp));
+        }
+        return lexeme;
     }
 
     protected Tag buildTag(Paradigm paradigm, short idx) {
@@ -154,18 +176,16 @@ public class Dictionary {
         return word.substring(prefix.length());
     }
 
-    class Parsed {
+    public static class Parsed {
         public final String word;
         public final Tag tag;
         public final String normalForm;
-        public final String foundWord;
         public final WordsDAWG.FoundParadigm foundParadigm;
 
-        public Parsed(String word, Tag tag, String normalForm, String foundWord, WordsDAWG.FoundParadigm foundParadigm) {
+        public Parsed(String word, Tag tag, String normalForm, WordsDAWG.FoundParadigm foundParadigm) {
             this.word = word;
             this.tag = tag;
             this.normalForm = normalForm;
-            this.foundWord = foundWord;
             this.foundParadigm = foundParadigm;
         }
     };
@@ -201,6 +221,22 @@ public class Dictionary {
 
         public int getTagId(short idx) {
             return data[length + idx];
+        }
+
+        public int size() {
+            return length;
+        }
+    };
+
+    public class ParadigmInfo {
+        public final String prefix;
+        public final String suffix;
+        public final Tag tag;
+
+        public ParadigmInfo(String prefix, String suffix, Tag tag) {
+            this.prefix = prefix;
+            this.suffix = suffix;
+            this.tag = tag;
         }
     };
 }

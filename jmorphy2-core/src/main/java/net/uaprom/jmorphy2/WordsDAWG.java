@@ -16,19 +16,32 @@ public class WordsDAWG extends PayloadsDAWG {
 
     @Override
     protected Payload newPayload(String key, byte[] value) throws IOException {
-        return new FoundParadigm(key, value);
+        DataInput stream = new DataInputStream(new ByteArrayInputStream(decodeValue(value)));
+        short paraId = stream.readShort();
+        short idx = stream.readShort();
+        return new FoundParadigm(key, paraId, idx);
     }
 
-    public class FoundParadigm extends PayloadsDAWG.Payload {
+    public static class FoundParadigm extends PayloadsDAWG.Payload {
         public final short paraId;
         public final short idx;
 
-        public FoundParadigm(String key, byte[] value) throws IOException {
-            super(key, value);
+        public FoundParadigm(String key, short paraId, short idx) {
+            super(key);
+            this.paraId = paraId;
+            this.idx = idx;
+        }
 
-            DataInput stream = new DataInputStream(new ByteArrayInputStream(this.value));
-            this.paraId = stream.readShort();
-            this.idx = stream.readShort();
+        @Override
+        public boolean equals(Object obj) {
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+
+            FoundParadigm other = (FoundParadigm) obj;
+            return key.equals(other.key)
+                && paraId == other.paraId
+                && idx == other.idx;
         }
     };
 }

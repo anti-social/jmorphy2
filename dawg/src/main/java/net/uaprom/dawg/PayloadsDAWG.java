@@ -34,8 +34,12 @@ public class PayloadsDAWG extends DAWG {
         return values;
     }
 
+    protected byte[] decodeValue(byte[] value) {
+        return new Base64().decodeBase64(value);
+    }
+
     protected Payload newPayload(String key, byte[] value) throws IOException {
-        return new Payload(key, value);
+        return new RawPayload(key, decodeValue(value));
     }
 
     public List<Payload> similarItems(String key) throws IOException {
@@ -224,13 +228,20 @@ public class PayloadsDAWG extends DAWG {
         }
     };
 
-    public class Payload {
+    abstract public static class Payload {
         public final String key;
+        
+        public Payload(String key) {
+            this.key = key;
+        }
+    };
+
+    public static class RawPayload extends Payload {
         public final byte[] value;
 
-        public Payload(String key, byte[] value) throws IOException {
-            this.key = key;
-            this.value = (new Base64()).decodeBase64(value);
+        public RawPayload(String key, byte[] value) {
+            super(key);
+            this.value = value;
         }
     };
 

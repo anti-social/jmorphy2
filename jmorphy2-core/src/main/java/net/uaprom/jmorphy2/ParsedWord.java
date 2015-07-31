@@ -29,6 +29,13 @@ public class ParsedWord implements Comparable {
         return new ParsedWord(word, tag, normalForm, foundWord, newScore, unit);
     }
 
+    public List<ParsedWord> getLexeme() {
+        return unit.getLexeme(this);
+    }
+
+    // public List<ParsedWord> inflect(includeTags);
+    // public List<ParsedWord> inflect(includeTags, excludeTags);
+
     @Override
     public boolean equals(Object obj) {
         if (getClass() != obj.getClass()) {
@@ -45,7 +52,7 @@ public class ParsedWord implements Comparable {
 
     @Override
     public String toString() {
-        return String.format("<Parsed: %s, %s, %s, %s, %.6f, %s>", word, tag, normalForm, foundWord, score, unit.getClass());
+        return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>", word, tag, normalForm, foundWord, score, unit.getClass());
     }
 
     @Override

@@ -28,6 +28,8 @@ abstract class AnalyzerUnit {
 
     public abstract List<ParsedWord> parse(String word) throws IOException;
 
+    public abstract List<ParsedWord> getLexeme(ParsedWord form);
+
 
     // Concrete units
 
@@ -44,7 +46,23 @@ abstract class AnalyzerUnit {
             List<Dictionary.Parsed> parseds = dict.parse(word.toLowerCase());
             List<ParsedWord> parsedWords = new ArrayList<ParsedWord>();
             for (Dictionary.Parsed p : parseds) {
-                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundWord, score, this, p.foundParadigm));
+                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, this, p.foundParadigm));
+            }
+            return parsedWords;
+        }
+
+        @Override
+        public List<ParsedWord> getLexeme(ParsedWord form) {
+            assert form instanceof DictionaryParsedWord;
+
+            return getLexeme((DictionaryParsedWord) form);
+        }
+
+        public List<ParsedWord> getLexeme(DictionaryParsedWord form) {
+            List<Dictionary.Parsed> dictParseds = dict.getLexeme(form.foundParadigm);
+            List<ParsedWord> parsedWords = new ArrayList<ParsedWord>();
+            for (Dictionary.Parsed p : dictParseds) {
+                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, 1.0f, this, p.foundParadigm));
             }
             return parsedWords;
         }
@@ -73,6 +91,11 @@ abstract class AnalyzerUnit {
     static public abstract class SingleLexemeAnalyzerUnit extends AnalyzerUnit {
         public SingleLexemeAnalyzerUnit(Tag.Storage tagStorage, boolean terminate, float score) {
             super(tagStorage, terminate, score);
+        }
+
+        @Override
+        public List<ParsedWord> getLexeme(ParsedWord form) {
+            return Arrays.asList(form);
         }
     };
 
@@ -178,6 +201,23 @@ abstract class AnalyzerUnit {
             }
             return parseds;
         }
+
+        @Override
+        public List<ParsedWord> getLexeme(ParsedWord form) {
+            String prefix = form.word.substring(0, form.word.length() - form.foundWord.length());
+            List<ParsedWord> baseLexeme = super.getLexeme(form);
+            List<ParsedWord> lexeme = new ArrayList<ParsedWord>();
+            for (ParsedWord p : baseLexeme) {
+                lexeme.add(new DictionaryParsedWord(prefix + p.word,
+                                                    p.tag,
+                                                    prefix + p.normalForm,
+                                                    p.foundWord,
+                                                    p.score,
+                                                    this,
+                                                    ((DictionaryParsedWord) p).foundParadigm));
+            }
+            return lexeme;
+        }
     };
 
     static public class KnownPrefixUnit extends PrefixedUnit {
@@ -205,6 +245,9 @@ abstract class AnalyzerUnit {
             }
             return parseds;
         }
+
+        // @Override
+        // public List<ParsedWord> getLexeme(ParsedWord form) throws IOException {}
     };
 
     static public class UnknownPrefixUnit extends PrefixedUnit {

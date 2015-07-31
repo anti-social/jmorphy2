@@ -28,7 +28,7 @@ public class KnownPrefixSplitter {
     public List<String> prefixes(String word, int minReminder) throws IOException {
         List<String> res = new ArrayList<String>();
         for (String prefix : dict.prefixes(word)) {
-            if (word.length() - prefix.length() > minReminder) {
+            if (word.length() - prefix.length() >= minReminder) {
                 res.add(prefix);
             }
         }

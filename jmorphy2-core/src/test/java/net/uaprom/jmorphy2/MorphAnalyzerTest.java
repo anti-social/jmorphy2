@@ -28,7 +28,9 @@ public class MorphAnalyzerTest {
 
     @Test
     public void test_parse() throws IOException {
-        List<ParsedWord> parseds = morph.parse("красивого");
+        List<ParsedWord> parseds;
+
+        parseds = morph.parse("красивого");
         Tag tag = parseds.get(0).tag;
         assertParseds("красивого:ADJF,Qual neut,sing,gent:красивый:красивого:0.5\n" +
                       "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:0.25\n" +
@@ -71,10 +73,21 @@ public class MorphAnalyzerTest {
 
         // е, ё
         assertParseds("ёжик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", morph.parse("ёжик"));
-        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ежик:1.0", morph.parse("ежик"));
-        assertParseds("теплые:ADJF,Qual plur,nomn:тёплый:теплые:0.5\n" +
-                      "теплые:ADJF,Qual inan,plur,accs:тёплый:теплые:0.5",
+        assertParseds("ежик:NOUN,anim,masc sing,nomn:ёжик:ёжик:1.0", morph.parse("ежик"));
+        assertParseds("теплые:ADJF,Qual plur,nomn:тёплый:тёплые:0.5\n" +
+                      "теплые:ADJF,Qual inan,plur,accs:тёплый:тёплые:0.5",
                       morph.parse("теплые"));
+
+        // known prefix
+        parseds = morph.parse("лжекот");
+        assertParseds("лжекот:NOUN,anim,masc sing,nomn:лжекот:кот:1.0",
+                      morph.parse("лжекот"));
+
+        // unknown prefix
+        assertParseds("лошарикам:NOUN,inan,masc plur,datv:лошарик:шарикам:0.333333\n" +
+                      "лошарикам:NOUN,anim,masc,Name plur,datv:лошарик:арикам:0.333333\n" +
+                      "лошарикам:NOUN,anim,femn,Name plur,datv:лошарика:арикам:0.333333",
+                      morph.parse("лошарикам"));
 
         // NUMB
         assertParseds("1:NUMB,intg:1:1:1.0", morph.parse("1"));
@@ -112,7 +125,53 @@ public class MorphAnalyzerTest {
                      morph.tag("красивого"));
     }
 
+    @Test
+    public void test_getLexem() throws IOException {
+        List<ParsedWord> parseds;
+        List<ParsedWord> lexeme;
+
+        parseds = morph.parse("IV");
+        assertParseds("IV:ROMN:IV:IV:0.5", parseds.get(0).getLexeme());
+        assertParseds("IV:LATN:IV:IV:0.5", parseds.get(1).getLexeme());
+
+        parseds = morph.parse("красивого");
+        lexeme = parseds.get(0).getLexeme();
+        assertParseds("красивый:ADJF,Qual masc,sing,nomn:красивый:красивый:1.0\n" +
+                      "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:1.0\n" +
+                      "красивому:ADJF,Qual masc,sing,datv:красивый:красивому:1.0\n" +
+                      "красивого:ADJF,Qual anim,masc,sing,accs:красивый:красивого:1.0\n" +
+                      "красивый:ADJF,Qual inan,masc,sing,accs:красивый:красивый:1.0\n" +
+                      "красивым:ADJF,Qual masc,sing,ablt:красивый:красивым:1.0\n" +
+                      "красивом:ADJF,Qual masc,sing,loct:красивый:красивом:1.0\n" +
+                      "красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:1.0",
+                      lexeme,
+                      false);
+        assertEquals(91, lexeme.size());
+
+        // known prefix
+        parseds = morph.parse("лжекот");
+        lexeme = parseds.get(0).getLexeme();
+        assertParseds("лжекот:NOUN,anim,masc sing,nomn:лжекот:кот:1.0\n" +
+                      "лжекота:NOUN,anim,masc sing,gent:лжекот:кота:1.0",
+                      lexeme,
+                      false);
+        assertEquals(12, lexeme.size());
+
+        // unkown prefix
+        parseds = morph.parse("лошарики");
+        lexeme = parseds.get(0).getLexeme();
+        assertParseds("лошарик:NOUN,inan,masc sing,nomn:лошарик:шарик:1.0\n" +
+                      "лошарика:NOUN,inan,masc sing,gent:лошарик:шарика:1.0",
+                      lexeme,
+                      false);
+        assertEquals(12, lexeme.size());
+    }
+
     private void assertParseds(String expectedString, List<ParsedWord> parseds) throws IOException {
+        assertParseds(expectedString, parseds, true);
+    }
+
+    private void assertParseds(String expectedString, List<ParsedWord> parseds, boolean checkLength) throws IOException {
         int i = 0;
         for (String s : expectedString.split("\n")) {
             if (s.equals("")) {
@@ -126,6 +185,9 @@ public class MorphAnalyzerTest {
             assertEquals(parts[3], parsed.foundWord);
             assertEquals(Float.parseFloat(parts[4]), parsed.score, ParsedWord.EPS);
             i++;
+        }
+        if (checkLength) {
+            assertEquals(i, parseds.size());
         }
     }
 }
