@@ -5,6 +5,9 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import net.uaprom.dawg.PayloadsDAWG;
 
@@ -14,21 +17,29 @@ public class WordsDAWG extends PayloadsDAWG {
         super(stream);
     }
 
-    @Override
-    protected Payload newPayload(String key, byte[] value) throws IOException {
-        DataInput stream = new DataInputStream(new ByteArrayInputStream(decodeValue(value)));
-        short paraId = stream.readShort();
+    protected WordForm decodePayload(Payload payload) throws IOException {
+        DataInput stream = new DataInputStream(new ByteArrayInputStream(payload.value));
+        short paradigmId = stream.readShort();
         short idx = stream.readShort();
-        return new FoundParadigm(key, paraId, idx);
+        return new WordForm(payload.key, paradigmId, idx);
     }
 
-    public static class FoundParadigm extends PayloadsDAWG.Payload {
-        public final short paraId;
+    public List<WordForm> similarWords(String word, Map<Character,String> replaceChars) throws IOException {
+        List<WordForm> foundWords = new ArrayList<>();
+        for (Payload payload : similarItems(word, replaceChars)) {
+            foundWords.add(decodePayload(payload));
+        }
+        return foundWords;
+    }
+
+    public static class WordForm {
+        public final String word;
+        public final short paradigmId;
         public final short idx;
 
-        public FoundParadigm(String key, short paraId, short idx) {
-            super(key);
-            this.paraId = paraId;
+        public WordForm(String word, short paradigmId, short idx) {
+            this.word = word;
+            this.paradigmId = paradigmId;
             this.idx = idx;
         }
 
@@ -38,9 +49,9 @@ public class WordsDAWG extends PayloadsDAWG {
                 return false;
             }
 
-            FoundParadigm other = (FoundParadigm) obj;
-            return key.equals(other.key)
-                && paraId == other.paraId
+            WordForm other = (WordForm) obj;
+            return word.equals(other.word)
+                && paradigmId == other.paradigmId
                 && idx == other.idx;
         }
     };

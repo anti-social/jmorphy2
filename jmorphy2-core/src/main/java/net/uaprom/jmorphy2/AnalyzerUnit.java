@@ -60,31 +60,31 @@ abstract class AnalyzerUnit {
             List<Dictionary.Parsed> parseds = dict.parse(word.toLowerCase());
             List<ParsedWord> parsedWords = new ArrayList<ParsedWord>();
             for (Dictionary.Parsed p : parseds) {
-                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, p.foundParadigm));
+                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.wordForm.word, score, p.wordForm));
             }
             return parsedWords;
         }
 
         class DictionaryParsedWord extends ParsedWord {
-            public final WordsDAWG.FoundParadigm foundParadigm;
+            public final WordsDAWG.WordForm wordForm;
 
-            public DictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.FoundParadigm foundParadigm) {
+            public DictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.WordForm wordForm) {
                 super(word, tag, normalForm, foundWord, score);
-                this.foundParadigm = foundParadigm;
+                this.wordForm = wordForm;
             }
 
             public DictionaryParsedWord(Dictionary.Parsed p, float score) {
-                this(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, p.foundParadigm);
+                this(p.word, p.tag, p.normalForm, p.wordForm.word, score, p.wordForm);
             }
 
             @Override
             public ParsedWord rescore(float newScore) {
-                return new DictionaryParsedWord(word, tag, normalForm, foundWord, newScore, foundParadigm);
+                return new DictionaryParsedWord(word, tag, normalForm, foundWord, newScore, wordForm);
             }
 
             @Override
             public List<ParsedWord> getLexeme() {
-                List<Dictionary.Parsed> dictParseds = DictionaryUnit.this.dict.getLexeme(foundParadigm);
+                List<Dictionary.Parsed> dictParseds = DictionaryUnit.this.dict.getLexeme(wordForm);
                 List<ParsedWord> lexeme = new ArrayList<>();
                 for (Dictionary.Parsed p : dictParseds) {
                     lexeme.add(new DictionaryParsedWord(p, 1.0f));
@@ -95,7 +95,7 @@ abstract class AnalyzerUnit {
             @Override
             public boolean equals(Object obj) {
                 return super.equals(obj)
-                    && foundParadigm.equals(((DictionaryParsedWord) obj).foundParadigm);
+                    && wordForm.equals(((DictionaryParsedWord) obj).wordForm);
             }
         }
     };
@@ -116,29 +116,29 @@ abstract class AnalyzerUnit {
                                                              prefix + p.normalForm,
                                                              p.word,
                                                              score,
-                                                             p.foundParadigm));
+                                                             p.wordForm));
             }
             return parseds;
         }
 
         class PrefixedDictionaryParsedWord extends DictionaryParsedWord {
-            public PrefixedDictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.FoundParadigm foundParadigm) {
-                super(word, tag, normalForm, foundWord, score, foundParadigm);
+            public PrefixedDictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.WordForm wordForm) {
+                super(word, tag, normalForm, foundWord, score, wordForm);
             }
 
             public PrefixedDictionaryParsedWord(String prefix, Dictionary.Parsed p, float score) {
-                this(prefix + p.word, p.tag, prefix + p.normalForm, p.foundParadigm.key, score, p.foundParadigm);
+                this(prefix + p.word, p.tag, prefix + p.normalForm, p.wordForm.word, score, p.wordForm);
             }
 
             @Override
             public ParsedWord rescore(float newScore) {
-                return new PrefixedDictionaryParsedWord(word, tag, normalForm, foundWord, newScore, foundParadigm);
+                return new PrefixedDictionaryParsedWord(word, tag, normalForm, foundWord, newScore, wordForm);
             }
 
             @Override
             public List<ParsedWord> getLexeme() {
                 String prefix = word.substring(0, word.length() - foundWord.length());
-                List<Dictionary.Parsed> dictParseds = PrefixedUnit.this.dict.getLexeme(foundParadigm);
+                List<Dictionary.Parsed> dictParseds = PrefixedUnit.this.dict.getLexeme(wordForm);
                 List<ParsedWord> lexeme = new ArrayList<>();
                 for (Dictionary.Parsed p : dictParseds) {
                     lexeme.add(new PrefixedDictionaryParsedWord(prefix, p, 1.0f));
