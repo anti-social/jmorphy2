@@ -190,22 +190,50 @@ public class MorphAnalyzerTest {
     }
 
     private void assertParseds(String expectedString, List<ParsedWord> parseds, boolean checkLength) throws IOException {
-        int i = 0;
+        List<ParsedWordMock> expected = new ArrayList<>();
         for (String s : expectedString.split("\n")) {
             if (s.equals("")) {
                 continue;
             }
             String[] parts = s.split(":");
-            ParsedWord parsed = parseds.get(i);
-            assertEquals(parts[0], parsed.word);
-            assertEquals(morph.getTag(parts[1]), parsed.tag);
-            assertEquals(parts[2], parsed.normalForm);
-            assertEquals(parts[3], parsed.foundWord);
-            assertEquals(Float.parseFloat(parts[4]), parsed.score, ParsedWord.EPS);
-            i++;
+            expected.add(new ParsedWordMock(parts[0],
+                                            morph.getTag(parts[1]), 
+                                            parts[2],
+                                            parts[3],
+                                            Float.parseFloat(parts[4])));
         }
-        if (checkLength) {
-            assertEquals(i, parseds.size());
+        if (!checkLength) {
+            assertEquals(expected, parseds.subList(0, expected.size()));
+        } else {
+            assertEquals(expected, parseds);
+        }
+    }
+
+    class ParsedWordMock extends ParsedWord {
+        public ParsedWordMock(String word, Tag tag, String normalForm, String foundWord, float score) {
+            super(word, tag, normalForm, foundWord, score);
+        }
+
+        @Override
+        public ParsedWord rescore(float newScore) {
+            return new ParsedWordMock(word, tag, normalForm, foundWord, newScore);
+        }
+
+        @Override
+        public List<ParsedWord> getLexeme() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ParsedWord) {
+                ParsedWord other = (ParsedWord) obj;
+                return word.equals(other.word)
+                    && tag.equals(other.tag)
+                    && normalForm.equals(other.normalForm)
+                    && Math.abs(score - other.score) < EPS;
+            }
+            return false;
         }
     }
 }
