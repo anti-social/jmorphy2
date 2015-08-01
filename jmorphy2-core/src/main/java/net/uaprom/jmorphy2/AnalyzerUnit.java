@@ -111,33 +111,30 @@ abstract class AnalyzerUnit {
                 if (!p.tag.isProductive()) {
                     continue;
                 }
-                parseds.add(new PrefixedDictionaryParsedWord(prefix + p.word,
-                                                             p.tag,
-                                                             prefix + p.normalForm,
-                                                             p.word,
-                                                             score,
-                                                             p.wordForm));
+                parseds.add(new PrefixedDictionaryParsedWord(prefix, p, score));
             }
             return parseds;
         }
 
         class PrefixedDictionaryParsedWord extends DictionaryParsedWord {
-            public PrefixedDictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.WordForm wordForm) {
+            private final String prefix;
+            
+            public PrefixedDictionaryParsedWord(String prefix, String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.WordForm wordForm) {
                 super(word, tag, normalForm, foundWord, score, wordForm);
+                this.prefix = prefix;
             }
 
             public PrefixedDictionaryParsedWord(String prefix, Dictionary.Parsed p, float score) {
-                this(prefix + p.word, p.tag, prefix + p.normalForm, p.wordForm.word, score, p.wordForm);
+                this(prefix, prefix + p.word, p.tag, prefix + p.normalForm, p.wordForm.word, score, p.wordForm);
             }
 
             @Override
             public ParsedWord rescore(float newScore) {
-                return new PrefixedDictionaryParsedWord(word, tag, normalForm, foundWord, newScore, wordForm);
+                return new PrefixedDictionaryParsedWord(prefix, word, tag, normalForm, foundWord, newScore, wordForm);
             }
 
             @Override
             public List<ParsedWord> getLexeme() {
-                String prefix = word.substring(0, word.length() - foundWord.length());
                 List<Dictionary.Parsed> dictParseds = PrefixedUnit.this.dict.getLexeme(wordForm);
                 List<ParsedWord> lexeme = new ArrayList<>();
                 for (Dictionary.Parsed p : dictParseds) {
