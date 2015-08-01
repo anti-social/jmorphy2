@@ -29,20 +29,23 @@ abstract class AnalyzerUnit {
 
     public abstract List<ParsedWord> parse(String word) throws IOException;
 
-    public abstract List<ParsedWord> getLexeme(ParsedWord form);
-
-    public List<ParsedWord> inflect(ParsedWord form, Collection<Grammeme> requiredGrammemes, Collection<Grammeme> excludeGrammemes) {
-        List<ParsedWord> paradigm = new ArrayList<ParsedWord>();
-        for (ParsedWord p : getLexeme(form)) {
-            if (p.tag.containsAll(requiredGrammemes) && !p.tag.containsAny(excludeGrammemes)) {
-                paradigm.add(p);
-            }
+    class AnalyzerParsedWord extends ParsedWord {
+        public AnalyzerParsedWord(String word, Tag tag, String normalForm, String foundWord, float score) {
+            super(word, tag, normalForm, foundWord, score);
         }
-        return paradigm;
-    }
 
+        @Override
+        public ParsedWord rescore(float newScore) {
+            return new AnalyzerParsedWord(word, tag, normalForm, foundWord, newScore);
+        }
 
-    // Concrete units
+        @Override
+        public List<ParsedWord> getLexeme() {
+            return Arrays.asList((ParsedWord) this);
+        }
+    };
+
+    // Concrete analyzer units
 
     static class DictionaryUnit extends AnalyzerUnit {
         protected final Dictionary dict;
@@ -57,38 +60,36 @@ abstract class AnalyzerUnit {
             List<Dictionary.Parsed> parseds = dict.parse(word.toLowerCase());
             List<ParsedWord> parsedWords = new ArrayList<ParsedWord>();
             for (Dictionary.Parsed p : parseds) {
-                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, this, p.foundParadigm));
+                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, p.foundParadigm));
             }
             return parsedWords;
         }
 
-        @Override
-        public List<ParsedWord> getLexeme(ParsedWord form) {
-            assert form instanceof DictionaryParsedWord;
-
-            return getLexeme((DictionaryParsedWord) form);
-        }
-
-        public List<ParsedWord> getLexeme(DictionaryParsedWord form) {
-            List<Dictionary.Parsed> dictParseds = dict.getLexeme(form.foundParadigm);
-            List<ParsedWord> parsedWords = new ArrayList<ParsedWord>();
-            for (Dictionary.Parsed p : dictParseds) {
-                parsedWords.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.foundParadigm.key, 1.0f, this, p.foundParadigm));
-            }
-            return parsedWords;
-        }
-
-        static class DictionaryParsedWord extends ParsedWord {
+        class DictionaryParsedWord extends ParsedWord {
             public final WordsDAWG.FoundParadigm foundParadigm;
 
-            public DictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, AnalyzerUnit unit, WordsDAWG.FoundParadigm foundParadigm) {
-                super(word, tag, normalForm, foundWord, score, unit);
+            public DictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.FoundParadigm foundParadigm) {
+                super(word, tag, normalForm, foundWord, score);
                 this.foundParadigm = foundParadigm;
+            }
+
+            public DictionaryParsedWord(Dictionary.Parsed p, float score) {
+                this(p.word, p.tag, p.normalForm, p.foundParadigm.key, score, p.foundParadigm);
             }
 
             @Override
             public ParsedWord rescore(float newScore) {
-                return new DictionaryParsedWord(word, tag, normalForm, foundWord, newScore, unit, foundParadigm);
+                return new DictionaryParsedWord(word, tag, normalForm, foundWord, newScore, foundParadigm);
+            }
+
+            @Override
+            public List<ParsedWord> getLexeme() {
+                List<Dictionary.Parsed> dictParseds = DictionaryUnit.this.dict.getLexeme(foundParadigm);
+                List<ParsedWord> lexeme = new ArrayList<>();
+                for (Dictionary.Parsed p : dictParseds) {
+                    lexeme.add(new DictionaryParsedWord(p, 1.0f));
+                }
+                return lexeme;
             }
 
             @Override
@@ -99,18 +100,111 @@ abstract class AnalyzerUnit {
         }
     };
 
-    static public abstract class SingleLexemeAnalyzerUnit extends AnalyzerUnit {
-        public SingleLexemeAnalyzerUnit(Tag.Storage tagStorage, boolean terminate, float score) {
-            super(tagStorage, terminate, score);
+    static abstract public class PrefixedUnit extends DictionaryUnit {
+        public PrefixedUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
+            super(tagStorage, dict, terminate, score);
+        }
+
+        protected List<ParsedWord> parseWithPrefix(String word, String prefix) throws IOException {
+            List<ParsedWord> parseds = new ArrayList<ParsedWord>();
+            for (Dictionary.Parsed p : dict.parse(word.substring(prefix.length()))) {
+                if (!p.tag.isProductive()) {
+                    continue;
+                }
+                parseds.add(new PrefixedDictionaryParsedWord(prefix + p.word,
+                                                             p.tag,
+                                                             prefix + p.normalForm,
+                                                             p.word,
+                                                             score,
+                                                             p.foundParadigm));
+            }
+            return parseds;
+        }
+
+        class PrefixedDictionaryParsedWord extends DictionaryParsedWord {
+            public PrefixedDictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.FoundParadigm foundParadigm) {
+                super(word, tag, normalForm, foundWord, score, foundParadigm);
+            }
+
+            public PrefixedDictionaryParsedWord(String prefix, Dictionary.Parsed p, float score) {
+                this(prefix + p.word, p.tag, prefix + p.normalForm, p.foundParadigm.key, score, p.foundParadigm);
+            }
+
+            @Override
+            public ParsedWord rescore(float newScore) {
+                return new PrefixedDictionaryParsedWord(word, tag, normalForm, foundWord, newScore, foundParadigm);
+            }
+
+            @Override
+            public List<ParsedWord> getLexeme() {
+                String prefix = word.substring(0, word.length() - foundWord.length());
+                List<Dictionary.Parsed> dictParseds = PrefixedUnit.this.dict.getLexeme(foundParadigm);
+                List<ParsedWord> lexeme = new ArrayList<>();
+                for (Dictionary.Parsed p : dictParseds) {
+                    lexeme.add(new PrefixedDictionaryParsedWord(prefix, p, 1.0f));
+                }
+                return lexeme;
+            }
+        };
+    };
+
+    static public class KnownPrefixUnit extends PrefixedUnit {
+        protected static final int DEFAULT_MIN_REMINDER = 3;
+
+        protected final KnownPrefixSplitter knownPrefixSplitter;
+        protected final int minReminder;
+
+        public KnownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, KnownPrefixSplitter knownPrefixSplitter, boolean terminate, float score) {
+            this(tagStorage, dict, knownPrefixSplitter, terminate, score, DEFAULT_MIN_REMINDER);
+        }
+
+        public KnownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, KnownPrefixSplitter knownPrefixSplitter, boolean terminate, float score, int minReminder) {
+            super(tagStorage, dict, terminate, score);
+            this.knownPrefixSplitter = knownPrefixSplitter;
+            this.minReminder = minReminder;
         }
 
         @Override
-        public List<ParsedWord> getLexeme(ParsedWord form) {
-            return Arrays.asList(form);
+        public List<ParsedWord> parse(String word) throws IOException {
+            word = word.toLowerCase();
+            List<ParsedWord> parseds = new ArrayList<>();
+            for (String prefix : knownPrefixSplitter.prefixes(word, minReminder)) {
+                parseds.addAll(parseWithPrefix(word, prefix));
+            }
+            return parseds;
         }
     };
 
-    static public class NumberUnit extends SingleLexemeAnalyzerUnit {
+    static public class UnknownPrefixUnit extends PrefixedUnit {
+        protected static final int DEFAULT_MAX_PREFIX_LENGTH = 5;
+        protected static final int DEFAULT_MIN_REMINDER = 3;
+
+        protected final int maxPrefixLength;
+        protected final int minReminder;
+
+        public UnknownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
+            this(tagStorage, dict, terminate, score, DEFAULT_MAX_PREFIX_LENGTH, DEFAULT_MIN_REMINDER);
+        }
+
+        public UnknownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score, int maxPrefixLength, int minReminder) {
+            super(tagStorage, dict, terminate, score);
+            this.maxPrefixLength = maxPrefixLength;
+            this.minReminder = minReminder;
+        }
+
+        @Override
+        public List<ParsedWord> parse(String word) throws IOException {
+            word = word.toLowerCase();
+            List<ParsedWord> parseds = new ArrayList<ParsedWord>();
+            int wordLength = word.length();
+            for (int i = 1; i <= maxPrefixLength && wordLength - i >= minReminder; i++) {
+                parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1)));
+            }
+            return parseds;
+        }
+    };
+
+    static public class NumberUnit extends AnalyzerUnit {
         public NumberUnit(Tag.Storage tagStorage, boolean terminate, float score) {
             super(tagStorage, terminate, score);
             this.tagStorage.newGrammeme(Lists.newArrayList("NUMB", "", "ЧИСЛО", "число"));
@@ -131,13 +225,15 @@ abstract class AnalyzerUnit {
             }
 
             if (tag != null) {
-                return Lists.newArrayList(new ParsedWord(word, tag, word, word, score, this));
+                List<ParsedWord> parseds = new ArrayList<>();
+                parseds.add(new AnalyzerParsedWord(word, tag, word, word, score));
+                return parseds;
             }
             return null;
         }
     };
 
-    static public class RegexUnit extends SingleLexemeAnalyzerUnit {
+    static public class RegexUnit extends AnalyzerUnit {
         protected final Pattern pattern;
         protected final String tagString;
 
@@ -150,7 +246,9 @@ abstract class AnalyzerUnit {
         @Override
         public List<ParsedWord> parse(String word) {
             if (pattern.matcher(word).matches()) {
-                return Lists.newArrayList(new ParsedWord(word, tagStorage.getTag(tagString), word, word, score, this));
+                List<ParsedWord> parseds = new ArrayList<>();
+                parseds.add(new AnalyzerParsedWord(word, tagStorage.getTag(tagString), word, word, score));
+                return parseds;
             }
             return null;
         }
@@ -188,102 +286,6 @@ abstract class AnalyzerUnit {
             super(tagStorage, ROMAN_REGEX, "ROMN", terminate, score);
             tagStorage.newGrammeme(Lists.newArrayList("ROMN", "", "РИМ", "римские цифры"));
             tagStorage.newTag("ROMN");
-        }
-    };
-
-    static abstract public class PrefixedUnit extends DictionaryUnit {
-        public PrefixedUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
-            super(tagStorage, dict, terminate, score);
-        }
-
-        protected List<ParsedWord> parseWithPrefix(String word, String prefix) throws IOException {
-            List<ParsedWord> parseds = new ArrayList<ParsedWord>();
-            for (Dictionary.Parsed p : dict.parse(word.substring(prefix.length()))) {
-                if (!p.tag.isProductive()) {
-                    continue;
-                }
-                parseds.add(new DictionaryParsedWord(prefix + p.word,
-                                                     p.tag,
-                                                     prefix + p.normalForm,
-                                                     p.word,
-                                                     score,
-                                                     this,
-                                                     p.foundParadigm));
-            }
-            return parseds;
-        }
-
-        @Override
-        public List<ParsedWord> getLexeme(ParsedWord form) {
-            String prefix = form.word.substring(0, form.word.length() - form.foundWord.length());
-            List<ParsedWord> baseLexeme = super.getLexeme(form);
-            List<ParsedWord> lexeme = new ArrayList<ParsedWord>();
-            for (ParsedWord p : baseLexeme) {
-                lexeme.add(new DictionaryParsedWord(prefix + p.word,
-                                                    p.tag,
-                                                    prefix + p.normalForm,
-                                                    p.foundWord,
-                                                    p.score,
-                                                    this,
-                                                    ((DictionaryParsedWord) p).foundParadigm));
-            }
-            return lexeme;
-        }
-    };
-
-    static public class KnownPrefixUnit extends PrefixedUnit {
-        protected static final int DEFAULT_MIN_REMINDER = 3;
-
-        protected final KnownPrefixSplitter knownPrefixSplitter;
-        protected final int minReminder;
-
-        public KnownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, KnownPrefixSplitter knownPrefixSplitter, boolean terminate, float score) {
-            this(tagStorage, dict, knownPrefixSplitter, terminate, score, DEFAULT_MIN_REMINDER);
-        }
-
-        public KnownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, KnownPrefixSplitter knownPrefixSplitter, boolean terminate, float score, int minReminder) {
-            super(tagStorage, dict, terminate, score);
-            this.knownPrefixSplitter = knownPrefixSplitter;
-            this.minReminder = minReminder;
-        }
-
-        @Override
-        public List<ParsedWord> parse(String word) throws IOException {
-            word = word.toLowerCase();
-            List<ParsedWord> parseds = new ArrayList<ParsedWord>();
-            for (String prefix : knownPrefixSplitter.prefixes(word, minReminder)) {
-                parseds.addAll(parseWithPrefix(word, prefix));
-            }
-            return parseds;
-        }
-    };
-
-    static public class UnknownPrefixUnit extends PrefixedUnit {
-        protected static final int DEFAULT_MAX_PREFIX_LENGTH = 5;
-        protected static final int DEFAULT_MIN_REMINDER = 3;
-
-        protected final int maxPrefixLength;
-        protected final int minReminder;
-
-        public UnknownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score) {
-            this(tagStorage, dict, terminate, score, DEFAULT_MAX_PREFIX_LENGTH, DEFAULT_MIN_REMINDER);
-        }
-
-        public UnknownPrefixUnit(Tag.Storage tagStorage, Dictionary dict, boolean terminate, float score, int maxPrefixLength, int minReminder) {
-            super(tagStorage, dict, terminate, score);
-            this.maxPrefixLength = maxPrefixLength;
-            this.minReminder = minReminder;
-        }
-
-        @Override
-        public List<ParsedWord> parse(String word) throws IOException {
-            word = word.toLowerCase();
-            List<ParsedWord> parseds = new ArrayList<ParsedWord>();
-            int wordLength = word.length();
-            for (int i = 1; i <= maxPrefixLength && wordLength - i >= minReminder; i++) {
-                parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1)));
-            }
-            return parseds;
         }
     };
 }

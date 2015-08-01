@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-public class ParsedWord implements Comparable {
+public abstract class ParsedWord implements Comparable {
     public static final float EPS = 1e-6f;
 
     public final String word;
@@ -15,31 +15,31 @@ public class ParsedWord implements Comparable {
     public final String normalForm;
     public final String foundWord;
     public final float score;
-    public final AnalyzerUnit unit;
 
-    public ParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, AnalyzerUnit unit) {
+    public ParsedWord(String word, Tag tag, String normalForm, String foundWord, float score) {
         this.word = word;
         this.tag = tag;
         this.normalForm = normalForm;
         this.foundWord = foundWord;
         this.score = score;
-        this.unit = unit;
     }
 
-    public ParsedWord rescore(float newScore) {
-        return new ParsedWord(word, tag, normalForm, foundWord, newScore, unit);
-    }
+    public abstract ParsedWord rescore(float newScore);
 
-    public List<ParsedWord> getLexeme() {
-        return unit.getLexeme(this);
-    }
+    public abstract List<ParsedWord> getLexeme();
 
     public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes) {
         return inflect(requiredGrammemes, null);
     }
 
     public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes, Collection<Grammeme> excludeGrammemes) {
-        return unit.inflect(this, requiredGrammemes, excludeGrammemes);
+        List<ParsedWord> paradigm = new ArrayList<ParsedWord>();
+        for (ParsedWord p : getLexeme()) {
+            if (p.tag.containsAll(requiredGrammemes) && !p.tag.containsAny(excludeGrammemes)) {
+                paradigm.add(p);
+            }
+        }
+        return paradigm;
     }
 
     @Override
@@ -52,13 +52,12 @@ public class ParsedWord implements Comparable {
         return word.equals(other.word)
             && tag.equals(other.tag)
             && normalForm.equals(other.normalForm)
-            && Math.abs(score - other.score) < EPS
-            && unit == other.unit;
+            && Math.abs(score - other.score) < EPS;
     }
 
     @Override
     public String toString() {
-        return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>", word, tag, normalForm, foundWord, score, unit.getClass());
+        return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f>", word, tag, normalForm, foundWord, score);
     }
 
     @Override

@@ -126,7 +126,7 @@ public class MorphAnalyzerTest {
     }
 
     @Test
-    public void test_getLexem() throws IOException {
+    public void test_getLexeme() throws IOException {
         List<ParsedWord> parseds;
         List<ParsedWord> lexeme;
 
