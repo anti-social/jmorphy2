@@ -43,6 +43,11 @@ abstract class AnalyzerUnit {
         public List<ParsedWord> getLexeme() {
             return Arrays.asList((ParsedWord) this);
         }
+
+        @Override
+        public String toString() {
+            return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>", word, tag, normalForm, foundWord, score, AnalyzerUnit.this.getClass());
+        }
     };
 
     // Concrete analyzer units
@@ -65,7 +70,7 @@ abstract class AnalyzerUnit {
             return parsedWords;
         }
 
-        class DictionaryParsedWord extends ParsedWord {
+        class DictionaryParsedWord extends AnalyzerParsedWord {
             public final WordsDAWG.WordForm wordForm;
 
             public DictionaryParsedWord(String word, Tag tag, String normalForm, String foundWord, float score, WordsDAWG.WordForm wordForm) {
