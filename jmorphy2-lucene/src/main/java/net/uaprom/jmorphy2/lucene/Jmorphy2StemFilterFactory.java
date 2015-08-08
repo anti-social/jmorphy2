@@ -25,7 +25,6 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     public static final String CACHE_SIZE_ATTR = "cacheSize";
     public static final String EXCLUDE_TAGS_ATTR = "excludeTags";
     public static final String INCLUDE_TAGS_ATTR = "includeTags";
-    public static final String INCLUDE_UNKNOWN_ATTR = "includeUnknown";
     public static final String ENABLE_POSITION_INCREMENTS_ATTR = "enablePositionIncrements";
     
     public static final String DEFAULT_DICT_PATH = "pymorphy2_dicts";
@@ -34,9 +33,8 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     private final String dictPath;
     private final String replacesPath;
     private final int cacheSize;
-    private final List<Set<String>> excludeTags;
     private final List<Set<String>> includeTags;
-    private final boolean includeUnknown;
+    private final List<Set<String>> excludeTags;
     private final boolean enablePositionIncrements;
 
     public Jmorphy2StemFilterFactory(Map<String,String> args) {
@@ -53,7 +51,6 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
         this.cacheSize = getInt(args, CACHE_SIZE_ATTR, MorphAnalyzer.DEFAULT_CACHE_SIZE);
         this.excludeTags = parseTags(args.get(EXCLUDE_TAGS_ATTR));
         this.includeTags = parseTags(args.get(INCLUDE_TAGS_ATTR));
-        this.includeUnknown = getBoolean(args, INCLUDE_UNKNOWN_ATTR, true);
         this.enablePositionIncrements = getBoolean(args, ENABLE_POSITION_INCREMENTS_ATTR, true);
     }
 
@@ -69,9 +66,8 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
     public TokenStream create(TokenStream tokenStream) {
         return new Jmorphy2StemFilter(tokenStream,
                                       morph,
-                                      excludeTags,
                                       includeTags,
-                                      includeUnknown,
+                                      excludeTags,
                                       enablePositionIncrements);
     }
 

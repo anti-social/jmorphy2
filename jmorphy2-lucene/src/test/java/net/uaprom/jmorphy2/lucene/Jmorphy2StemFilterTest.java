@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 
 @RunWith(JUnit4.class)
 public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
-    private static List<Set<String>> includeTags =
+    private static List<Set<String>> DEFAULT_INCLUDE_TAGS =
         ImmutableList.<Set<String>>of(ImmutableSet.of("NOUN"),
                                       ImmutableSet.of("ADJF"),
                                       ImmutableSet.of("ADJS"),
@@ -36,12 +36,12 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
         init();
     }
 
-    protected Analyzer getAnalyzer(final boolean enablePositionIncrements) {
+    protected Analyzer getAnalyzer(final List<Set<String>> includeTags, final List<Set<String>> excludeTags, final boolean enablePositionIncrements) {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
                 Tokenizer source = new WhitespaceTokenizer(LUCENE_VERSION, reader);
-                TokenFilter filter = new Jmorphy2StemFilter(source, morph, null, includeTags, true, enablePositionIncrements);
+                TokenFilter filter = new Jmorphy2StemFilter(source, morph, includeTags, excludeTags, enablePositionIncrements);
                 return new TokenStreamComponents(source, filter);
             }
         };
@@ -49,7 +49,7 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
 
     @Test
     public void test() throws IOException {
-        Analyzer analyzer = getAnalyzer(true);
+        Analyzer analyzer = getAnalyzer(DEFAULT_INCLUDE_TAGS, null, true);
 
         assertAnalyzesTo(analyzer,
                          "",
@@ -75,11 +75,34 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
                          "купить технику",
                          new String[]{"техника", "техник"},
                          new int[]{2, 0});
+        assertAnalyzesTo(analyzer,
+                         "ъь ъё",
+                         new String[0],
+                         new int[0]);
+    }
+ 
+    @Test
+    public void testIgnoreUnknown() throws IOException {
+        List<Set<String>> excludeUnknown = ImmutableList.<Set<String>>of(ImmutableSet.of("UNKN"));
+        Analyzer analyzer = getAnalyzer(null, excludeUnknown, true);
+        assertAnalyzesTo(analyzer,
+                         "ъь ъё",
+                         new String[0],
+                         new int[0]);
+    }
+
+    @Test
+    public void testSaveAll() throws IOException {
+        Analyzer analyzer = getAnalyzer(null, null, true);
+        assertAnalyzesTo(analyzer,
+                         "ъь ъё",
+                         new String[]{"ъь", "ъё"},
+                         new int[]{1, 1});
     }
 
     @Test
     public void testDisablePositionIncrements() throws IOException {
-        Analyzer analyzer = getAnalyzer(false);
+        Analyzer analyzer = getAnalyzer(DEFAULT_INCLUDE_TAGS, null, false);
 
         assertAnalyzesTo(analyzer,
                          "",

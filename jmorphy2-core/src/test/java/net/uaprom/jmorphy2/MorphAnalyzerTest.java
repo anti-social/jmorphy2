@@ -104,12 +104,16 @@ public class MorphAnalyzerTest {
         assertParseds("test1.0:LATN:test1.0:test1.0:1.0", morph.parse("test1.0"));
         assertParseds(".test.:LATN:.test.:.test.:1.0", morph.parse(".test."));
         assertParseds("männer:LATN:männer:männer:1.0", morph.parse("männer"));
-        assertParseds("", morph.parse("тестsymbolmix"));
 
         // ROMN (all roman numbers are also latin)
         assertParseds("MD:ROMN:MD:MD:0.5\n" +
                       "MD:LATN:MD:MD:0.5\n",
                       morph.parse("MD"));
+
+        // Unknown word
+        assertParseds("ъь:UNKN:ъь:ъь:1.0", morph.parse("ъь"));
+        assertParseds("тестsymbolmix:UNKN:тестsymbolmix:тестsymbolmix:1.0",
+                      morph.parse("тестsymbolmix"));
 
         // TODO: Hyphen
 
@@ -165,6 +169,9 @@ public class MorphAnalyzerTest {
                       lexeme,
                       false);
         assertEquals(12, lexeme.size());
+
+        // Unknown word
+        assertParseds("ъь:UNKN:ъь:ъь:1.0", morph.parse("ъь").get(0).getLexeme());
     }
 
     @Test

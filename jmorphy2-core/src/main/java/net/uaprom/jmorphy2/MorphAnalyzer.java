@@ -69,7 +69,8 @@ public class MorphAnalyzer {
                                    new AnalyzerUnit.RomanUnit(tagStorage, false, 0.9f),
                                    new AnalyzerUnit.LatinUnit(tagStorage, true, 0.9f),
                                    new AnalyzerUnit.KnownPrefixUnit(tagStorage, dict, knownPrefixSplitter, true, 0.75f),
-                                   new AnalyzerUnit.UnknownPrefixUnit(tagStorage, dict, true, 0.5f));
+                                   new AnalyzerUnit.UnknownPrefixUnit(tagStorage, dict, true, 0.5f),
+                                   new AnalyzerUnit.UnknownWordUnit(tagStorage, true, 1.0f));
         prob = new ProbabilityEstimator(loader);
         if (cacheSize > 0) {
             cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();

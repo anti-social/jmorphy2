@@ -290,4 +290,19 @@ abstract class AnalyzerUnit {
             tagStorage.newTag("ROMN");
         }
     };
+
+    static public class UnknownWordUnit extends AnalyzerUnit {
+        public UnknownWordUnit(Tag.Storage tagStorage, boolean terminate, float score) {
+            super(tagStorage, terminate, score);
+            tagStorage.newGrammeme(Lists.newArrayList("UNKN", "", "НЕИЗВ", "неизвестное"));
+            tagStorage.newTag("UNKN");
+        }
+
+        @Override
+        public List<ParsedWord> parse(String word) {
+            List<ParsedWord> parseds = new ArrayList<>();
+            parseds.add(new AnalyzerParsedWord(word, tagStorage.getTag("UNKN"), word, word, score));
+            return parseds;
+        }
+    };
 }

@@ -47,7 +47,7 @@ public final class Jmorphy2Analyzer extends Analyzer {
     protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
         final Tokenizer source = new StandardTokenizer(matchVersion, reader);
         TokenStream result = new LowerCaseFilter(matchVersion, source);
-        result = new Jmorphy2StemFilter(result, morph, DEFAULT_EXCLUDE_TAGS, null, true);
+        result = new Jmorphy2StemFilter(result, morph, null, DEFAULT_EXCLUDE_TAGS, true);
         return new TokenStreamComponents(source, result);
     }
 }

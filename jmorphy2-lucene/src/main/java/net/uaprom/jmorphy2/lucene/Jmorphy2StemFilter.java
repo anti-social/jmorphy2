@@ -13,8 +13,9 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.KeywordAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
-import net.uaprom.jmorphy2.ParsedWord;
+import net.uaprom.jmorphy2.Grammeme;
 import net.uaprom.jmorphy2.MorphAnalyzer;
+import net.uaprom.jmorphy2.ParsedWord;
 
 
 public class Jmorphy2StemFilter extends TokenFilter {
@@ -23,9 +24,8 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
 
     private final MorphAnalyzer morph;
-    private final List<Set<String>> excludeTags;
-    private final List<Set<String>> includeTags;
-    private final boolean includeUnknown;
+    private final List<Set<Grammeme>> includeGrammemes;
+    private final List<Set<Grammeme>> excludeGrammemes;
     private final boolean enablePositionIncrements;
         
     private Iterator<String> normalForms = null;
@@ -34,29 +34,50 @@ public class Jmorphy2StemFilter extends TokenFilter {
     private int skippedPositions = 0;
      
     public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph) {
-        this(input, morph, null, null, true, true);
+        this(input, morph, null, null, true);
+    }
+
+    public Jmorphy2StemFilter(TokenStream input, MorphAnalyzer morph, List<Set<String>> includeTags) {
+        this(input, morph, includeTags, null, true);
     }
 
     public Jmorphy2StemFilter(TokenStream input,
                               MorphAnalyzer morph,
-                              List<Set<String>> excludeTags,
                               List<Set<String>> includeTags,
-                              boolean includeUnknown) {
-        this(input, morph, excludeTags, includeTags, includeUnknown, true);
+                              List<Set<String>> excludeTags) {
+        this(input, morph, includeTags, excludeTags, true);
     }
 
     public Jmorphy2StemFilter(TokenStream input,
                               MorphAnalyzer morph,
-                              List<Set<String>> excludeTags,
                               List<Set<String>> includeTags,
-                              boolean includeUnknown,
+                              List<Set<String>> excludeTags,
                               boolean enablePositionIncrements) {
         super(input);
         this.morph = morph;
-        this.excludeTags = excludeTags;
-        this.includeTags = includeTags;
-        this.includeUnknown = includeUnknown;
+        this.includeGrammemes = convertValuesToGrammemes(includeTags);
+        this.excludeGrammemes = convertValuesToGrammemes(excludeTags);
         this.enablePositionIncrements = enablePositionIncrements;
+    }
+
+    private List<Set<Grammeme>> convertValuesToGrammemes(List<Set<String>> valuesSets) {
+        if (valuesSets == null) {
+            return null;
+        }
+
+        List<Set<Grammeme>> grammemesSets = new ArrayList<>();
+        for (Set<String> valueSet : valuesSets) {
+            Set<Grammeme> grammemeSet = new HashSet<>();
+            for (String value : valueSet) {
+                grammemeSet.add(morph.getGrammeme(value));
+            }
+            
+            if (!grammemeSet.isEmpty()) {
+                grammemesSets.add(grammemeSet);
+            }
+        }
+
+        return grammemesSets;
     }
     
     @Override
@@ -109,39 +130,33 @@ public class Jmorphy2StemFilter extends TokenFilter {
         
         List<ParsedWord> parseds = morph.parse(token);
 
-        if (parseds.isEmpty()) {
-            if (includeUnknown) {
-                normalForms.add(token);
-            }
-        } else {
-            for (ParsedWord p : parseds) {
-                boolean shouldAdd = false;
-                if (includeTags != null) {
-                    for (Set<String> includeGrammemeValues : includeTags) {
-                        if (p.tag.containsAllValues(includeGrammemeValues)) {
-                            shouldAdd = true;
-                            break;
-                        }
-                    }
-                } else if (excludeTags != null) {
-                    boolean shouldExclude = false;
-                    for (Set<String> excludeGrammemeValues : excludeTags) {
-                        if (p.tag.containsAllValues(excludeGrammemeValues)) {
-                            shouldExclude = true;
-                            break;
-                        }
-                    }
-                    if (!shouldExclude) {
+        for (ParsedWord p : parseds) {
+            boolean shouldAdd = false;
+            if (includeGrammemes != null) {
+                for (Set<Grammeme> includeGrammemeSet : includeGrammemes) {
+                    if (p.tag.containsAll(includeGrammemeSet)) {
                         shouldAdd = true;
+                        break;
                     }
-                } else {
+                }
+            } else if (excludeGrammemes != null) {
+                boolean shouldExclude = false;
+                for (Set<Grammeme> excludeGrammemeSet : excludeGrammemes) {
+                    if (p.tag.containsAll(excludeGrammemeSet)) {
+                        shouldExclude = true;
+                        break;
+                    }
+                }
+                if (!shouldExclude) {
                     shouldAdd = true;
                 }
+            } else {
+                shouldAdd = true;
+            }
 
-                if (shouldAdd && !uniqueNormalForms.contains(p.normalForm)) {
-                    normalForms.add(p.normalForm);
-                    uniqueNormalForms.add(p.normalForm);
-                }
+            if (shouldAdd && !uniqueNormalForms.contains(p.normalForm)) {
+                normalForms.add(p.normalForm);
+                uniqueNormalForms.add(p.normalForm);
             }
         }
 

@@ -23,9 +23,8 @@ import net.uaprom.jmorphy2.elasticsearch.indices.Jmorphy2Analysis;
 public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
     private final MorphAnalyzer morph;
 
-    private final List<Set<String>> excludeTags;
     private final List<Set<String>> includeTags;
-    private final boolean includeUnknown;
+    private final List<Set<String>> excludeTags;
 
     @Inject
     public Jmorphy2StemTokenFilterFactory(Index index,
@@ -38,13 +37,12 @@ public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
         String dictPath = settings.get("name");
         morph = jmorphy2Service.getMorphAnalyzer(dictPath);
 
-        excludeTags = parseTags(settings.get("exclude_tags"));
         includeTags = parseTags(settings.get("include_tags"));
-        includeUnknown = settings.getAsBoolean("include_unknown", true);
+        excludeTags = parseTags(settings.get("exclude_tags"));
     }
 
     @Override
     public TokenStream create(TokenStream tokenStream) {
-        return new Jmorphy2StemFilter(tokenStream, morph, excludeTags, includeTags, includeUnknown);
+        return new Jmorphy2StemFilter(tokenStream, morph, includeTags, excludeTags);
     }
 }
