@@ -39,7 +39,6 @@ public class Jmorphy2StemFilterFactory extends TokenFilterFactory implements Res
 
     public Jmorphy2StemFilterFactory(Map<String,String> args) {
         super(args);
-        assureMatchVersion();
 
         String dictPath = args.get(DICT_PATH_ATTR);
         if (dictPath == null) {

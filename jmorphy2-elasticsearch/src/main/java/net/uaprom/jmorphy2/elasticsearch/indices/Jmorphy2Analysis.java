@@ -9,9 +9,9 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.Locale;
 
-import org.elasticsearch.common.cache.CacheBuilder;
-import org.elasticsearch.common.cache.CacheLoader;
-import org.elasticsearch.common.cache.LoadingCache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.env.Environment;
@@ -98,7 +98,7 @@ public class Jmorphy2Analysis extends AbstractComponent {
         if (location != null) {
             return new File(location);
         }
-        return new File(env.configFile(), "jmorphy2");
+        return new File(env.configFile().toFile(), "jmorphy2");
     }
 
     private MorphAnalyzer loadMorphAnalyzer(String name, Settings settings, Environment env) throws IOException {

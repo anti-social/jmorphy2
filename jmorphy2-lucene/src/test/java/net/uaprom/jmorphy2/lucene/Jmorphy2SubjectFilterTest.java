@@ -51,8 +51,8 @@ public class Jmorphy2SubjectFilterTest extends BaseFilterTestCase {
     protected Analyzer getAnalyzer() {
         return new Analyzer() {
             @Override
-            protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-                Tokenizer source = new WhitespaceTokenizer(LUCENE_VERSION, reader);
+            protected TokenStreamComponents createComponents(String fieldName) {
+                Tokenizer source = new WhitespaceTokenizer();
                 TokenFilter filter = new Jmorphy2SubjectFilter(source, subjExtractor);
                 return new TokenStreamComponents(source, filter);
             }

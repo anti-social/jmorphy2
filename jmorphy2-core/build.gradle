@@ -2,8 +2,8 @@ description = 'Java port of pymorphy2'
 
 dependencies {
     compile 'commons-io:commons-io:2.4'
-    compile 'org.noggit:noggit:0.5'
-    compile 'com.google.guava:guava:16.0.1'
+    compile 'org.noggit:noggit:0.7'
+    compile 'com.google.guava:guava:18.0'
 
     compile project(':dawg')
 }

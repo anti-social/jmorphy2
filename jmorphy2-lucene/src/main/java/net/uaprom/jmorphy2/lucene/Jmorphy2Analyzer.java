@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.ru.RussianLetterTokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.util.Version;
@@ -34,19 +33,17 @@ public final class Jmorphy2Analyzer extends Analyzer {
         }
     }
 
-    private final Version matchVersion;
     private final MorphAnalyzer morph;
 
-    public Jmorphy2Analyzer(Version matchVersion, MorphAnalyzer morph) {
+    public Jmorphy2Analyzer(MorphAnalyzer morph) {
         super();
-        this.matchVersion = matchVersion;
         this.morph = morph;
     }
 
     @Override
-    protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-        final Tokenizer source = new StandardTokenizer(matchVersion, reader);
-        TokenStream result = new LowerCaseFilter(matchVersion, source);
+    protected TokenStreamComponents createComponents(String fieldName) {
+        final Tokenizer source = new StandardTokenizer();
+        TokenStream result = new LowerCaseFilter(source);
         result = new Jmorphy2StemFilter(result, morph, null, DEFAULT_EXCLUDE_TAGS, true);
         return new TokenStreamComponents(source, result);
     }

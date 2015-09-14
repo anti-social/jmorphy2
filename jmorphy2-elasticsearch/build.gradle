@@ -1,11 +1,15 @@
 description = 'Jmorphy2 plugin for ElasticSearch'
 
+ext {
+    pluginName = 'analysis-jmorphy2'
+}
+
 dependencies {
     compile "org.elasticsearch:elasticsearch:$elasticsearchVersion"
     testCompile "org.apache.lucene:lucene-test-framework:$luceneVersion"
     testCompile "org.elasticsearch:elasticsearch:$elasticsearchVersion:tests"
     testCompile 'org.hamcrest:hamcrest-all:1.3'
-    testCompile 'com.carrotsearch.randomizedtesting:randomizedtesting-runner:2.1.2'
+    testCompile 'com.carrotsearch.randomizedtesting:randomizedtesting-runner:2.1.16'
 
     compile project(':jmorphy2-lucene')
     testCompile project(':jmorphy2-core').sourceSets.test.output
@@ -19,7 +23,34 @@ processTestResources << {
 }
 
 task copyDependencies(type: Copy) {
-   from configurations.runtime
-   into 'build/dependencies'
-   include 'dawg-*.jar', 'jmorphy2-core-*.jar', 'jmorphy2-nlp-*.jar', 'jmorphy2-lucene-*.jar', 'guava-*.jar', 'noggit-*.jar', 'commons-io-*.jar', 'commons-codec-*.jar'
+    from configurations.runtime
+    into 'build/dependencies'
+    include 'dawg-*.jar', 'jmorphy2-core-*.jar', 'jmorphy2-nlp-*.jar', 'jmorphy2-lucene-*.jar', 'noggit-*.jar', 'commons-io-*.jar', 'commons-codec-*.jar'
 }
+
+task processPluginMetadata(type: Copy) {
+    def tokens = [
+        description: project.description,
+        version: project.version,
+        pluginName: pluginName,
+        elasticsearchVersion: elasticsearchVersion
+    ]
+    def engine = new groovy.text.GStringTemplateEngine()
+
+    from 'plugin-metadata/plugin-descriptor.properties'
+    into 'build/plugin-metadata/'
+    filter {
+        engine.createTemplate(it).make(tokens).toString()
+    }
+}
+processPluginMetadata.outputs.upToDateWhen { false }
+
+task buildZip(type: Zip) {
+    from jar
+    from 'build/dependencies'
+    from 'build/plugin-metadata/plugin-descriptor.properties'
+}
+
+build.dependsOn buildZip
+buildZip.dependsOn copyDependencies
+buildZip.dependsOn processPluginMetadata

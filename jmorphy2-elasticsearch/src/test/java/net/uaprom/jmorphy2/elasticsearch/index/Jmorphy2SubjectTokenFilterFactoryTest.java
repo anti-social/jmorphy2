@@ -14,17 +14,14 @@ import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesT
 import org.elasticsearch.index.analysis.AnalysisService;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import static org.elasticsearch.cluster.metadata.IndexMetaData.SETTING_VERSION_CREATED;
 
 
 public class Jmorphy2SubjectTokenFilterFactoryTest extends BaseTokenFilterFactoryTest {
     @Test
     public void test() throws IOException {
-        org.elasticsearch.Version version = org.elasticsearch.Version.CURRENT;
-        Settings settings = ImmutableSettings.settingsBuilder()
-            .put(SETTING_VERSION_CREATED, version)
-            .put("path.conf", getResource("/indices/analyze/config"))
+        Settings settings = Settings.settingsBuilder()
+            .put("path.home", createTempDir().toString())
+            .put("path.conf", getDataPath("/indices/analyze/config"))
             .put("index.analysis.filter.jmorphy2_subject.type", "jmorphy2_subject")
             .put("index.analysis.filter.jmorphy2_subject.name", "ru")
             .put("index.analysis.analyzer.text.tokenizer", "standard")

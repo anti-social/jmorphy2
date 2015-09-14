@@ -52,7 +52,6 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
 
     public Jmorphy2SubjectFilterFactory(Map<String,String> args) {
         super(args);
-        assureMatchVersion();
 
         String dictPath = args.get(DICT_PATH_ATTR);
         if (dictPath == null) {

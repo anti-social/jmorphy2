@@ -1,15 +1,15 @@
 subprojects {
     apply plugin: 'java'
 
-    version = '0.1'
+    version = '0.2-dev'
 
     sourceCompatibility = '1.7'
 
     compileJava.options.encoding = 'UTF-8'
 
     ext {
-        elasticsearchVersion = '1.7.1'
-        luceneVersion = '4.10.4'
+        elasticsearchVersion = '2.0.0-beta1'
+        luceneVersion = '5.2.1'
     }
 
     repositories {

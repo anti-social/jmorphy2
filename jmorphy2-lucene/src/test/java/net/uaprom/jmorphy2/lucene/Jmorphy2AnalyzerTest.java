@@ -31,7 +31,7 @@ public class Jmorphy2AnalyzerTest extends BaseFilterTestCase {
 
     @Test
     public void test() throws IOException {
-        Analyzer analyzer = new Jmorphy2Analyzer(LUCENE_VERSION, morph);
+        Analyzer analyzer = new Jmorphy2Analyzer(morph);
 
         assertAnalyzesTo(analyzer,
                          "",
