@@ -2,6 +2,9 @@ description = 'Jmorphy2 plugin for ElasticSearch'
 
 ext {
     pluginName = 'analysis-jmorphy2'
+    pluginMetadataDir = 'plugin-metadata'
+    pluginMetadataProperties = 'plugin-descriptor.properties'
+    dependenciesDir = "${buildDir}/dependencies"
 }
 
 dependencies {
@@ -24,7 +27,7 @@ processTestResources << {
 
 task copyDependencies(type: Copy) {
     from configurations.runtime
-    into 'build/dependencies'
+    into dependenciesDir
     include 'dawg-*.jar', 'jmorphy2-core-*.jar', 'jmorphy2-nlp-*.jar', 'jmorphy2-lucene-*.jar', 'noggit-*.jar', 'commons-io-*.jar', 'commons-codec-*.jar'
 }
 
@@ -37,8 +40,8 @@ task processPluginMetadata(type: Copy) {
     ]
     def engine = new groovy.text.GStringTemplateEngine()
 
-    from 'plugin-metadata/plugin-descriptor.properties'
-    into 'build/plugin-metadata/'
+    from "${pluginMetadataDir}/${pluginMetadataProperties}"
+    into "${buildDir}/${pluginMetadataDir}/"
     filter {
         engine.createTemplate(it).make(tokens).toString()
     }
@@ -47,8 +50,8 @@ processPluginMetadata.outputs.upToDateWhen { false }
 
 task buildZip(type: Zip) {
     from jar
-    from 'build/dependencies'
-    from 'build/plugin-metadata/plugin-descriptor.properties'
+    from dependenciesDir
+    from "${buildDir}/${pluginMetadataDir}/${pluginMetadataProperties}"
 }
 
 build.dependsOn buildZip
