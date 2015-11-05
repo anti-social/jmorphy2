@@ -8,7 +8,7 @@ subprojects {
     compileJava.options.encoding = 'UTF-8'
 
     ext {
-        elasticsearchVersion = '2.0.0-rc1'
+        elasticsearchVersion = '2.0.0'
         luceneVersion = '5.2.1'
     }
 
