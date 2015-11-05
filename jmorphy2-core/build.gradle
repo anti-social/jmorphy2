@@ -6,6 +6,7 @@ dependencies {
     compile 'com.google.guava:guava:18.0'
 
     compile project(':dawg')
+    testCompile 'junit:junit:4.11'
 }
 
 task benchmark(type: Test) {

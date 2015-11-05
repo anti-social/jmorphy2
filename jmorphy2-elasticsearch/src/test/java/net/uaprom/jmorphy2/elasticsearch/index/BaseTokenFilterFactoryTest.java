@@ -18,8 +18,9 @@ import org.elasticsearch.index.settings.IndexSettingsModule;
 import org.elasticsearch.indices.IndicesModule;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
 import org.elasticsearch.test.ESTestCase;
+import org.elasticsearch.test.ESIntegTestCase;
 
-import net.uaprom.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
+import net.uaprom.jmorphy2.elasticsearch.index.Jmorphy2AnalysisBinderProcessor;
 
 
 public class BaseTokenFilterFactoryTest extends ESTestCase {
@@ -27,32 +28,22 @@ public class BaseTokenFilterFactoryTest extends ESTestCase {
         Index index = new Index("test");
 
         if (settings.get(IndexMetaData.SETTING_VERSION_CREATED) == null) {
-            settings = Settings.builder().put(settings).put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT).build();
+            settings = Settings.builder()
+                .put(settings)
+                .put(IndexMetaData.SETTING_VERSION_CREATED, Version.CURRENT)
+                .build();
         }
 
-        IndicesModule indicesModule = new IndicesModule(settings) {
-            @Override
-            public void configure() {
-                // skip services
-            }
-        };
-        Injector parentInjector =
-            new ModulesBuilder()
+        Injector parentInjector = new ModulesBuilder()
             .add(new SettingsModule(settings),
-                 new EnvironmentModule(new Environment(settings)),
-                 indicesModule)
+                 new EnvironmentModule(new Environment(settings)))
             .createInjector();
-
-        AnalysisModule analysisModule =
-            new AnalysisModule(settings,
-                               parentInjector.getInstance(IndicesAnalysisService.class));
-        new AnalysisJmorphy2Plugin().onModule(analysisModule);
-
-        Injector injector =
-            new ModulesBuilder()
+        Injector injector = new ModulesBuilder()
             .add(new IndexSettingsModule(index, settings),
                  new IndexNameModule(index),
-                 analysisModule)
+                 new AnalysisModule(settings,
+                                    parentInjector.getInstance(IndicesAnalysisService.class))
+                 .addProcessor(new Jmorphy2AnalysisBinderProcessor()))
             .createChildInjector(parentInjector);
 
         return injector.getInstance(AnalysisService.class);

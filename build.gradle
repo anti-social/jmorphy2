@@ -8,7 +8,7 @@ subprojects {
     compileJava.options.encoding = 'UTF-8'
 
     ext {
-        elasticsearchVersion = '2.0.0-beta1'
+        elasticsearchVersion = '2.0.0-rc1'
         luceneVersion = '5.2.1'
     }
 
@@ -16,9 +16,9 @@ subprojects {
         mavenCentral()
     }
 
-    dependencies {
-        testCompile 'junit:junit:4.11'
-    }
+    // dependencies {
+    //     testCompile 'junit:junit:4.11'
+    // }
 
     test {
         exclude '**/*Benchmark*'
