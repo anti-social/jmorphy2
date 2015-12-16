@@ -1,9 +1,11 @@
 description = 'Jmorphy2 plugin for ElasticSearch'
 
 ext {
+    elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : elasticsearchVersion
+  
     pluginName = 'analysis-jmorphy2'
-    pluginMetadataDir = 'plugin-metadata'
-    pluginMetadataProperties = 'plugin-descriptor.properties'
+    pluginClassname = 'net.uaprom.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
+    pluginMetadataFilename = 'plugin-descriptor.properties'
     dependenciesDir = "${buildDir}/dependencies"
 }
 
@@ -42,27 +44,25 @@ task copyDependencies(type: Copy) {
     include 'dawg-*.jar', 'jmorphy2-core-*.jar', 'jmorphy2-nlp-*.jar', 'jmorphy2-lucene-*.jar', 'noggit-*.jar', 'commons-io-*.jar', 'commons-codec-*.jar'
 }
 
-task processPluginMetadata(type: Copy) {
-    def tokens = [
-        description: project.description,
-        version: project.version,
-        pluginName: pluginName,
-        elasticsearchVersion: elasticsearchVersion
-    ]
-    def engine = new groovy.text.GStringTemplateEngine()
-
-    from "${pluginMetadataDir}/${pluginMetadataProperties}"
-    into "${buildDir}/${pluginMetadataDir}/"
-    filter {
-        engine.createTemplate(it).make(tokens).toString()
-    }
+task processPluginMetadata << {
+    def pluginMetadataFile = new File("${buildDir}/${pluginMetadataFilename}")
+    pluginMetadataFile.text = """
+name=${pluginName}
+description=${project.description}
+version=${project.version}
+classname=${pluginClassname}
+site=false
+jvm=true
+java.version=${sourceCompatibility}
+elasticsearch.version=${elasticsearchVersion}
+"""
 }
 processPluginMetadata.outputs.upToDateWhen { false }
 
 task buildZip(type: Zip) {
     from jar
     from dependenciesDir
-    from "${buildDir}/${pluginMetadataDir}/${pluginMetadataProperties}"
+    from "${buildDir}/${pluginMetadataFilename}"
 }
 
 build.dependsOn buildZip
