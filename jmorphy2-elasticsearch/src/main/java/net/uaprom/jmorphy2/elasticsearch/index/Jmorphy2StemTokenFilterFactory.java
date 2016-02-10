@@ -9,9 +9,9 @@ import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.settings.IndexSettings;
 import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
+import org.elasticsearch.index.settings.IndexSettingsService;
 
 import net.uaprom.jmorphy2.MorphAnalyzer;
 import net.uaprom.jmorphy2.lucene.Jmorphy2StemFilter;
@@ -28,11 +28,11 @@ public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
 
     @Inject
     public Jmorphy2StemTokenFilterFactory(Index index,
-                                          @IndexSettings Settings indexSettings,
+                                          IndexSettingsService indexSettingsService,
                                           @Assisted String name,
                                           @Assisted Settings settings,
                                           Jmorphy2Analysis jmorphy2Service) {
-        super(index, indexSettings, name, settings);
+        super(index, indexSettingsService.getSettings(), name, settings);
 
         String dictPath = settings.get("name");
         morph = jmorphy2Service.getMorphAnalyzer(dictPath);

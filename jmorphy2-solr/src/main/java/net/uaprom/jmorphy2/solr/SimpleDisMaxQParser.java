@@ -99,13 +99,12 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
                             buffer.getAttribute(TermToBytesRefAttribute.class);
                         PositionIncrementAttribute posIncAtt =
                             buffer.getAttribute(PositionIncrementAttribute.class);
-                        BytesRef bytes = termAtt == null ? null : termAtt.getBytesRef();
 
                         int pos = 0;
                         FieldTerms curTerms = null;
                         buffer.reset();
                         while (source.incrementToken()) {
-                            termAtt.fillBytesRef();
+                            BytesRef bytes = termAtt.getBytesRef();
                             int posInc = posIncAtt.getPositionIncrement();
                             pos += posInc;
                             if (!allTerms.containsKey(pos)) {
@@ -127,7 +126,7 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
                 }
             }
 
-            BooleanQuery q = newBooleanQuery(true);
+            BooleanQuery q = newBooleanQuery(true).build();
             for (int i = 0; i <= maxPos; i++) {
                 List<FieldTerms> terms = allTerms.get(i);
                 if (terms == null) {
@@ -135,7 +134,7 @@ public class SimpleDisMaxQParser extends DisMaxQParser {
                 }
                 DisjunctionMaxQuery queryForTerm = new DisjunctionMaxQuery(0.0f);
                 for (FieldTerms fieldTerms : terms) {
-                    BooleanQuery fieldQuery = newBooleanQuery(true);
+                    BooleanQuery fieldQuery = newBooleanQuery(true).build();
                     for (BytesRef term : fieldTerms.terms) {
                         fieldQuery.add(newTermQuery(new Term(fieldTerms.field, term)),
                                        BooleanClause.Occur.SHOULD);

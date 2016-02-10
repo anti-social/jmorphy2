@@ -1,5 +1,7 @@
 package net.uaprom.jmorphy2.elasticsearch.index;
 
+import java.util.Collection;
+
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.inject.Injector;
@@ -17,13 +19,15 @@ import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.settings.IndexSettingsModule;
 import org.elasticsearch.indices.IndicesModule;
 import org.elasticsearch.indices.analysis.IndicesAnalysisService;
+import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.test.ESIntegTestCase;
 
 import net.uaprom.jmorphy2.elasticsearch.index.Jmorphy2AnalysisBinderProcessor;
+import net.uaprom.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
 
 
-public class BaseTokenFilterFactoryTest extends ESTestCase {
+public class BaseTokenFilterFactoryTest extends ESIntegTestCase {
     protected AnalysisService createAnalysisService(Settings settings) {
         Index index = new Index("test");
 
