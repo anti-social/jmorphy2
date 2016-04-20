@@ -12,8 +12,9 @@
 # maven #
 target/
 
-# gradle #
+# build #
 .gradle/
+.vagga/
 build/
 
 # pymorphy2 dicts #
