@@ -8,17 +8,22 @@ subprojects {
     compileJava.options.encoding = 'UTF-8'
 
     ext {
-        elasticsearchVersion = '2.1.2'
-        luceneVersion = '5.3.1'
+        defaultEsVersion = '2.3.5'
+        defaultLuceneVersion = '5.5.0'
+
+        esLuceneVersions = [
+          // '2.0': '5.2.1',
+          '2.1': '5.3.1',
+          '2.2': '5.4.1',
+          '2.3': '5.5.0',
+        ]
+        elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
+        luceneVersion = esLuceneVersions.get(elasticsearchVersion[0..2], defaultLuceneVersion)
     }
 
     repositories {
         mavenCentral()
     }
-
-    // dependencies {
-    //     testCompile 'junit:junit:4.11'
-    // }
 
     test {
         exclude '**/*Benchmark*'

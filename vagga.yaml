@@ -1,4 +1,11 @@
-# minimum-vagga: v0.6.0
+_default:
+  command_options: &cmd_opts
+    container: java
+    user-id: 1
+    external-user-id: 0
+
+
+minimum-vagga: v0.6.1
 
 containers:
   java:
@@ -6,29 +13,41 @@ containers:
       GRADLE_USER_HOME: /work/.gradle
       LANG: en_US.UTF-8
     setup:
-    - !UbuntuRelease {version: 15.10}
+    - !UbuntuRelease { codename: xenial }
     - !UbuntuUniverse
     - !Install
-      - openjdk-8-jdk
-      - ca-certificates
-      - ca-certificates-java
+      - openjdk-8-jdk-headless
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-2.12-bin.zip
-      sha256: e77064981906cd0476ff1e0de3e6fef747bd18e140960f1915cca8ff6c33ab5c
-      subdir: gradle-2.12
+      url: https://services.gradle.org/distributions/gradle-2.14.1-bin.zip
+      sha256: cfc61eda71f2d12a572822644ce13d2919407595c2aec3e3566d2aab6f97ef39
+      subdir: gradle-2.14.1
       path: /opt/gradle
     - !Sh |
-        chmod +x /opt/gradle/bin/gradle
         ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
 commands:
   gradle: !Command
-    description: Run gradle
-    container: java
+    <<: *cmd_opts
+    description: Run arbitrary gradle command
     run: [gradle]
 
   build: !Command
-    description: Build all
-    container: java
+    <<: *cmd_opts
+    description: Compile, run tests and make packages
     run: [gradle, build]
+
+  clean: !Command
+    <<: *cmd_opts
+    description: Clean all building files
+    run: [gradle, clean]
+
+  test: !Command
+    <<: *cmd_opts
+    description: Run tests
+    run: [gradle, test]
+
+  benchmark: !Command
+    <<: *cmd_opts
+    description: Run benchmarks
+    run: [gradle, benchmark]

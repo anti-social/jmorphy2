@@ -3,14 +3,11 @@ jmorphy2
 
 Java port of the pymorphy2
 
-Compile project, make jars and run tests:
+Compile project, build jars and run tests:
 
 ```sh
 git clone https://github.com/anti-social/jmorphy2
 cd jmorphy2
-
-mvn package
-# or
 gradle build
 ```
 
@@ -18,38 +15,38 @@ gradle build
 Elasticsearch
 =============
 
-Copy jmorphy2 jars and dependencies into elasticsearch distribution `lib` directory:
+Default elasticsearch version against which plugin is built is 2.3.5
+
+To build for specific elastisearch version run build as:
 
 ```sh
-# replace with real path to your elasticsearch distribution
-export path_to_es_distrib=/path/to/es/distrib
-
-# if mvn
-cp jmorphy2-elasticsearch/target/*.jar ${path_to_es_distrib}/lib/
-cp jmorphy2-elasticsearch/target/lib/*.jar ${path_to_es_distrib}/lib/
-# elif gradle
-gradle copyDependencies
-cp jmorphy2-elasticsearch/build/libs/*.jar ${path_to_es_distrib}/lib/
-cp jmorphy2-elasticsearch/build/dependencies/*.jar ${path_to_es_distrib}/lib/
+gradle build -PesVersion=2.2.1
 ```
 
-Put `pymorphy2_dicts` into `config/jmorphy2/ru` direcotory:
+Supported elasticsearch versions: 2.1, 2.2, 2.3
+
+Install plugin
 
 ```sh
-mkdir -p ${path_to_es_distrib}/config/jmorphy2/ru/
-cp -r jmorphy2-core/src/test/resources/pymorphy2_dicts ${path_to_es_distrib}/config/jmorphy2/ru/
-cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json ${path_to_es_distrib}/config/jmorphy2/ru/
+export es_home=/usr/share/elasticsearch
+cd ${es_home}
+
+./bin/plugin install file:jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+
+# Put `pymorphy2_dicts` into `config/jmorphy2/ru` direcotory:
+mkdir -p /etc/elasticsearch/jmorphy2/ru/
+cp -r jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/
+cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json /etc/elasticsearch/jmorphy2/ru/
 ```
 
 Create index with specific analyzer and test it:
 
 
 ```sh
-cd ${path_to_es_distrib}
+cd ${es_home}
 bin/elasticsearch
 
 # open new tab
-cd ${path_to_es_distrib}
 curl -XPUT 'localhost:9200/test_index' -d '
 {
     "settings": {
