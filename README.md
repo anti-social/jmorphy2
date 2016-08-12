@@ -1,4 +1,4 @@
-jmorphy2
+Jmorphy2
 ========
 
 Java port of the pymorphy2
@@ -18,6 +18,8 @@ Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubunt
 vagga build
 ```
 
+To see all available vagga commands just type ``vagga``
+
 
 Elasticsearch plugin
 ====================
@@ -30,9 +32,15 @@ To build for specific elastisearch version run build as:
 gradle build -PesVersion=2.2.1
 ```
 
+Or:
+
+```sh
+vagga build -PesVersion=2.2.1
+```
+
 Supported elasticsearch versions: 2.1, 2.2, 2.3
 
-Install plugin
+Install plugin:
 
 ```sh
 export es_home=/usr/share/elasticsearch
