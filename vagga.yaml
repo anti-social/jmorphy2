@@ -40,10 +40,10 @@ containers:
       suite: stable
       components: [main]
     - !Install
-      - openjdk-8-jre-headless
       - elasticsearch=2.3.5
     - !Sh |
         gradle build -x test -p jmorphy2-elasticsearch
+        gradle processTestResources -p jmorphy2-core
         /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
         mkdir -p /etc/elasticsearch/jmorphy2/ru
         cp -r /work/jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
