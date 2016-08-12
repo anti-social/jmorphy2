@@ -1,4 +1,5 @@
 _default:
+  gradle_home: &gradle_home /work/.gradle
   command_options: &cmd_opts
     container: java
     user-id: 1
@@ -10,7 +11,7 @@ minimum-vagga: v0.6.1
 containers:
   java:
     environ:
-      GRADLE_USER_HOME: /work/.gradle
+      GRADLE_USER_HOME: *gradle_home
       LANG: en_US.UTF-8
     setup:
     - !UbuntuRelease { codename: xenial }
@@ -25,6 +26,31 @@ containers:
       path: /opt/gradle
     - !Sh |
         ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
+    - !Env
+      GRADLE_USER_HOME: *gradle_home
+
+  elastic:
+    setup:
+    - !Container java
+    - !AptTrust
+      server: pgp.mit.edu
+      keys: [D88E42B4]
+    - !UbuntuRepo
+      url: http://packages.elastic.co/elasticsearch/2.x/debian
+      suite: stable
+      components: [main]
+    - !Install
+      - openjdk-8-jre-headless
+      - elasticsearch=2.3.5
+    - !Sh |
+        gradle build -x test -p jmorphy2-elasticsearch
+        /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+        mkdir -p /etc/elasticsearch/jmorphy2/ru
+        cp -r /work/jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
+        cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json /etc/elasticsearch/jmorphy2/ru/
+    - !EnsureDir /var/elasticsearch
+    volumes:
+      /var/elasticsearch: !Persistent { name: elastic }
 
 commands:
   gradle: !Command
@@ -51,3 +77,14 @@ commands:
     <<: *cmd_opts
     description: Run benchmarks
     run: [gradle, benchmark]
+
+  elastic: !Command
+    description: Run elasticsearch
+    container: elastic
+    user-id: 1
+    external-user-id: 0
+    run:
+    - /usr/share/elasticsearch/bin/elasticsearch
+    - -Dpath.conf=/etc/elasticsearch
+    - -Dpath.logs=/var/elasticsearch/logs
+    - -Dpath.data=/var/elasticsearch/data

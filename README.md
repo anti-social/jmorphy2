@@ -11,9 +11,16 @@ cd jmorphy2
 gradle build
 ```
 
+Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubuntu)
+(no java and gradle needed):
 
-Elasticsearch
-=============
+```sh
+vagga build
+```
+
+
+Elasticsearch plugin
+====================
 
 Default elasticsearch version against which plugin is built is 2.3.5
 
@@ -38,6 +45,16 @@ mkdir -p /etc/elasticsearch/jmorphy2/ru/
 cp -r jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/
 cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json /etc/elasticsearch/jmorphy2/ru/
 ```
+
+Or just run elasticsearch inside the container:
+
+```sh
+# build container and run elasticsearch with jmorphy2 plugin
+vagga elastic
+```
+
+Test elasticsearch with jmorphy2 plugin
+---------------------------------------
 
 Create index with specific analyzer and test it:
 
@@ -76,26 +93,6 @@ curl -XPUT 'localhost:9200/test_index' -d '
 '
 
 curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'Привет, лошарики!'
-# you should get something like that:
-{
-  "tokens" : [ {
-    "token" : "привет",
-    "start_offset" : 0,
-    "end_offset" : 6,
-    "type" : "word",
-    "position" : 1
-  }, {
-    "token" : "лошарик",
-    "start_offset" : 8,
-    "end_offset" : 16,
-    "type" : "word",
-    "position" : 2
-  }, {
-    "token" : "лошарика",
-    "start_offset" : 8,
-    "end_offset" : 16,
-    "type" : "word",
-    "position" : 2
-  } ]
-}
+
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж'            
 ```
