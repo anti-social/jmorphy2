@@ -32,7 +32,8 @@ public abstract class ParsedWord implements Comparable {
         return inflect(requiredGrammemes, null);
     }
 
-    public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes, Collection<Grammeme> excludeGrammemes) {
+    public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes,
+            Collection<Grammeme> excludeGrammemes) {
         List<ParsedWord> paradigm = new ArrayList<ParsedWord>();
         for (ParsedWord p : getLexeme()) {
             if (p.tag.containsAll(requiredGrammemes) && !p.tag.containsAny(excludeGrammemes)) {
@@ -57,7 +58,8 @@ public abstract class ParsedWord implements Comparable {
 
     @Override
     public String toString() {
-        return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f>", word, tag, normalForm, foundWord, score);
+        return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f>",
+            word, tag, normalForm, foundWord, score);
     }
 
     @Override

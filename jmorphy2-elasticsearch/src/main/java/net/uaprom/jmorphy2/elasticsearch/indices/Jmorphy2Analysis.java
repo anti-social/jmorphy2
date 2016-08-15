@@ -117,24 +117,12 @@ public class Jmorphy2Analysis extends AbstractComponent {
 
         int cacheSize = defaultCacheSize;
 
-        return new MorphAnalyzer(pymorphy2DictsDir.getPath(), replaces, cacheSize);
+        return new MorphAnalyzer.Builder()
+            .dictPath(pymorphy2DictsDir.getPath())
+            .charSubstitutes(replaces)
+            .cacheSize(cacheSize)
+            .build();
     }
-
-    // private SubjectExtractor loadSubjectExtractor(String name, Settings settings, Environment env) throws IOException {
-    //     MorphAnalyzer morph = getMorphAnalyzer(name);
-    //     File taggerRulesFile = new File(dicDir, "tagger_rules.txt");
-    //     File parserRulesFile = new File(dicDir, "parser_rules.txt");
-    //     Tagger tagger =
-    //         new SimpleTagger(morph,
-    //                          new Ruleset(loader.openResource(taggerRulesPath)),
-    //                          settings.getAsInt("tagger_threshold", SimpleTagger.DEFAULT_THRESHOLD));
-    //     Parser parser =
-    //         new SimpleParser(morph,
-    //                          tagger,
-    //                          new Ruleset(loader.openResource(parserRulesPath)),
-    //                          settings.getAsInt("parser_threshold", SimpleParser.DEFAULT_THRESHOLD));
-    //     return new SubjectExtractor(parser, extract, true);
-    // }
 
     private void scanAndLoadMorphAnalyzers() {
         if (jmorphy2Dir.exists() && jmorphy2Dir.isDirectory()) {

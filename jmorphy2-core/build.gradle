@@ -18,20 +18,25 @@ task benchmark(type: Test) {
 }
 
 task fetch_pymorphy2_dicts() << {
-    String pymorphy2_dicts_version = '2.4.393442.3710985'
-    String pymorphy2_dicts_name = "pymorphy2-dicts-${pymorphy2_dicts_version}"
+    // https://pypi.python.org/packages/source/p/pymorphy2-dicts-ru/pymorphy2-dicts-ru-2.4.393658.3725883.tar.gz?md5=bdd5d23660f2ad5e8ec2721743a8b419
+    String pymorphy2_dicts_version = '2.4.393658.3725883'
+    String pymorphy2_dicts_package_name = 'pymorphy2-dicts-ru'
+    String pymorphy2_dicts_name = "${pymorphy2_dicts_package_name}-${pymorphy2_dicts_version}"
     String pymorphy2_dicts_filename = "${pymorphy2_dicts_name}.tar.gz"
-    String pymorphy2_dicts_md5sum = '6757bf0b4c1b935b83f31d9bc6bce267'
-    String pymorphy2_dicts_url = "https://pypi.python.org/packages/source/p/pymorphy2-dicts/${pymorphy2_dicts_filename}?md5=${pymorphy2_dicts_md5sum}"
+    String pymorphy2_dicts_md5sum = 'bdd5d23660f2ad5e8ec2721743a8b419'
+    String pymorphy2_dicts_url = "https://pypi.python.org/packages/source/p/${pymorphy2_dicts_package_name}/${pymorphy2_dicts_filename}?md5=${pymorphy2_dicts_md5sum}"
 
     def resources_path = sourceSets.test.resources.getSrcDirs().iterator()[0]
+    def pymorphy2_dicts_file = new File("${resources_path}/${pymorphy2_dicts_filename}")
+    if (!pymorphy2_dicts_file.exists()) {
+        println 'Downloading pymorphy2 dicts...'
+        new URL(pymorphy2_dicts_url).withInputStream{ i -> pymorphy2_dicts_file.withOutputStream{ it << i }}
+    }
     def pymorphy2_dicts_dir = new File("${resources_path}/pymorphy2_dicts")
+    if (pymorphy2_dicts_dir.lastModified() < pymorphy2_dicts_file.lastModified()) {
+        pymorphy2_dicts_dir.deleteDir()
+    }
     if (!pymorphy2_dicts_dir.exists()) {
-        def pymorphy2_dicts_file = new File("${resources_path}/${pymorphy2_dicts_filename}")
-        if (!pymorphy2_dicts_file.exists()) {
-            println 'Downloading pymorphy2 dicts...'
-            new URL(pymorphy2_dicts_url).withInputStream{ i -> pymorphy2_dicts_file.withOutputStream{ it << i }}
-        }
         println 'Unpacking pymorphy2 dicts...'
         pymorphy2_dicts_dir.mkdirs()
         copy {
@@ -39,7 +44,7 @@ task fetch_pymorphy2_dicts() << {
             into pymorphy2_dicts_dir
             includeEmptyDirs = false
             eachFile { FileCopyDetails fcp ->
-               String zip_root_path = "${pymorphy2_dicts_name}/pymorphy2_dicts/data/"
+               String zip_root_path = "${pymorphy2_dicts_name}/pymorphy2_dicts_ru/data/"
                Integer strip_segments = zip_root_path.length() - zip_root_path.replace('/', '').length()
                if (fcp.relativePath.pathString.startsWith(zip_root_path)) {
                    fcp.relativePath = new RelativePath(

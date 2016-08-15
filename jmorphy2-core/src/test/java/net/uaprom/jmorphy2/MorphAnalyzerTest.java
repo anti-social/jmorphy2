@@ -47,11 +47,8 @@ public class MorphAnalyzerTest {
         assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
         // word with unknown prefix
-        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:шарики:0.2\n" +
-                      "лошарики:NOUN,inan,masc plur,accs:лошарик:шарики:0.2\n" +
-                      "лошарики:NOUN,anim,masc,Name plur,nomn:лошарик:арики:0.2\n" +
-                      "лошарики:NOUN,anim,femn,Name sing,gent:лошарика:арики:0.2\n" +
-                      "лошарики:NOUN,anim,femn,Name plur,nomn:лошарика:арики:0.2\n",
+        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:шарики:0.5\n" +
+                      "лошарики:NOUN,inan,masc plur,accs:лошарик:шарики:0.5\n",
                       morph.parse("лошарики"));
 
         // unknown word
@@ -84,9 +81,7 @@ public class MorphAnalyzerTest {
                       morph.parse("лжекот"));
 
         // unknown prefix
-        assertParseds("лошарикам:NOUN,inan,masc plur,datv:лошарик:шарикам:0.333333\n" +
-                      "лошарикам:NOUN,anim,masc,Name plur,datv:лошарик:арикам:0.333333\n" +
-                      "лошарикам:NOUN,anim,femn,Name plur,datv:лошарика:арикам:0.333333",
+        assertParseds("лошарикам:NOUN,inan,masc plur,datv:лошарик:шарикам:1.0\n",
                       morph.parse("лошарикам"));
 
         // NUMB
@@ -120,7 +115,7 @@ public class MorphAnalyzerTest {
         // normal form
         assertEquals(Arrays.asList("красивый"), morph.normalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), morph.normalForms("для"));
-        assertEquals(Arrays.asList("лошарик", "лошарика"), morph.normalForms("лошарикам"));
+        assertEquals(Arrays.asList("лошарик"), morph.normalForms("лошарикам"));
 
         // tag
         assertEquals(Arrays.asList(morph.getTag("ADJF,Qual neut,sing,gent"),
@@ -140,14 +135,14 @@ public class MorphAnalyzerTest {
 
         parseds = morph.parse("красивого");
         lexeme = parseds.get(0).getLexeme();
-        assertParseds("красивый:ADJF,Qual masc,sing,nomn:красивый:красивый:1.0\n" +
-                      "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:1.0\n" +
-                      "красивому:ADJF,Qual masc,sing,datv:красивый:красивому:1.0\n" +
-                      "красивого:ADJF,Qual anim,masc,sing,accs:красивый:красивого:1.0\n" +
-                      "красивый:ADJF,Qual inan,masc,sing,accs:красивый:красивый:1.0\n" +
-                      "красивым:ADJF,Qual masc,sing,ablt:красивый:красивым:1.0\n" +
-                      "красивом:ADJF,Qual masc,sing,loct:красивый:красивом:1.0\n" +
-                      "красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:1.0",
+        assertParseds("красивый:ADJF,Qual masc,sing,nomn:красивый:красивый:0.5\n" +
+                      "красивого:ADJF,Qual masc,sing,gent:красивый:красивого:0.5\n" +
+                      "красивому:ADJF,Qual masc,sing,datv:красивый:красивому:0.5\n" +
+                      "красивого:ADJF,Qual anim,masc,sing,accs:красивый:красивого:0.5\n" +
+                      "красивый:ADJF,Qual inan,masc,sing,accs:красивый:красивый:0.5\n" +
+                      "красивым:ADJF,Qual masc,sing,ablt:красивый:красивым:0.5\n" +
+                      "красивом:ADJF,Qual masc,sing,loct:красивый:красивом:0.5\n" +
+                      "красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:0.5",
                       lexeme,
                       false);
         assertEquals(91, lexeme.size());
@@ -182,13 +177,13 @@ public class MorphAnalyzerTest {
         parseds = morph.parse("красивого");
         paradigm = parseds.get(0).inflect(Arrays.asList(morph.getGrammeme("ADJF"), morph.getGrammeme("femn")),
                                           Arrays.asList(morph.getGrammeme("Supr")));
-        assertParseds("красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:1.0\n" +
-                      "красивой:ADJF,Qual femn,sing,gent:красивый:красивой:1.0\n" +
-                      "красивой:ADJF,Qual femn,sing,datv:красивый:красивой:1.0\n" +
-                      "красивую:ADJF,Qual femn,sing,accs:красивый:красивую:1.0\n" +
-                      "красивой:ADJF,Qual femn,sing,ablt:красивый:красивой:1.0\n" +
-                      "красивою:ADJF,Qual femn,sing,ablt,V-oy:красивый:красивою:1.0\n" +
-                      "красивой:ADJF,Qual femn,sing,loct:красивый:красивой:1.0",
+        assertParseds("красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:0.5\n" +
+                      "красивой:ADJF,Qual femn,sing,gent:красивый:красивой:0.5\n" +
+                      "красивой:ADJF,Qual femn,sing,datv:красивый:красивой:0.5\n" +
+                      "красивую:ADJF,Qual femn,sing,accs:красивый:красивую:0.5\n" +
+                      "красивой:ADJF,Qual femn,sing,ablt:красивый:красивой:0.5\n" +
+                      "красивою:ADJF,Qual femn,sing,ablt,V-oy:красивый:красивою:0.5\n" +
+                      "красивой:ADJF,Qual femn,sing,loct:красивый:красивой:0.5",
                       paradigm);
     }
 

@@ -1,9 +1,11 @@
 package net.uaprom.jmorphy2;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -17,64 +19,119 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
+import net.uaprom.jmorphy2.units.*;
+
 
 public class MorphAnalyzer {
     private final Tag.Storage tagStorage;
-    private final Dictionary dict;
-    private final KnownPrefixSplitter knownPrefixSplitter;
     private final List<AnalyzerUnit> units;
     private final ProbabilityEstimator prob;
-    private Cache<String,List<ParsedWord>> cache = null;
+    private final Cache<String,List<ParsedWord>> cache;
 
-    // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
-    private static final String DICT_PATH_VAR = "dictPath";
+    enum Lang { RU, UK };
 
-    public static final int DEFAULT_CACHE_SIZE = 10000;
+    public static class Builder {
+        // private static final String ENV_DICT_PATH = "PYMORPHY2_DICT_PATH";
+        private static final String DICT_PATH_VAR = "dictPath";
+        public static final int DEFAULT_CACHE_SIZE = 10000;
 
-    public MorphAnalyzer() throws IOException {
-        this(System.getProperty(DICT_PATH_VAR), null);
-    }
+        private String dictPath;
+        private FileLoader loader;
+        private Map<Character,String> charSubstitutes;
+        private Lang lang = Lang.RU;
+        private List<AnalyzerUnit.Builder> unitBuilders;
+        private int cacheSize = DEFAULT_CACHE_SIZE;
+        private Cache<String,List<ParsedWord>> cache = null;
 
-    public MorphAnalyzer(String path) throws IOException {
-        this(path, null);
-    }
-
-    public MorphAnalyzer(Map<Character,String> replaceChars) throws IOException {
-        this(System.getProperty(DICT_PATH_VAR), replaceChars, DEFAULT_CACHE_SIZE);
-    }
-
-    public MorphAnalyzer(Map<Character,String> replaceChars, int cacheSize) throws IOException {
-        this(System.getProperty(DICT_PATH_VAR), replaceChars, cacheSize);
-    }
-
-    public MorphAnalyzer(String path, Map<Character,String> replaceChars) throws IOException {
-        this(new FSFileLoader(path), replaceChars, DEFAULT_CACHE_SIZE);
-    }
-
-    public MorphAnalyzer(String path, Map<Character,String> replaceChars, int cacheSize) throws IOException {
-        this(new FSFileLoader(path), replaceChars, cacheSize);
-    }
-
-    public MorphAnalyzer(FileLoader loader, Map<Character,String> replaceChars) throws IOException {
-        this(loader, replaceChars, DEFAULT_CACHE_SIZE);
-    }
-
-    public MorphAnalyzer(FileLoader loader, Map<Character,String> replaceChars, int cacheSize) throws IOException {
-        tagStorage = new Tag.Storage();
-        dict = new Dictionary(tagStorage, loader, replaceChars);
-        knownPrefixSplitter = new KnownPrefixSplitter(loader);
-        units = Lists.newArrayList(new AnalyzerUnit.DictionaryUnit(tagStorage, dict, true, 1.0f),
-                                   new AnalyzerUnit.NumberUnit(tagStorage, true, 0.9f),
-                                   new AnalyzerUnit.PunctuationUnit(tagStorage, true, 0.9f),
-                                   new AnalyzerUnit.RomanUnit(tagStorage, false, 0.9f),
-                                   new AnalyzerUnit.LatinUnit(tagStorage, true, 0.9f),
-                                   new AnalyzerUnit.KnownPrefixUnit(tagStorage, dict, knownPrefixSplitter, true, 0.75f),
-                                   new AnalyzerUnit.UnknownPrefixUnit(tagStorage, dict, true, 0.5f),
-                                   new AnalyzerUnit.UnknownWordUnit(tagStorage, true, 1.0f));
-        prob = new ProbabilityEstimator(loader);
-        if (cacheSize > 0) {
-            cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+        public Builder dictPath(String path) {
+            this.dictPath = path;
+            return this;
         }
+
+        public Builder fileLoader(FileLoader loader) {
+            this.loader = loader;
+            return this;
+        }
+
+        public Builder lang(Lang lang) {
+            this.lang = lang;
+            return this;
+        }
+
+        public Builder charSubstitutes(Map<Character,String> charSubstitutes) {
+            this.charSubstitutes = charSubstitutes;
+            return this;
+        }
+
+        public Builder units(List<AnalyzerUnit.Builder> unitBuilders) {
+            this.unitBuilders = unitBuilders;
+            return this;
+        }
+
+        public Builder cacheSize(int size) {
+            this.cacheSize = size;
+            return this;
+        }
+
+        private Set<String> getKnownPrefixes(Lang lang) throws IOException {
+            Set<String> prefixes = new HashSet<>();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/lang/ru/known_prefixes.txt")));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                prefixes.add(line);
+            }
+            return prefixes;
+        }
+
+        public MorphAnalyzer build() throws IOException {
+            Tag.Storage tagStorage = new Tag.Storage();
+            if (loader == null) {
+                if (dictPath == null) {
+                    dictPath = System.getProperty(DICT_PATH_VAR);
+                }
+                loader = new FSFileLoader(dictPath);
+            }
+            if (unitBuilders == null) {
+                Dictionary.Builder dictBuilder = new Dictionary.Builder(loader);
+                Set<String> knownPrefixes = null;
+                if (lang != null) {
+                    knownPrefixes = getKnownPrefixes(lang);
+                }
+                AnalyzerUnit.Builder dictUnitBuilder = new DictionaryUnit.Builder(dictBuilder, true, 1.0f)
+                    .charSubstitutes(charSubstitutes);
+                unitBuilders = new ArrayList<>();
+                unitBuilders.add(dictUnitBuilder);
+                unitBuilders.add(new NumberUnit.Builder(true, 0.9f));
+                unitBuilders.add(new PunctuationUnit.Builder(true, 0.9f));
+                unitBuilders.add(new RomanUnit.Builder(false, 0.9f));
+                unitBuilders.add(new LatinUnit.Builder(true, 0.9f));
+                if (knownPrefixes != null) {
+                    unitBuilders.add(new KnownPrefixUnit.Builder(dictUnitBuilder, knownPrefixes, true, 0.75f));
+                }
+                unitBuilders.add(new UnknownPrefixUnit.Builder(dictUnitBuilder, true, 0.5f));
+                unitBuilders.add(new UnknownUnit.Builder(true, 1.0f));
+            }
+            List<AnalyzerUnit> units = new ArrayList<>();
+            for (AnalyzerUnit.Builder unitBuilder : unitBuilders) {
+                units.add(unitBuilder.build(tagStorage));
+            }
+            ProbabilityEstimator prob = new ProbabilityEstimator(loader);
+            if (cacheSize > 0) {
+                cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+            }
+            return new MorphAnalyzer(tagStorage, units, prob, cache);
+        }
+    };
+
+    private MorphAnalyzer(Tag.Storage tagStorage,
+                          List<AnalyzerUnit> units,
+                          ProbabilityEstimator prob,
+                          Cache<String,List<ParsedWord>> cache) throws IOException {
+        this.tagStorage = tagStorage;
+        this.units = units;
+        this.prob = prob;
+        this.cache = cache;
     }
 
     public Grammeme getGrammeme(String value) {

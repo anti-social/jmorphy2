@@ -29,7 +29,8 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
                                       ImmutableSet.of("ADJF"),
                                       ImmutableSet.of("ADJS"),
                                       ImmutableSet.of("LATN"),
-                                      ImmutableSet.of("NUMB"));
+                                      ImmutableSet.of("NUMB"),
+                                      ImmutableSet.of("UNKN"));
 
     @Before
     public void setUp() throws IOException {
@@ -77,8 +78,8 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
                          new int[]{2, 0});
         assertAnalyzesTo(analyzer,
                          "ъь ъё",
-                         new String[0],
-                         new int[0]);
+                         new String[]{"ъь", "ъё"},
+                         new int[]{1, 1});
     }
  
     @Test

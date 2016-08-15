@@ -62,8 +62,9 @@ public class JSONUtils {
                 ((List<Object>) container).add(obj);
             }
             else if (container instanceof Map) {
-                if (obj != null && prevObj != null) {
+                if (prevObj != null) {
                     ((Map<Object,Object>) container).put(prevObj, obj);
+                    prevObj = null;
                 }
                 else {
                     prevObj = obj;

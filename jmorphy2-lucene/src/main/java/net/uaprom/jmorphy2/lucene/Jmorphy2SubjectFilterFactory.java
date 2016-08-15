@@ -61,7 +61,7 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
         // morph analyzer
         this.dictPath = dictPath;
         this.replacesPath = args.get(REPLACES_PATH_ATTR);
-        this.cacheSize = getInt(args, CACHE_SIZE_ATTR, MorphAnalyzer.DEFAULT_CACHE_SIZE);
+        this.cacheSize = getInt(args, CACHE_SIZE_ATTR, Jmorphy2StemFilterFactory.DEFAULT_CACHE_SIZE);
         // tagger
         this.taggerRulesPath = args.get(TAGGER_RULES_PATH_ATTR);
         this.taggerThreshold = getInt(args, TAGGER_THRESHOLD_ATTR, SimpleTagger.DEFAULT_THRESHOLD);
@@ -79,7 +79,11 @@ public class Jmorphy2SubjectFilterFactory extends TokenFilterFactory implements 
             replaceChars = parseReplaces(loader.openResource(replacesPath));
         }
 
-        MorphAnalyzer morph = new MorphAnalyzer(new LuceneFileLoader(loader, dictPath), replaceChars, cacheSize);
+        MorphAnalyzer morph = new MorphAnalyzer.Builder()
+            .fileLoader(new LuceneFileLoader(loader, dictPath))
+            .charSubstitutes(replaceChars)
+            .cacheSize(cacheSize)
+            .build();
         Tagger tagger = new SimpleTagger(morph, new Ruleset(loader.openResource(taggerRulesPath)), taggerThreshold);
         Parser parser = new SimpleParser(morph, tagger, new Ruleset(loader.openResource(parserRulesPath)), parserThreshold);
         subjExtractor = new SubjectExtractor(parser, extract, true);

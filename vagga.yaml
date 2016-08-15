@@ -58,6 +58,11 @@ commands:
     description: Run arbitrary gradle command
     run: [gradle]
 
+  compile: !Command
+    <<: *cmd_opts
+    description: Compile all source files
+    run: [gradle, compileJava]
+
   build: !Command
     <<: *cmd_opts
     description: Compile, run tests and make packages

@@ -20,13 +20,15 @@ public class Jmorphy2TestsHelpers {
     }
 
     public static MorphAnalyzer newMorphAnalyzer(Map<Character,String> replaceChars) throws IOException {
-        return new MorphAnalyzer(new FileLoader() {
+        return new MorphAnalyzer.Builder()
+            .fileLoader(new FileLoader() {
                 @Override
                 public InputStream getStream(String filename) throws IOException {
                     return getClass().getResourceAsStream(DICT_PATH + "/" + filename);
                 }
-            },
-            replaceChars,
-            0);
+            })
+            .charSubstitutes(replaceChars)
+            .cacheSize(0)
+            .build();
     }
 }

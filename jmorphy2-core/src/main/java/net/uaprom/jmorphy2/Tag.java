@@ -155,7 +155,7 @@ public class Tag {
     }
 
     // TODO: make as API
-    static class Storage {
+    static public class Storage {
         private final Map<String,Tag> tags = new HashMap<String,Tag>();
         private final Map<String,Grammeme> grammemes = new HashMap<String,Grammeme>();
 
