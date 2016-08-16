@@ -31,7 +31,7 @@ containers:
 
   elastic:
     setup:
-    - !Container java
+    - !Ubuntu xenial
     - !AptTrust
       server: pgp.mit.edu
       keys: [D88E42B4]
@@ -40,17 +40,14 @@ containers:
       suite: stable
       components: [main]
     - !Install
+      - openjdk-8-jre-headless
       - elasticsearch=2.3.5
-    - !Sh |
-        gradle build -x test -p jmorphy2-elasticsearch
-        gradle processTestResources -p jmorphy2-core
-        /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
-        mkdir -p /etc/elasticsearch/jmorphy2/ru
-        cp -r /work/jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
-        cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json /etc/elasticsearch/jmorphy2/ru/
     - !EnsureDir /var/elasticsearch
+    - !EnsureDir /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
+    - !EnsureDir /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
+    auto-clean: true
 
 commands:
   gradle: !Command
@@ -88,8 +85,23 @@ commands:
     container: elastic
     user-id: 1
     external-user-id: 0
-    run:
-    - /usr/share/elasticsearch/bin/elasticsearch
-    - -Dpath.conf=/etc/elasticsearch
-    - -Dpath.logs=/var/elasticsearch/logs
-    - -Dpath.data=/var/elasticsearch/data
+    prerequisites: [_build-plugin]
+    volumes:
+      /usr/share/elasticsearch/plugins: !Tmpfs
+      /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_ru
+      /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_uk
+    run: |
+      rm -rf /usr/share/elasticsearch/plugins/analysis-jmorphy2
+      /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+      /usr/share/elasticsearch/bin/elasticsearch \
+        --path.conf=/etc/elasticsearch \
+        --path.logs=/var/elasticsearch/logs \
+        --path.data=/var/elasticsearch/data \
+        --security.manager.enabled=false
+
+  _build-plugin: !Command
+    <<: *cmd_opts
+    run: |
+      set -ex
+      gradle clean build -x test -p jmorphy2-elasticsearch
+      gradle processTestResources -p jmorphy2-core

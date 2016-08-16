@@ -40,16 +40,18 @@ public class UnknownPrefixUnit extends PrefixedUnit {
 
         public Builder maxPrefixLength(int maxPrefixLength) {
             this.maxPrefixLength = maxPrefixLength;
+            this.cachedUnit = null;
             return this;
         }
 
         public Builder minReminder(int minReminder) {
             this.minReminder = minReminder;
+            this.cachedUnit = null;
             return this;
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) throws IOException {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) throws IOException {
             return new UnknownPrefixUnit(tagStorage,
                                          unit.build(tagStorage),
                                          minReminder,

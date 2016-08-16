@@ -6,6 +6,7 @@ import java.util.List;
 
 
 public class Grammeme {
+    public final String key;
     public final String value;
     public final String parentValue;
     public final String russianValue;
@@ -22,6 +23,7 @@ public class Grammeme {
     }
 
     public Grammeme(String value, String parentValue, String russianValue, String description, Tag.Storage storage) {
+        this.key = value.toLowerCase();
         this.value = value;
         this.parentValue = stringOrNull(parentValue);
         this.russianValue = russianValue;

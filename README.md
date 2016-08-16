@@ -72,35 +72,41 @@ cd ${es_home}
 bin/elasticsearch
 
 # open new tab
-curl -XPUT 'localhost:9200/test_index' -d '
-{
-    "settings": {
-        "index": {
-            "analysis": {
-                "filter": {
-                    "jmorphy2": {
-                        "type": "jmorphy2_stemmer",
-                        "name": "ru",
-                        "cache_size": 50000
-                    }
-                },
-                "analyzer": {
-                    "text_ru": {
-                        "tokenizer": "whitespace",
-                        "filter": [
-                            "word_delimiter",
-                            "lowercase",
-                            "jmorphy2"
-                        ]
-                    }
-                }
-            }
-        }
-    }
-}
+curl -XPUT 'localhost:9200/test_index' -d '---
+settings:
+  index:
+    analysis:
+      filter:
+        delimiter:
+          type: word_delimiter
+          preserve_original: true
+        jmorphy2_russian:
+          type: jmorphy2_stemmer
+          name: ru
+        jmorphy2_ukrainian:
+          type: jmorphy2_stemmer
+          name: uk
+      analyzer:
+        text_ru:
+          tokenizer: whitespace
+          filter:
+          - delimiter
+          - lowercase
+          - jmorphy2_russian
+        text_uk:
+          tokenizer: whitespace
+          filter:
+          - delimiter
+          - lowercase
+          - jmorphy2_ukrainian
 '
 
+# Test russian analyzer
 curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'Привет, лошарики!'
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж'
 
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж'            
+# Test ukrainian analyzer
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d 'Пригоди Котигорошка'
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d 'їжаки'
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d "комп'ютером"
 ```

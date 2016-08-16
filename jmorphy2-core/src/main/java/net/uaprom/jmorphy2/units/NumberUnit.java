@@ -22,7 +22,7 @@ public class NumberUnit extends AnalyzerUnit {
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
             tagStorage.newGrammeme(Lists.newArrayList("NUMB", "", "ЧИСЛО", "число"));
             tagStorage.newGrammeme(Lists.newArrayList("intg", "", "цел", "целое"));
             tagStorage.newGrammeme(Lists.newArrayList("real", "", "вещ", "вещественное"));

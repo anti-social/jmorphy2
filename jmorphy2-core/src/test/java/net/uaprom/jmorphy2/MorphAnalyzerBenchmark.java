@@ -25,7 +25,7 @@ public class MorphAnalyzerBenchmark {
     @Before
     public void setUp() throws IOException {
         if (!initialized) {
-            morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
             loadWords(WORDS_FREQ_RESOURCE);
         }
     }

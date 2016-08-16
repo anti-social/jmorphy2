@@ -181,7 +181,10 @@ public class Tag {
         }
 
         public Grammeme getGrammeme(String grammemeValue) {
-            return grammemes.get(grammemeValue);
+            if (grammemeValue == null) {
+                return null;
+            }
+            return grammemes.get(grammemeValue.toLowerCase());
         }
 
         public Collection<Grammeme> getAllGrammemes() {
@@ -189,7 +192,7 @@ public class Tag {
         }
 
         private void addGrammeme(Grammeme grammeme) {
-            grammemes.put(grammeme.value, grammeme);
+            grammemes.put(grammeme.key, grammeme);
         }
 
         public Grammeme newGrammeme(List<String> grammemeInfo) {

@@ -12,7 +12,7 @@ public class BaseFilterTestCase {
 
     protected void init() throws IOException {
         if (!initialized) {
-            morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
             initialized = true;
         }
     }

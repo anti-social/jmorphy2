@@ -18,7 +18,7 @@ public class PunctuationUnit extends RegexUnit {
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
             tagStorage.newGrammeme(Lists.newArrayList("PNCT", "", "ЗПР", "пунктуация"));
             tagStorage.newTag("PNCT");
             return new PunctuationUnit(tagStorage, terminate, score);

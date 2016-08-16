@@ -20,10 +20,6 @@ import net.uaprom.jmorphy2.MorphAnalyzer;
 
 
 public final class Jmorphy2Analyzer extends Analyzer {
-    private static Map<Character, String> DEFAULT_REPLACES = new HashMap<Character, String>() {
-        { put('е', "ё"); }
-    };
-
     private static List<Set<String>> DEFAULT_EXCLUDE_TAGS = new ArrayList<Set<String>>();
     static {
         for (final String pos : new String[]{"NPRO", "PREP", "CONJ", "PRCL", "INTJ"}) {

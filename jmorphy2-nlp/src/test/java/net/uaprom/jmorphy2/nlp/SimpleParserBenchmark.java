@@ -18,7 +18,7 @@ public class SimpleParserBenchmark {
 
     @Before
     public void setUp() throws IOException {
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer();
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
         parser = new SimpleParser(morph, new SimpleTagger(morph));
     }
 

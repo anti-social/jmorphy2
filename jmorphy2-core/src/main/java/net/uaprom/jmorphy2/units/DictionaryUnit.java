@@ -38,14 +38,19 @@ public class DictionaryUnit extends AnalyzerUnit {
 
         public Builder charSubstitutes(Map<Character,String> charSubstitutes) {
             this.charSubstitutes = charSubstitutes;
+            this.cachedUnit = null;
             return this;
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) throws IOException {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) throws IOException {
             Dictionary dict = dictBuilder.build(tagStorage);
             return new DictionaryUnit(tagStorage, dict, charSubstitutes, terminate, score);
         }
+    }
+
+    public Dictionary getDict() {
+        return dict;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class UnknownUnit extends AnalyzerUnit {
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
             tagStorage.newGrammeme(Lists.newArrayList("UNKN", "", "НЕИЗВ", "неизвестное"));
             tagStorage.newTag("UNKN");
             return new UnknownUnit(tagStorage, terminate, score);

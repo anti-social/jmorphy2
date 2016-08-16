@@ -44,11 +44,12 @@ public class KnownPrefixUnit extends PrefixedUnit {
 
         public Builder minReminder(int minReminder) {
             this.minReminder = minReminder;
+            this.cachedUnit = null;
             return this;
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) throws IOException {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) throws IOException {
             return new KnownPrefixUnit(tagStorage,
                                        unit.build(tagStorage),
                                        prefixes,
@@ -65,8 +66,6 @@ public class KnownPrefixUnit extends PrefixedUnit {
         int wordLength = word.length();
         for (int i = 1; wordLength - i >= minReminder; i++) {
             String prefix = word.substring(0, i);
-            System.out.println(prefix);
-            System.out.println(prefixes.contains(prefix));
             if (prefixes.contains(prefix)) {
                 parseds.addAll(parseWithPrefix(word, prefix));
             }

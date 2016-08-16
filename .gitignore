@@ -20,3 +20,4 @@ build/
 # pymorphy2 dicts #
 pymorphy2-dicts-*
 pymorphy2_dicts/
+pymorphy2_dicts_*/

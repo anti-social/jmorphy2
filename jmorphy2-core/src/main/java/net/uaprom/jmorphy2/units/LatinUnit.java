@@ -18,7 +18,7 @@ public class LatinUnit extends RegexUnit {
         }
 
         @Override
-        public AnalyzerUnit build(Tag.Storage tagStorage) {
+        protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
             tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "латиница"));
             tagStorage.newTag("LATN");
             return new LatinUnit(tagStorage, terminate, score);

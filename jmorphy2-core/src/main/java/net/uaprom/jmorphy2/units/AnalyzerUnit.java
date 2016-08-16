@@ -16,15 +16,23 @@ public abstract class AnalyzerUnit {
     public static abstract class Builder {
         protected final boolean terminate;
         protected final float score;
+        protected AnalyzerUnit cachedUnit;
         
         protected Builder(boolean terminate, float score) {
             this.terminate = terminate;
             this.score = score;
         }
 
-        public abstract AnalyzerUnit build(Tag.Storage tagStorage) throws IOException;
+        protected abstract AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) throws IOException;
+
+        public AnalyzerUnit build(Tag.Storage tagStorage) throws IOException {
+            if (cachedUnit == null) {
+                cachedUnit = newAnalyzerUnit(tagStorage);
+            }
+            return cachedUnit;
+        }
     }
-    
+
     protected AnalyzerUnit(Tag.Storage tagStorage, boolean terminate, float score) {
         this.tagStorage = tagStorage;
         this.terminate = terminate;

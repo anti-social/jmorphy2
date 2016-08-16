@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -53,35 +51,29 @@ public class MorphAnalyzer {
             return this;
         }
 
-        public Builder lang(Lang lang) {
-            this.lang = lang;
-            return this;
-        }
+        // public Builder lang(Lang lang) {
+        //     this.lang = lang;
+        //     return this;
+        // }
 
         public Builder charSubstitutes(Map<Character,String> charSubstitutes) {
             this.charSubstitutes = charSubstitutes;
             return this;
         }
 
-        public Builder units(List<AnalyzerUnit.Builder> unitBuilders) {
-            this.unitBuilders = unitBuilders;
-            return this;
-        }
+        // public Builder units(List<AnalyzerUnit.Builder> unitBuilders) {
+        //     this.unitBuilders = unitBuilders;
+        //     return this;
+        // }
+
+        // public Builder probabilityEstimator(ProbabilityEstimator prob) {
+        //     this.prob = prob;
+        //     return this;
+        // }
 
         public Builder cacheSize(int size) {
             this.cacheSize = size;
             return this;
-        }
-
-        private Set<String> getKnownPrefixes(Lang lang) throws IOException {
-            Set<String> prefixes = new HashSet<>();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                getClass().getResourceAsStream("/lang/ru/known_prefixes.txt")));
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                prefixes.add(line);
-            }
-            return prefixes;
         }
 
         public MorphAnalyzer build() throws IOException {
@@ -94,9 +86,14 @@ public class MorphAnalyzer {
             }
             if (unitBuilders == null) {
                 Dictionary.Builder dictBuilder = new Dictionary.Builder(loader);
+                String langCode = dictBuilder.build(tagStorage).getMeta().languageCode.toUpperCase();
+                lang = Lang.valueOf(langCode);
                 Set<String> knownPrefixes = null;
                 if (lang != null) {
-                    knownPrefixes = getKnownPrefixes(lang);
+                    knownPrefixes = Resources.getKnownPrefixes(lang);
+                    if (charSubstitutes == null) {
+                        charSubstitutes = Resources.getCharSubstitutes(lang);
+                    }
                 }
                 AnalyzerUnit.Builder dictUnitBuilder = new DictionaryUnit.Builder(dictBuilder, true, 1.0f)
                     .charSubstitutes(charSubstitutes);
@@ -113,10 +110,18 @@ public class MorphAnalyzer {
                 unitBuilders.add(new UnknownUnit.Builder(true, 1.0f));
             }
             List<AnalyzerUnit> units = new ArrayList<>();
+            Dictionary.Meta dictMeta = null;
             for (AnalyzerUnit.Builder unitBuilder : unitBuilders) {
-                units.add(unitBuilder.build(tagStorage));
+                AnalyzerUnit unit = unitBuilder.build(tagStorage);
+                if (unit instanceof DictionaryUnit) {
+                    dictMeta = ((DictionaryUnit) unit).getDict().getMeta();
+                }
+                units.add(unit);
             }
-            ProbabilityEstimator prob = new ProbabilityEstimator(loader);
+            ProbabilityEstimator prob = null;
+            if (dictMeta != null && dictMeta.ptw) {
+                prob = new ProbabilityEstimator(loader);
+            }
             if (cacheSize > 0) {
                 cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
             }
@@ -222,13 +227,15 @@ public class MorphAnalyzer {
         float[] newScores = new float[parseds.size()];
         float sumProbs = 0.0f, sumScores = 0.0f;
         int i = 0;
+        if (prob == null) {
+            return parseds;
+        }
         for (ParsedWord parsed : parseds) {
             newScores[i] = prob.getProbability(parsed.foundWord, parsed.tag);
             sumProbs += newScores[i];
             sumScores += parsed.score;
             i++;
         }
-
         if (sumProbs < ParsedWord.EPS) {
             float k = 1.0f / sumScores;
             i = 0;
