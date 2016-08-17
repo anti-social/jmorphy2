@@ -1,7 +1,7 @@
 Jmorphy2
 ========
 
-Java port of the pymorphy2
+Java port of the [pymorphy2](https://github.com/kmike/pymorphy2)
 
 Compile project, build jars and run tests:
 
