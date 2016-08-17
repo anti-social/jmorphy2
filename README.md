@@ -51,7 +51,6 @@ cd ${es_home}
 # Put `pymorphy2_dicts` into `config/jmorphy2/ru` direcotory:
 mkdir -p /etc/elasticsearch/jmorphy2/ru/
 cp -r jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/
-cp jmorphy2-elasticsearch/src/test/resources/indices/analyze/config/jmorphy2/ru/replaces.json /etc/elasticsearch/jmorphy2/ru/
 ```
 
 Or just run elasticsearch inside the container:
