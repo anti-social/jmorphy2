@@ -6,7 +6,7 @@ _default:
     external-user-id: 0
 
 
-minimum-vagga: v0.6.1
+minimum-vagga: v0.6.1-119
 
 containers:
   java:
