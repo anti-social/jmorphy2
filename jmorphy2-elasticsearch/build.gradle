@@ -32,13 +32,22 @@ test {
     systemProperty 'tests.security.manager', 'false'
 }
 
+processTestResources {
+    ext.resourcesMain = "${buildDir}/resources/main"
+    ext.inputDicts = "${project(':jmorphy2-core').sourceSets['test'].output.resourcesDir}/pymorphy2_dicts_ru"
+    ext.outputDicts = "${sourceSets['test'].output.resourcesDir}/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts"
+    outputs.dir resourcesMain
+    inputs.dir inputDicts
+    outputs.dir outputDicts
+}
+
 processTestResources << {
     // prevent jar hell exception
-    mkdir "${buildDir}/resources/main"
-    
+    mkdir resourcesMain
+
     copy {
-        from "${project(':jmorphy2-core').sourceSets['test'].output.resourcesDir}/pymorphy2_dicts"
-        into "${sourceSets['test'].output.resourcesDir}/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts"
+      from inputDicts
+      into outputDicts
     }
 }
 
