@@ -41,7 +41,7 @@ containers:
       components: [main]
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=2.3.5
+      - elasticsearch=2.4.0
     - !EnsureDir /var/elasticsearch
     - !EnsureDir /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
     - !EnsureDir /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts

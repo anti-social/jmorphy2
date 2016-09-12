@@ -9,14 +9,15 @@ subprojects {
     compileJava.options.compilerArgs << "-Xlint:unchecked"
 
     ext {
-        defaultEsVersion = '2.3.5'
-        defaultLuceneVersion = '5.5.0'
+        defaultEsVersion = '2.4.0'
+        defaultLuceneVersion = '5.5.2'
 
         esLuceneVersions = [
           // '2.0': '5.2.1',
           '2.1': '5.3.1',
           '2.2': '5.4.1',
           '2.3': '5.5.0',
+          '2.4': '5.5.2',
         ]
         elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
         luceneVersion = esLuceneVersions.get(elasticsearchVersion[0..2], defaultLuceneVersion)
