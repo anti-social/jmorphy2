@@ -49,6 +49,19 @@ containers:
       /var/elasticsearch: !Persistent { name: elastic }
     auto-clean: true
 
+  pymorphy2:
+    environ:
+      HOME: /work
+      LANG: en_US.UTF-8
+    setup:
+    - !UbuntuRelease { codename: xenial }
+    - !PipConfig { dependencies: true }
+    - !Py3Install
+      - pymorphy2
+      - pymorphy2-dicts-ru
+      - pymorphy2-dicts-uk
+      - ipython
+
 commands:
   gradle: !Command
     <<: *cmd_opts
@@ -105,3 +118,8 @@ commands:
       set -ex
       gradle clean build -x test -p jmorphy2-elasticsearch
       gradle processTestResources -p jmorphy2-core
+
+  python: !Command
+    description: Run python shell with pymorphy2 package installed
+    container: pymorphy2
+    run: [ipython]

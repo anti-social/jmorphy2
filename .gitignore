@@ -15,6 +15,7 @@ target/
 # build #
 .gradle/
 .vagga/
+.ipython/
 build/
 
 # pymorphy2 dicts #
