@@ -33,7 +33,7 @@ public class NumberUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word) {
+    public List<ParsedWord> parse(String word, String wordLower) {
         Tag tag = null;
         if (Ints.tryParse(word) != null) {
             tag = tagStorage.getTag("NUMB,intg");

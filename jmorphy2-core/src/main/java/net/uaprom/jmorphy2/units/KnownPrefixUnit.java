@@ -60,14 +60,13 @@ public class KnownPrefixUnit extends PrefixedUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word) throws IOException {
-        word = word.toLowerCase();
+    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
         List<ParsedWord> parseds = new ArrayList<>();
-        int wordLength = word.length();
-        for (int i = 1; wordLength - i >= minReminder; i++) {
-            String prefix = word.substring(0, i);
+        int wordLen = word.length();
+        for (int i = 1; wordLen - i >= minReminder; i++) {
+            String prefix = wordLower.substring(0, i);
             if (prefixes.contains(prefix)) {
-                parseds.addAll(parseWithPrefix(word, prefix));
+                parseds.addAll(parseWithPrefix(word, wordLower, prefix));
             }
         }
         return parseds;

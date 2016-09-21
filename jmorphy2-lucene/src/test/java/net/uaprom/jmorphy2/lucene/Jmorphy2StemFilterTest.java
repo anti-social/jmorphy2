@@ -58,8 +58,8 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
                          new int[0]);
         assertAnalyzesTo(analyzer,
                          "тест стеммера",
-                         new String[]{"тест", "тесто", "стеммера"},
-                         new int[]{1, 0, 1});
+                         new String[]{"тест", "тесто", "стеммера", "стеммер"},
+                         new int[]{1, 0, 1, 0});
         assertAnalyzesTo(analyzer,
                          "iphone",
                          new String[]{"iphone"},
@@ -111,8 +111,8 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
                          new int[0]);
         assertAnalyzesTo(analyzer,
                          "тест стеммера",
-                         new String[]{"тест", "тесто", "стеммера"},
-                         new int[]{1, 0, 1});
+                         new String[]{"тест", "тесто", "стеммера", "стеммер"},
+                         new int[]{1, 0, 1, 0});
         assertAnalyzesTo(analyzer,
                          "iphone",
                          new String[]{"iphone"},

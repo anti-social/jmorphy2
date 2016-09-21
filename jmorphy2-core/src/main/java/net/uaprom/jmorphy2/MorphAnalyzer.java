@@ -204,9 +204,10 @@ public class MorphAnalyzer {
     }
 
     private List<ParsedWord> parseNC(String word) throws IOException {
+        String wordLower = word.toLowerCase();
         List<ParsedWord> parseds = Lists.newArrayList();
         for (AnalyzerUnit unit : units) {
-            List<ParsedWord> unitParseds = unit.parse(word);
+            List<ParsedWord> unitParseds = unit.parse(word, wordLower);
             if (unitParseds == null) {
                 continue;
             }

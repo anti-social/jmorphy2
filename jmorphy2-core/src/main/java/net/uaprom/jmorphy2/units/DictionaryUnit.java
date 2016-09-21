@@ -54,10 +54,10 @@ public class DictionaryUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word) throws IOException {
+    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
         List<ParsedWord> parseds = new ArrayList<>();
-        for (Dictionary.Parsed dictParsed : dict.parse(word, charSubstitutes)) {
-            parseds.add(new DictionaryParsedWord(word, dictParsed.tag, dictParsed.normalForm, word, score, dictParsed));
+        for (Dictionary.Parsed dictParsed : dict.parse(wordLower, charSubstitutes)) {
+            parseds.add(new DictionaryParsedWord(wordLower, dictParsed.tag, dictParsed.normalForm, wordLower, score, dictParsed));
         }
         return parseds;
     }

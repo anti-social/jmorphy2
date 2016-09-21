@@ -40,8 +40,8 @@ public class Jmorphy2StemTokenFilterFactoryTest extends BaseTokenFilterFactoryTe
                          new int[0]);
         assertAnalyzesTo(analyzer,
                          "тест стеммера",
-                         new String[]{"тест", "тесто", "стеммера"},
-                         new int[]{1, 0, 1});
+                         new String[]{"тест", "тесто", "стеммера", "стеммер"},
+                         new int[]{1, 0, 1, 0});
         assertAnalyzesTo(analyzer,
                          "iphone",
                          new String[]{"iphone"},
@@ -61,6 +61,6 @@ public class Jmorphy2StemTokenFilterFactoryTest extends BaseTokenFilterFactoryTe
         assertAnalyzesTo(analyzer,
                          "мы любим Украину",
                          new String[]{"любим", "любимый", "любить", "украина"},
-                         new int[]{2, 0, 0, 1});
+                         new int[]{2, 0, 0, 1, 0});
     }
 }

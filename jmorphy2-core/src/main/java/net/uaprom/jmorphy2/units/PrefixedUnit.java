@@ -16,9 +16,10 @@ abstract class PrefixedUnit extends AnalyzerUnit {
         this.unit = unit;
     }
 
-    protected List<ParsedWord> parseWithPrefix(String word, String prefix) throws IOException {
+    protected List<ParsedWord> parseWithPrefix(String word, String wordLower, String prefix) throws IOException {
         List<ParsedWord> parseds = new ArrayList<ParsedWord>();
-        for (ParsedWord p : unit.parse(word.substring(prefix.length()))) {
+        int prefixLen = prefix.length();
+        for (ParsedWord p : unit.parse(word.substring(prefixLen), wordLower.substring(prefixLen))) {
             if (!p.tag.isProductive()) {
                 continue;
             }

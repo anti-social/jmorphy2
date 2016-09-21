@@ -19,7 +19,7 @@ public class RegexUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word) {
+    public List<ParsedWord> parse(String word, String wordLower) {
         if (pattern.matcher(word).matches()) {
             List<ParsedWord> parseds = new ArrayList<>();
             parseds.add(new AnalyzerParsedWord(word, tagStorage.getTag(tagString), word, word, score));

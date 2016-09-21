@@ -43,7 +43,7 @@ public abstract class AnalyzerUnit {
         return terminate;
     }
 
-    public abstract List<ParsedWord> parse(String word) throws IOException;
+    public abstract List<ParsedWord> parse(String word, String wordLower) throws IOException;
 
     class AnalyzerParsedWord extends ParsedWord {
         public AnalyzerParsedWord(String word, Tag tag, String normalForm, String foundWord, float score) {

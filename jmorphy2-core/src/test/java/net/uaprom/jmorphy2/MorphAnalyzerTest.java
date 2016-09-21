@@ -46,15 +46,33 @@ public class MorphAnalyzerTest {
         assertFalse(tag.contains("NOUN"));
         assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
-        // word with unknown prefix
-        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:шарики:0.5\n" +
-                      "лошарики:NOUN,inan,masc plur,accs:лошарик:шарики:0.5\n",
-                      morph.parse("лошарики"));
+        // dictionary word: capitalized
+        assertParseds("украину:NOUN,inan,femn,Sgtm,Geox sing,accs:украина:украину:1.0",
+                      morph.parse("Украину"));
 
-        // unknown word
+        // known prefix
         assertParseds("псевдокошка:NOUN,anim,femn sing,nomn:псевдокошка:кошка:0.8333333\n" +
                       "псевдокошка:NOUN,inan,femn sing,nomn:псевдокошка:кошка:0.1666666",
                       morph.parse("псевдокошка"));
+        assertParseds("лже-кот:NOUN,anim,masc sing,nomn:лже-кот:кот:1.0",
+                      morph.parse("лже-кот"));
+
+        // unknown prefix
+        assertParseds("лошарики:NOUN,inan,masc plur,nomn:лошарик:шарики:0.2\n" +
+                      "лошарики:NOUN,inan,masc plur,accs:лошарик:шарики:0.2\n" +
+                      "лошарики:NOUN,anim,masc,Name plur,nomn:лошарик:арики:0.2\n" +
+                      "лошарики:NOUN,anim,femn,Name sing,gent:лошарика:арики:0.2\n" +
+                      "лошарики:NOUN,anim,femn,Name plur,nomn:лошарика:арики:0.2\n",
+                      morph.parse("лошарики"));
+
+        // unknown prefix: maximum prefix length
+        assertParseds("бочкоподобный:ADJF,Subx,Qual masc,sing,nomn:бочкоподобный:подобный:0.666666\n" +
+                      "бочкоподобный:ADJF,Subx,Qual inan,masc,sing,accs:бочкоподобный:подобный:0.333333\n",
+                      morph.parse("бочкоподобный"));
+
+        // unknown prefix: minimum reminder
+        assertParseds("штрихкот:NOUN,anim,masc sing,nomn:штрихкот:кот:1.0\n",
+                      morph.parse("штрихкот"));
 
         assertParseds("снега:NOUN,inan,masc sing,gent:снег:снега:0.818181\n" +
                       "снега:NOUN,inan,masc plur,nomn:снег:снега:0.090909\n" +
@@ -74,15 +92,6 @@ public class MorphAnalyzerTest {
         assertParseds("теплые:ADJF,Qual plur,nomn:тёплый:тёплые:0.5\n" +
                       "теплые:ADJF,Qual inan,plur,accs:тёплый:тёплые:0.5",
                       morph.parse("теплые"));
-
-        // known prefix
-        parseds = morph.parse("лжекот");
-        assertParseds("лжекот:NOUN,anim,masc sing,nomn:лжекот:кот:1.0",
-                      morph.parse("лжекот"));
-
-        // unknown prefix
-        assertParseds("лошарикам:NOUN,inan,masc plur,datv:лошарик:шарикам:1.0\n",
-                      morph.parse("лошарикам"));
 
         // NUMB
         assertParseds("1:NUMB,intg:1:1:1.0", morph.parse("1"));
@@ -111,13 +120,17 @@ public class MorphAnalyzerTest {
                       morph.parse("тестsymbolmix"));
 
         // TODO: Hyphen
+    }
 
-        // normal form
+    @Test
+    public void test_normalForms() throws IOException {
         assertEquals(Arrays.asList("красивый"), morph.normalForms("красивого"));
         assertEquals(Arrays.asList("для", "длить"), morph.normalForms("для"));
-        assertEquals(Arrays.asList("лошарик"), morph.normalForms("лошарикам"));
+        assertEquals(Arrays.asList("лошарик", "лошарика"), morph.normalForms("лошарикам"));
+    }
 
-        // tag
+    @Test
+    public void test_getTag() throws IOException {
         assertEquals(Arrays.asList(morph.getTag("ADJF,Qual neut,sing,gent"),
                                    morph.getTag("ADJF,Qual masc,sing,gent"),
                                    morph.getTag("ADJF,Qual anim,masc,sing,accs")),

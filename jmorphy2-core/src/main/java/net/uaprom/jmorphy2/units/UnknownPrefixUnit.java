@@ -54,20 +54,19 @@ public class UnknownPrefixUnit extends PrefixedUnit {
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) throws IOException {
             return new UnknownPrefixUnit(tagStorage,
                                          unit.build(tagStorage),
-                                         minReminder,
                                          maxPrefixLength,
+                                         minReminder,
                                          terminate,
                                          score);
         }
     }
 
     @Override
-    public List<ParsedWord> parse(String word) throws IOException {
-        word = word.toLowerCase();
+    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
         List<ParsedWord> parseds = new ArrayList<ParsedWord>();
-        int wordLength = word.length();
-        for (int i = 1; i <= maxPrefixLength && wordLength - i >= minReminder; i++) {
-            parseds.addAll(parseWithPrefix(word, word.substring(0, i - 1)));
+        int wordLen = word.length();
+        for (int i = 1; i <= maxPrefixLength && wordLen - i >= minReminder; i++) {
+            parseds.addAll(parseWithPrefix(word, wordLower, wordLower.substring(0, i)));
         }
         return parseds;
     }

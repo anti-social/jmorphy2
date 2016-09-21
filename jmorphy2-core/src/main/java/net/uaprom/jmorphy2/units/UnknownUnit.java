@@ -28,7 +28,7 @@ public class UnknownUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word) {
+    public List<ParsedWord> parse(String word, String wordLower) {
         List<ParsedWord> parseds = new ArrayList<>();
         parseds.add(new AnalyzerParsedWord(word, tagStorage.getTag("UNKN"), word, word, score));
         return parseds;
