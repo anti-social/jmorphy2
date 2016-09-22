@@ -56,43 +56,48 @@ public class DictionaryUnit extends AnalyzerUnit {
     @Override
     public List<ParsedWord> parse(String word, String wordLower) throws IOException {
         List<ParsedWord> parseds = new ArrayList<>();
-        for (Dictionary.Parsed dictParsed : dict.parse(wordLower, charSubstitutes)) {
-            parseds.add(new DictionaryParsedWord(wordLower, dictParsed.tag, dictParsed.normalForm, wordLower, score, dictParsed));
+        for (WordsDAWG.WordForm wf : dict.getWords().similarWords(wordLower, charSubstitutes)) {
+            String normalForm = dict.buildNormalForm(wf.paradigmId, wf.idx, wf.word);
+            Tag tag = dict.buildTag(wf.paradigmId, wf.idx);
+            parseds.add(new DictionaryParsedWord(wordLower, tag, normalForm, wf.word, wf, score));
         }
         return parseds;
     }
 
     class DictionaryParsedWord extends AnalyzerParsedWord {
-        public final Dictionary.Parsed dictParsed;
+        private final WordsDAWG.WordForm wordForm;
 
         public DictionaryParsedWord(String word,
                                     Tag tag,
                                     String normalForm,
                                     String foundWord,
-                                    float score,
-                                    Dictionary.Parsed dictParsed) {
+                                    WordsDAWG.WordForm wordForm,
+                                    float score) {
             super(word, tag, normalForm, foundWord, score);
-            this.dictParsed = dictParsed;
+            this.wordForm = wordForm;
         }
 
         @Override
         public ParsedWord rescore(float newScore) {
-            return new DictionaryParsedWord(word, tag, normalForm, foundWord, newScore, dictParsed);
+            return new DictionaryParsedWord(word, tag, normalForm, foundWord, wordForm, newScore);
         }
 
         @Override
         public List<ParsedWord> getLexeme() {
             List<ParsedWord> lexeme = new ArrayList<>();
-            for (Dictionary.Parsed p : dictParsed.iterLexeme()) {
-                lexeme.add(new DictionaryParsedWord(p.word, p.tag, p.normalForm, p.word, score, p));
+            Dictionary.Paradigm paradigm = dict.getParadigm(wordForm.paradigmId);
+            int paradigmSize = paradigm.size();
+            String stem = dict.buildStem(wordForm.paradigmId, wordForm.idx, wordForm.word);
+            String normalForm = dict.buildNormalForm(wordForm.paradigmId, wordForm.idx, wordForm.word);
+            for (short idx = 0; idx < paradigmSize; idx++) {
+                String prefix = dict.getParadigmPrefixes()[paradigm.getStemPrefixId(idx)];
+                String suffix = dict.getSuffix(wordForm.paradigmId, idx);
+                String word = prefix + stem + suffix;
+                Tag tag = dict.buildTag(wordForm.paradigmId, idx);
+                WordsDAWG.WordForm wf = new WordsDAWG.WordForm(word, wordForm.paradigmId, idx);
+                lexeme.add(new DictionaryParsedWord(word, tag, normalForm, wf.word, wf, score));
             }
             return lexeme;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return super.equals(obj)
-                && dictParsed.equals(((DictionaryParsedWord) obj).dictParsed);
         }
     }
 }

@@ -16,6 +16,7 @@ import java.text.Normalizer;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import net.uaprom.jmorphy2.units.*;
 
@@ -107,6 +108,8 @@ public class MorphAnalyzer {
                     unitBuilders.add(new KnownPrefixUnit.Builder(dictUnitBuilder, knownPrefixes, true, 0.75f));
                 }
                 unitBuilders.add(new UnknownPrefixUnit.Builder(dictUnitBuilder, true, 0.5f));
+                unitBuilders.add(new KnownSuffixUnit.Builder(dictBuilder, true, 0.5f)
+                                 .charSubstitutes(charSubstitutes));
                 unitBuilders.add(new UnknownUnit.Builder(true, 1.0f));
             }
             List<AnalyzerUnit> units = new ArrayList<>();
@@ -257,12 +260,13 @@ public class MorphAnalyzer {
     }
 
     private List<ParsedWord> filterDups(List<ParsedWord> parseds) {
-        Set<Tag> seenTags = new HashSet<Tag>();
+        Set<ParsedWord.Unique> seenParseds = new HashSet<>();
         List<ParsedWord> filteredParseds = new ArrayList<ParsedWord>();
         for (ParsedWord p : parseds) {
-            if (!seenTags.contains(p.tag)) {
+            ParsedWord.Unique u = p.toUnique();
+            if (!seenParseds.contains(u)) {
                 filteredParseds.add(p);
-                seenTags.add(p.tag);
+                seenParseds.add(u);
             }
         }
         return filteredParseds;
