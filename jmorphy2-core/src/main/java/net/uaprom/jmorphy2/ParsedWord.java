@@ -69,4 +69,37 @@ public abstract class ParsedWord implements Comparable {
         if (score < other.score) return -1;
         return 0;
     }
+
+    public Unique toUnique() {
+        return new Unique(tag, normalForm);
+    }
+
+    public static class Unique {
+        public final Tag tag;
+        public final String normalForm;
+
+        public Unique(Tag tag, String normalForm) {
+            this.tag = tag;
+            this.normalForm = normalForm;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+
+            Unique other = (Unique) obj;
+            return tag.equals(other.tag)
+                && normalForm.equals(other.normalForm);
+        }
+
+        @Override
+        public int hashCode() {
+            int h = 17;
+            h = h * 37 + tag.hashCode();
+            h = h * 37 + normalForm.hashCode();
+            return h;
+        }
+    }
 }

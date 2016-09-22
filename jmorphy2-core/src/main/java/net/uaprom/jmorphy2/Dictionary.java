@@ -17,112 +17,115 @@ import org.apache.commons.io.input.SwappedDataInputStream;
 import net.uaprom.dawg.PayloadsDAWG;
 
 
-public class Dictionary {
+public final class Dictionary {
     private final Tag.Storage tagStorage;
-    private Meta meta;
-    private WordsDAWG words;
-    public PredictionSuffixesDAWG predictionSuffixes;
-    private Paradigm[] paradigms;
-    private String[] paradigmPrefixes;
-    private String[] suffixes;
-    private Tag[] gramtab;
-
-    public static final String META_FILENAME = "meta.json";
-    public static final String WORDS_FILENAME = "words.dawg";
-    public static final String GRAMMEMES_FILENAME = "grammemes.json";
-    public static final String PARADIGMS_FILENAME = "paradigms.array";
-    public static final String SUFFIXES_FILENAME = "suffixes.json";
-    public static final String PREDICTION_SUFFIXES_FILENAME = "prediction-suffixes-0.dawg";
-    public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
-
-    private Dictionary(Tag.Storage tagStorage, FileLoader loader) throws IOException {
-        this(tagStorage,
-             loader.getStream(META_FILENAME),
-             loader.getStream(WORDS_FILENAME),
-             loader.getStream(PREDICTION_SUFFIXES_FILENAME),
-             loader.getStream(GRAMMEMES_FILENAME),
-             loader.getStream(PARADIGMS_FILENAME),
-             loader.getStream(SUFFIXES_FILENAME),
-             loader.getStream(GRAMTAB_OPENCORPORA_FILENAME));
-    }
+    private final Meta meta;
+    private final String[] paradigmPrefixes;
+    private final WordsDAWG words;
+    private final PredictionSuffixesDAWG[] predictionSuffixes;
+    private final Paradigm[] paradigms;
+    private final String[] suffixes;
+    private final Tag[] gramtab;
 
     private Dictionary(Tag.Storage tagStorage,
-                       InputStream metaStream,
-                       InputStream wordsStream,
-                       InputStream predictionSuffixesStream,
-                       InputStream grammemesStream,
-                       InputStream paradigmsStream,
-                       InputStream suffixesStream,
-                       InputStream gramtabStream) throws IOException {
+                       Meta meta,
+                       WordsDAWG words,
+                       PredictionSuffixesDAWG[] predictionSuffixes,
+                       Paradigm[] paradigms,
+                       String[] suffixes,
+                       Tag[] gramtab) {
         this.tagStorage = tagStorage;
-        loadMeta(metaStream);
-        words = new WordsDAWG(wordsStream);
-        loadPredictionSuffixes(predictionSuffixesStream);
-        loadGrammemes(grammemesStream);
-        loadParadigms(paradigmsStream);
-        loadSuffixes(suffixesStream);
-        loadGramtab(gramtabStream);
+        this.meta = meta;
+        this.paradigmPrefixes = meta.compileOptions.paradigmPrefixes;
+        this.words = words;
+        this.predictionSuffixes = predictionSuffixes;
+        this.paradigms = paradigms;
+        this.suffixes = suffixes;
+        this.gramtab = gramtab;
     }
 
     public static class Builder {
         private FileLoader loader;
         private Dictionary cachedDict;
 
+        public static final String META_FILENAME = "meta.json";
+        public static final String WORDS_FILENAME = "words.dawg";
+        public static final String PARADIGMS_FILENAME = "paradigms.array";
+        public static final String SUFFIXES_FILENAME = "suffixes.json";
+        public static final String PREDICTION_SUFFIXES_FILENAME_TEMPLATE = "prediction-suffixes-%s.dawg";
+        public static final String GRAMMEMES_FILENAME = "grammemes.json";
+        public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
+
         public Builder(FileLoader loader) {
             this.loader = loader;
         }
 
+        @SuppressWarnings("unchecked")
+        private Meta parseMeta(InputStream stream) throws IOException {
+            Map<String,Object> rawMeta = new HashMap<>();
+            List<List<Object>> parsed = (List<List<Object>>) JSONUtils.parseJSON(stream);
+            for (List<Object> pair : parsed) {
+                rawMeta.put((String) pair.get(0), pair.get(1));
+            }
+            return new Meta(rawMeta);
+        }
+
+        private PredictionSuffixesDAWG[] parsePredictionSuffixes(FileLoader loader, String filenameTemplate, int num) throws IOException {
+            PredictionSuffixesDAWG[] predictionSuffixes = new PredictionSuffixesDAWG[num];
+            for (int i = 0; i < num; i++) {
+                predictionSuffixes[i] = new PredictionSuffixesDAWG(loader.getStream(String.format(filenameTemplate, i)));
+            }
+            return predictionSuffixes;
+        }
+
+        private Paradigm[] parseParadigms(InputStream stream) throws IOException {
+            DataInput paradigmsStream = new SwappedDataInputStream(stream);
+            short paradigmCount = paradigmsStream.readShort();
+            Paradigm[] paradigms = new Paradigm[paradigmCount];
+            for (int paraId = 0; paraId < paradigmCount; paraId++) {
+                paradigms[paraId] = new Paradigm(paradigmsStream);
+            }
+            return paradigms;
+        }
+
+        @SuppressWarnings("unchecked")
+        private String[] parseSuffixes(InputStream stream) throws IOException {
+            return ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void loadGrammemes(Tag.Storage tagStorage, InputStream stream) throws IOException {
+            for (List<String> grammemeInfo : (List<List<String>>) JSONUtils.parseJSON(stream)) {
+                tagStorage.newGrammeme(grammemeInfo);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private Tag[] parseGramtab(Tag.Storage tagStorage, InputStream stream) throws IOException {
+            List<String> tagStrings = (List<String>) JSONUtils.parseJSON(stream);
+            int tagsLength = tagStrings.size();
+            Tag[] gramtab = new Tag[tagsLength];
+            for (int i = 0; i < tagsLength; i++) {
+                gramtab[i] = tagStorage.newTag(tagStrings.get(i));
+            }
+            return gramtab;
+        }
+
         public Dictionary build(Tag.Storage tagStorage) throws IOException {
             if (cachedDict == null) {
-                cachedDict = new Dictionary(tagStorage, loader);
+                Meta meta = parseMeta(loader.getStream(META_FILENAME));
+                loadGrammemes(tagStorage, loader.getStream(GRAMMEMES_FILENAME));
+                cachedDict = new Dictionary(tagStorage,
+                                            meta,
+                                            new WordsDAWG(loader.getStream(WORDS_FILENAME)),
+                                            parsePredictionSuffixes(loader,
+                                                                    PREDICTION_SUFFIXES_FILENAME_TEMPLATE,
+                                                                    meta.compileOptions.paradigmPrefixes.length),
+                                            parseParadigms(loader.getStream(PARADIGMS_FILENAME)),
+                                            parseSuffixes(loader.getStream(SUFFIXES_FILENAME)),
+                                            parseGramtab(tagStorage, loader.getStream(GRAMTAB_OPENCORPORA_FILENAME)));
             }
             return cachedDict;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadMeta(InputStream stream) throws IOException {
-        Map<String,Object> rawMeta = new HashMap<>();
-        List<List<Object>> parsed = (List<List<Object>>) JSONUtils.parseJSON(stream);
-        for (List<Object> pair : parsed) {
-            rawMeta.put((String) pair.get(0), pair.get(1));
-        }
-        meta = new Meta(rawMeta);
-        paradigmPrefixes = meta.compileOptions.paradigmPrefixes;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadGrammemes(InputStream stream) throws IOException {
-        for (List<String> grammemeInfo : (List<List<String>>) JSONUtils.parseJSON(stream)) {
-            tagStorage.newGrammeme(grammemeInfo);
-        }
-    }
-
-    private void loadParadigms(InputStream stream) throws IOException {
-        DataInput paradigmsStream = new SwappedDataInputStream(stream);
-        short paradigmCount = paradigmsStream.readShort();
-        paradigms = new Paradigm[paradigmCount];
-        for (int paraId = 0; paraId < paradigmCount; paraId++) {
-            paradigms[paraId] = new Paradigm(paradigmsStream);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadSuffixes(InputStream stream) throws IOException {
-        suffixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
-    }
-
-    private void loadPredictionSuffixes(InputStream stream) throws IOException {
-        predictionSuffixes = new PredictionSuffixesDAWG(stream);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadGramtab(InputStream stream) throws IOException {
-        List<String> tagStrings = (List<String>) JSONUtils.parseJSON(stream);
-        int tagsLength = tagStrings.size();
-        gramtab = new Tag[tagsLength];
-        for (int i = 0; i < tagsLength; i++) {
-            gramtab[i] = tagStorage.newTag(tagStrings.get(i));
         }
     }
 
@@ -130,36 +133,16 @@ public class Dictionary {
         return meta;
     }
 
-    // public List<Parsed> parse(char[] word, int offset, int count) throws IOException {
-    //     return parse(new String(word, offset, count));
-    // }
+    public WordsDAWG getWords() {
+        return words;
+    }
 
-    // public List<Parsed> parse(String word) throws IOException {
-    //     List<Parsed> parseds = new ArrayList<Parsed>();
+    public PredictionSuffixesDAWG getPredictionSuffixes(int n) {
+        return predictionSuffixes[n];
+    }
 
-    //     for (WordsDAWG.WordForm wordForm : words.similarWords(word, replaceChars)) {
-    //         Paradigm paradigm = paradigms[wordForm.paradigmId];
-    //         String normalForm = buildNormalForm(paradigm, wordForm.idx, wordForm.word);
-    //         Tag tag = buildTag(paradigm, wordForm.idx);
-    //         parseds.add(new Parsed(word, tag, normalForm, wordForm));
-    //     }
-        
-    //     return parseds;
-    // }
-
-    // TODO: benchmark iterators
-    public List<Parsed> parse(String word, Map<Character, String> replaceChars)
-        throws IOException
-    {
-        List<Parsed> parseds = new ArrayList<>();
-
-        for (WordsDAWG.WordForm wordForm : words.similarWords(word, replaceChars)) {
-            String normalForm = buildNormalForm(wordForm.paradigmId, wordForm.idx, wordForm.word);
-            Tag tag = buildTag(wordForm.paradigmId, wordForm.idx);
-            parseds.add(new Parsed(word, tag, normalForm, wordForm));
-        }
-        
-        return parseds;
+    public String[] getParadigmPrefixes() {
+        return paradigmPrefixes;
     }
 
     public Paradigm getParadigm(short paradigmId) {
@@ -267,43 +250,14 @@ public class Dictionary {
         }
     }
 
-    public class Parsed {
-        public final String word;
-        public final Tag tag;
-        public final String normalForm;
-        public final WordsDAWG.WordForm wordForm;
-
-        public Parsed(String word, Tag tag, String normalForm, WordsDAWG.WordForm wordForm) {
-            this.word = word;
-            this.tag = tag;
-            this.normalForm = normalForm;
-            this.wordForm = wordForm;
-        }
-
-        public List<Parsed> iterLexeme() {
-            List<Parsed> lexeme = new ArrayList<>();
-            Paradigm paradigm = Dictionary.this.getParadigm(wordForm.paradigmId);
-            int paradigmSize = paradigm.size();
-            String stem = Dictionary.this.buildStem(wordForm.paradigmId, wordForm.idx, wordForm.word);
-            String normalForm = Dictionary.this.buildNormalForm(wordForm.paradigmId, wordForm.idx, wordForm.word);
-            for (short idx = 0; idx < paradigmSize; idx++) {
-                String prefix = paradigmPrefixes[paradigm.getStemPrefixId(idx)];
-                String suffix = Dictionary.this.getSuffix(wordForm.paradigmId, idx);
-                String word = prefix + stem + suffix;
-                Tag tag = Dictionary.this.buildTag(wordForm.paradigmId, idx);
-                WordsDAWG.WordForm wf = new WordsDAWG.WordForm(word, wordForm.paradigmId, idx);
-                lexeme.add(new Parsed(word, tag, normalForm, wf));
-            }
-            return lexeme;
-        }
-    };
-
     static public class Paradigm {
         private final short[] data;
         private final int length;
 
         public Paradigm(DataInput input) throws IOException {
             short size = input.readShort();
+            assert size % 3 == 0 : size;
+
             this.data = new short[size];
             for (int i = 0; i < size; i++) {
                 this.data[i] = input.readShort();

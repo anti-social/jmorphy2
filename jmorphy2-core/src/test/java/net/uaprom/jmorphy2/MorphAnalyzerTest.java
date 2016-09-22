@@ -82,6 +82,18 @@ public class MorphAnalyzerTest {
         // known suffix
         assertParseds("няшка:NOUN,inan,femn sing,nomn:няшка:няшка:1.0\n",
                       morph.parse("няшка"));
+        assertParseds("шуруповерт:NOUN,anim,masc sing,nomn:шуруповерт:оверт:1.0\n",
+                      morph.parse("шуруповерт"));
+        assertParseds("шуруповертами:NOUN,inan,masc plur,ablt:шуруповерт:ртами:1.0\n",
+                      morph.parse("шуруповертами"));
+        
+        // known suffix: with paradigm prefix
+        assertParseds("наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:няшный:ейший:0.25\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:няшный:ейший:0.25\n" +
+                      "наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:наиняшный:ейший:0.248387\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:наиняшный:ейший:0.248387\n" +
+                      "наиняшнейший:NOUN,anim,masc sing,nomn:наиняшнейший:ейший:0.003226\n",
+                      morph.parse("наиняшнейший"));
 
         // gen2, loct, loc2
         assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", morph.parse("снеге"));
