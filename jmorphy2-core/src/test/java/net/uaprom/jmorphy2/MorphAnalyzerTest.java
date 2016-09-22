@@ -79,6 +79,10 @@ public class MorphAnalyzerTest {
                       "снега:NOUN,inan,masc plur,accs:снег:снега:0.090909\n",
                       morph.parse("снега"));
 
+        // known suffix
+        assertParseds("няшка:NOUN,inan,femn sing,nomn:няшка:няшка:1.0\n",
+                      morph.parse("няшка"));
+
         // gen2, loct, loc2
         assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", morph.parse("снеге"));
         assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:снегу:0.5\n" +

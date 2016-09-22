@@ -21,6 +21,7 @@ public class Dictionary {
     private final Tag.Storage tagStorage;
     private Meta meta;
     private WordsDAWG words;
+    public PredictionSuffixesDAWG predictionSuffixes;
     private Paradigm[] paradigms;
     private String[] paradigmPrefixes;
     private String[] suffixes;
@@ -31,12 +32,14 @@ public class Dictionary {
     public static final String GRAMMEMES_FILENAME = "grammemes.json";
     public static final String PARADIGMS_FILENAME = "paradigms.array";
     public static final String SUFFIXES_FILENAME = "suffixes.json";
+    public static final String PREDICTION_SUFFIXES_FILENAME = "prediction-suffixes-0.dawg";
     public static final String GRAMTAB_OPENCORPORA_FILENAME = "gramtab-opencorpora-int.json";
 
     private Dictionary(Tag.Storage tagStorage, FileLoader loader) throws IOException {
         this(tagStorage,
              loader.getStream(META_FILENAME),
              loader.getStream(WORDS_FILENAME),
+             loader.getStream(PREDICTION_SUFFIXES_FILENAME),
              loader.getStream(GRAMMEMES_FILENAME),
              loader.getStream(PARADIGMS_FILENAME),
              loader.getStream(SUFFIXES_FILENAME),
@@ -46,6 +49,7 @@ public class Dictionary {
     private Dictionary(Tag.Storage tagStorage,
                        InputStream metaStream,
                        InputStream wordsStream,
+                       InputStream predictionSuffixesStream,
                        InputStream grammemesStream,
                        InputStream paradigmsStream,
                        InputStream suffixesStream,
@@ -53,6 +57,7 @@ public class Dictionary {
         this.tagStorage = tagStorage;
         loadMeta(metaStream);
         words = new WordsDAWG(wordsStream);
+        loadPredictionSuffixes(predictionSuffixesStream);
         loadGrammemes(grammemesStream);
         loadParadigms(paradigmsStream);
         loadSuffixes(suffixesStream);
@@ -105,6 +110,10 @@ public class Dictionary {
     @SuppressWarnings("unchecked")
     private void loadSuffixes(InputStream stream) throws IOException {
         suffixes = ((List<String>) JSONUtils.parseJSON(stream)).toArray(new String[0]);
+    }
+
+    private void loadPredictionSuffixes(InputStream stream) throws IOException {
+        predictionSuffixes = new PredictionSuffixesDAWG(stream);
     }
 
     @SuppressWarnings("unchecked")

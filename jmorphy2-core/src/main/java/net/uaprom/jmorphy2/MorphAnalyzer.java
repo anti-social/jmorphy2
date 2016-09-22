@@ -107,6 +107,8 @@ public class MorphAnalyzer {
                     unitBuilders.add(new KnownPrefixUnit.Builder(dictUnitBuilder, knownPrefixes, true, 0.75f));
                 }
                 unitBuilders.add(new UnknownPrefixUnit.Builder(dictUnitBuilder, true, 0.5f));
+                unitBuilders.add(new KnownSuffixUnit.Builder(dictBuilder, true, 0.5f)
+                                 .charSubstitutes(charSubstitutes));
                 unitBuilders.add(new UnknownUnit.Builder(true, 1.0f));
             }
             List<AnalyzerUnit> units = new ArrayList<>();
