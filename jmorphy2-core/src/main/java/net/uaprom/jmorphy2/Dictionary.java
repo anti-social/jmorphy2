@@ -258,32 +258,57 @@ public final class Dictionary {
             short size = input.readShort();
             assert size % 3 == 0 : size;
 
+            this.length = size / 3;
             this.data = new short[size];
             for (int i = 0; i < size; i++) {
-                this.data[i] = input.readShort();
+                int formId = i % this.length;
+                this.data[formId * 3 + i / this.length] = input.readShort();
             }
-            this.length = size / 3;
         }
 
         public int getNormSuffixId() {
             return data[0];
         }
 
+        public int getNormTagId() {
+            return data[1];
+        }
+
         public int getNormPrefixId() {
-            return data[length * 2];
+            return data[2];
         }
 
         public int getStemSuffixId(short idx) {
-            return data[idx];
-        }
-
-        public int getStemPrefixId(short idx) {
-            return data[length * 2 + idx];
+            return data[idx * 3];
         }
 
         public int getTagId(short idx) {
-            return data[length + idx];
+            return data[idx * 3 + 1];
         }
+
+        public int getStemPrefixId(short idx) {
+            return data[idx * 3 + 2];
+        }
+
+        // public int getNormSuffixId() {
+        //     return data[0];
+        // }
+
+        // public int getNormPrefixId() {
+        //     return data[length * 2];
+        // }
+
+        // public int getStemSuffixId(short idx) {
+        //     return data[idx];
+        // }
+
+        // public int getStemPrefixId(short idx) {
+        //     return data[length * 2 + idx];
+        // }
+
+        // public int getTagId(short idx) {
+        //     return data[length + idx];
+        // }
 
         public int size() {
             return length;
