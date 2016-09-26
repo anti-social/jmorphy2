@@ -68,6 +68,15 @@ commands:
     description: Run arbitrary gradle command
     run: [gradle]
 
+  daemon: !Command
+    <<: *cmd_opts
+    description: Run gradle daemon
+    run: |
+      # --foreground option runs daemon with different jvm options
+      # so then another gradle process rejects to connect to the daemon
+      gradle --dry-run --daemon build
+      tail -f /work/.gradle/daemon/3.1/daemon-*.out.log
+
   compile: !Command
     <<: *cmd_opts
     description: Compile all source files
