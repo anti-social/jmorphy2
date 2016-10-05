@@ -2,10 +2,10 @@ install:
 - choco install gradle
 
 build_script:
-- gradle assemble
+- gradle assemble --no-daemon
 
 test_script:
-- gradle check
+- gradle check --no-daemon
 
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml
