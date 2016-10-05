@@ -1,0 +1,8 @@
+install:
+- choco install gradle
+
+build_script:
+- gradle assemble
+
+test_script:
+- gradle check
