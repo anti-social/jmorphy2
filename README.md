@@ -27,7 +27,7 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 2.3.5
+Default elasticsearch version against which plugin is built is 2.4.1
 
 To build for specific elastisearch version run build as:
 
@@ -41,7 +41,7 @@ Or:
 vagga build -PesVersion=2.2.1
 ```
 
-Supported elasticsearch versions: 2.1, 2.2, 2.3
+Supported elasticsearch versions: 2.1, 2.2, 2.3, 2.4
 
 Install plugin:
 
