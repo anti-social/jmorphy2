@@ -66,7 +66,8 @@ public class UnknownPrefixUnit extends PrefixedUnit {
         List<ParsedWord> parseds = new ArrayList<ParsedWord>();
         int wordLen = word.length();
         for (int i = 1; i <= maxPrefixLength && wordLen - i >= minReminder; i++) {
-            parseds.addAll(parseWithPrefix(word, wordLower, wordLower.substring(0, i)));
+            String prefix = wordLower.substring(0, i);
+            parseds.addAll(parseWithPrefix(word, wordLower, prefix));
         }
         return parseds;
     }

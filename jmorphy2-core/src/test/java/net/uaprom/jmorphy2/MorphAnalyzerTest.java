@@ -79,6 +79,22 @@ public class MorphAnalyzerTest {
                       "снега:NOUN,inan,masc plur,accs:снег:снега:0.090909\n",
                       morph.parse("снега"));
 
+        // known suffix
+        assertParseds("няшка:NOUN,inan,femn sing,nomn:няшка:няшка:1.0\n",
+                      morph.parse("няшка"));
+        assertParseds("шуруповерт:NOUN,anim,masc sing,nomn:шуруповерт:оверт:1.0\n",
+                      morph.parse("шуруповерт"));
+        assertParseds("шуруповертами:NOUN,inan,masc plur,ablt:шуруповерт:ртами:1.0\n",
+                      morph.parse("шуруповертами"));
+        
+        // known suffix: with paradigm prefix
+        assertParseds("наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:няшный:ейший:0.25\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:няшный:ейший:0.25\n" +
+                      "наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:наиняшный:ейший:0.248387\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:наиняшный:ейший:0.248387\n" +
+                      "наиняшнейший:NOUN,anim,masc sing,nomn:наиняшнейший:ейший:0.003226\n",
+                      morph.parse("наиняшнейший"));
+
         // gen2, loct, loc2
         assertParseds("снеге:NOUN,inan,masc sing,loct:снег:снеге:1.0", morph.parse("снеге"));
         assertParseds("снегу:NOUN,inan,masc sing,loc2:снег:снегу:0.5\n" +
@@ -174,6 +190,15 @@ public class MorphAnalyzerTest {
         lexeme = parseds.get(0).getLexeme();
         assertParseds("лошарик:NOUN,inan,masc sing,nomn:лошарик:шарик:1.0\n" +
                       "лошарика:NOUN,inan,masc sing,gent:лошарик:шарика:1.0",
+                      lexeme,
+                      false);
+        assertEquals(12, lexeme.size());
+
+        // known suffix
+        parseds = morph.parse("шуруповертами");
+        lexeme = parseds.get(0).getLexeme();
+        assertParseds("шуруповерт:NOUN,inan,masc sing,nomn:шуруповерт:ртами:1.0\n" +
+                      "шуруповерта:NOUN,inan,masc sing,gent:шуруповерт:ртами:1.0\n",
                       lexeme,
                       false);
         assertEquals(12, lexeme.size());
