@@ -22,7 +22,12 @@ public class Grammeme {
              storage);
     }
 
-    public Grammeme(String value, String parentValue, String russianValue, String description, Tag.Storage storage) {
+    public Grammeme(String value,
+                    String parentValue,
+                    String russianValue,
+                    String description,
+                    Tag.Storage storage)
+    {
         this.key = value.toLowerCase();
         this.value = value;
         this.parentValue = stringOrNull(parentValue);
@@ -60,7 +65,7 @@ public class Grammeme {
         if (obj instanceof String) {
             return value.equals((String) obj);
         }
-        
+
         if (getClass() != obj.getClass()) {
             return false;
         }

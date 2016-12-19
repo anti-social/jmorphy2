@@ -25,7 +25,9 @@ public class SuffixesDAWG extends PayloadsDAWG {
         return new SuffixForm(payload.key, count, paradigmId, idx);
     }
 
-    public List<SuffixForm> similarSuffixes(String word, Map<Character,String> replaceChars) throws IOException {
+    public List<SuffixForm> similarSuffixes(String word, Map<Character,String> replaceChars)
+        throws IOException
+    {
         List<SuffixForm> foundSuffixes = new ArrayList<>();
         for (Payload payload : similarItems(word, replaceChars)) {
             foundSuffixes.add(decodePayload(payload));

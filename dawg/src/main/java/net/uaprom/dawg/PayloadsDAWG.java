@@ -42,15 +42,22 @@ public class PayloadsDAWG extends DAWG {
         return similarItems(key, null);
     }
 
-    public List<Payload> similarItems(String key, Map<Character,String> replaceChars) throws IOException {
+    public List<Payload> similarItems(String key, Map<Character,String> replaceChars)
+        throws IOException
+    {
         return similarItems(key, replaceChars, "", Dict.ROOT);
     }
 
-    private List<Payload> similarItems(String key, Map<Character,String> replaceChars, String prefix, int index) throws IOException {
+    private List<Payload> similarItems(String key,
+                                       Map<Character,String> replaceChars,
+                                       String prefix,
+                                       int index)
+        throws IOException
+    {
         List<Payload> items = new ArrayList<Payload>();
         int keyLength = key.length();
         int prefixLength = prefix.length();
-        
+
         for (int i = prefixLength; i < keyLength; i++) {
             char c = key.charAt(i);
 
@@ -74,7 +81,7 @@ public class PayloadsDAWG extends DAWG {
                 return items;
             }
         }
-        
+
         if (index == Dict.MISSING) {
             return items;
         }
@@ -89,7 +96,7 @@ public class PayloadsDAWG extends DAWG {
 
     private class Guide {
         private byte[] units;
-    
+
         public Guide(DataInput input) throws IOException {
             int baseSize = input.readInt();
 
@@ -183,7 +190,7 @@ public class PayloadsDAWG extends DAWG {
             System.arraycopy(key, 0, newKey, 0, keyLength);
             return newKey;
         }
-    
+
         private int follow(byte label, int index) {
             int nextIndex = dict.followByte(label, index);
             if (nextIndex == Dict.MISSING) {
@@ -218,7 +225,7 @@ public class PayloadsDAWG extends DAWG {
                 System.arraycopy(key, 0, newKey, 0, key.length);
                 key = newKey;
             }
-        
+
             key[keyLength] = label;
             keyLength++;
         }
@@ -227,18 +234,10 @@ public class PayloadsDAWG extends DAWG {
     public static class Payload {
         public final String key;
         public final byte[] value;
-        
+
         public Payload(String key, byte[] value) {
             this.key = key;
             this.value = value;
         }
     };
-
-    // private class Units {
-    //     private int size;
-    //     private int[] units;
-
-    //     public Units(DataInput input) {
-    //     }
-    // }
 }

@@ -17,7 +17,7 @@ public abstract class AnalyzerUnit {
         protected final boolean terminate;
         protected final float score;
         protected AnalyzerUnit cachedUnit;
-        
+
         protected Builder(boolean terminate, float score) {
             this.terminate = terminate;
             this.score = score;

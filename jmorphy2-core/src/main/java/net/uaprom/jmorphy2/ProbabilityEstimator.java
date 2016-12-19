@@ -16,7 +16,7 @@ public class ProbabilityEstimator {
     public ProbabilityEstimator(FileLoader loader) throws IOException {
         this(loader.getStream(PROBABILITY_FILENAME));
     }
-    
+
     public ProbabilityEstimator(InputStream stream) throws IOException {
         dict = new IntegerDAWG(stream);
     }

@@ -52,25 +52,10 @@ public class MorphAnalyzer {
             return this;
         }
 
-        // public Builder lang(Lang lang) {
-        //     this.lang = lang;
-        //     return this;
-        // }
-
         public Builder charSubstitutes(Map<Character,String> charSubstitutes) {
             this.charSubstitutes = charSubstitutes;
             return this;
         }
-
-        // public Builder units(List<AnalyzerUnit.Builder> unitBuilders) {
-        //     this.unitBuilders = unitBuilders;
-        //     return this;
-        // }
-
-        // public Builder probabilityEstimator(ProbabilityEstimator prob) {
-        //     this.prob = prob;
-        //     return this;
-        // }
 
         public Builder cacheSize(int size) {
             this.cacheSize = size;
@@ -255,7 +240,7 @@ public class MorphAnalyzer {
             estimatedParseds.add(parsed.rescore(newScores[i]));
             i++;
         }
-        
+
         return estimatedParseds;
     }
 

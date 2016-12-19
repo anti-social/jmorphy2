@@ -49,5 +49,4 @@ public class NumberUnit extends AnalyzerUnit {
         }
         return null;
     }
-};
-
+}

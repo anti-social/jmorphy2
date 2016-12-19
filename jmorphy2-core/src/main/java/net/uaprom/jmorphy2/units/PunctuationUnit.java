@@ -7,7 +7,7 @@ import net.uaprom.jmorphy2.Tag;
 
 public class PunctuationUnit extends RegexUnit {
     private static final String PUNCTUATION_REGEX = "\\p{Punct}+";
-    
+
     private PunctuationUnit(Tag.Storage tagStorage, boolean terminate, float score) {
         super(tagStorage, PUNCTUATION_REGEX, "PNCT", terminate, score);
     }

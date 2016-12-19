@@ -23,7 +23,7 @@ class Dict {
         if (index == MISSING) {
             return false;
         }
-        
+
         return hasValue(index);
     }
 
@@ -52,7 +52,7 @@ class Dict {
 
         return index;
     }
-    
+
     public int followByte(byte c, int index) {
         int o = Units.offset(units[index]);
         int nextIndex = (index ^ o ^ (c & 0xFF)) & Units.PRECISION_MASK;
@@ -81,7 +81,7 @@ class Dict {
         public static final int EXTENSION_BIT = 1 << 9;
         public static final int OFFSET_MAX = 1 << 21;
         public static final int IS_LEAF_BIT = 1 << 31;
-        
+
         public static int value(int base) {
             return base & ~IS_LEAF_BIT & PRECISION_MASK;
         }

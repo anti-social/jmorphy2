@@ -21,7 +21,7 @@ public class JSONUtils {
         Deque<Object> stack = new LinkedList<Object>();
         Object obj = null, prevObj = null, container = null;
         int event;
-        
+
         while ((event = parser.nextEvent()) != JSONParser.EOF) {
             switch (event) {
             case JSONParser.ARRAY_START:

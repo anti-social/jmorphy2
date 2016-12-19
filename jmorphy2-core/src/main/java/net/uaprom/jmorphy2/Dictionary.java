@@ -70,7 +70,11 @@ public final class Dictionary {
             return new Meta(rawMeta);
         }
 
-        private SuffixesDAWG[] parsePredictionSuffixes(FileLoader loader, String filenameTemplate, int num) throws IOException {
+        private SuffixesDAWG[] parsePredictionSuffixes(FileLoader loader,
+                                                       String filenameTemplate,
+                                                       int num)
+            throws IOException
+        {
             SuffixesDAWG[] predictionSuffixes = new SuffixesDAWG[num];
             for (int i = 0; i < num; i++) {
                 predictionSuffixes[i] = new SuffixesDAWG(loader.getStream(String.format(filenameTemplate, i)));
@@ -148,11 +152,11 @@ public final class Dictionary {
     public Paradigm getParadigm(short paradigmId) {
         return paradigms[paradigmId];
     }
-    
+
     public String getSuffix(short paradigmId, short idx) {
         return suffixes[paradigms[paradigmId].getStemSuffixId(idx)];
     }
-    
+
     public Tag buildTag(short paradigmId, short idx) {
         Paradigm paradigm = paradigms[paradigmId];
         return gramtab[paradigm.getTagId(idx)];
@@ -163,7 +167,7 @@ public final class Dictionary {
         String stem = buildStem(paradigmId, idx, word);
         String prefix = paradigmPrefixes[paradigm.getNormPrefixId()];
         String suffix = suffixes[paradigm.getNormSuffixId()];
-        
+
         return prefix + stem + suffix;
     }
 
@@ -218,7 +222,7 @@ public final class Dictionary {
                 minParadigmPopularity = (long) options.get("min_paradigm_popularity");
             }
         }
-        
+
         @SuppressWarnings("unchecked")
         public Meta(Map<String,Object> meta) {
             formatVersion = (String) meta.get("format_version");

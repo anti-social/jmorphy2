@@ -24,7 +24,9 @@ public class WordsDAWG extends PayloadsDAWG {
         return new WordForm(payload.key, paradigmId, idx);
     }
 
-    public List<WordForm> similarWords(String word, Map<Character,String> replaceChars) throws IOException {
+    public List<WordForm> similarWords(String word, Map<Character,String> replaceChars)
+        throws IOException
+    {
         List<WordForm> foundWords = new ArrayList<>();
         for (Payload payload : similarItems(word, replaceChars)) {
             foundWords.add(decodePayload(payload));
