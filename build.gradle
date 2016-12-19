@@ -5,7 +5,7 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
-    version = '0.2-dev'
+    version = '0.2.0-SNAPSHOT'
 
     sourceCompatibility = '1.7'
 
