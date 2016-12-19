@@ -6,3 +6,11 @@ dependencies {
     testCompile 'junit:junit:4.11'
     testCompile project(':jmorphy2-core').sourceSets.test.output
 }
+
+task benchmark(type: Test) {
+    include '**/*Benchmark*'
+    outputs.upToDateWhen { false }
+    testLogging {
+        showStandardStreams = true
+    }
+}

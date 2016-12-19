@@ -1,27 +1,30 @@
 package company.evo.jmorphy2.elasticsearch.index;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.IOException;
-
-import org.junit.Test;
+import java.nio.file.Path;
 
 import static org.hamcrest.Matchers.instanceOf;
 
 import org.apache.lucene.analysis.Analyzer;
 import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
-import org.elasticsearch.index.analysis.AnalysisService;
-import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.index.Index;
+import org.elasticsearch.index.analysis.TokenFilterFactory;
+import org.elasticsearch.test.ESTestCase;
+
+import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
+import static company.evo.jmorphy2.elasticsearch.index.Utils.copyFilesFromResources;
 
 
-public class Jmorphy2StemTokenFilterFactoryTest extends BaseTokenFilterFactoryTest {
-    @Test
-    public void test() throws IOException {
-        Settings settings = Settings.settingsBuilder()
-            .put("path.home", createTempDir().toString())
-            .put("path.conf", getDataPath("/indices/analyze/config"))
+public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
+
+    public void testJmorphy2StemTokenFilter() throws IOException {
+        Path home = createTempDir();
+        Settings settings = Settings.builder()
+            .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .put(Environment.PATH_CONF_SETTING.getKey(), home.resolve("config"))
             .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
             .put("index.analysis.filter.jmorphy2.name", "ru")
             .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
@@ -29,11 +32,15 @@ public class Jmorphy2StemTokenFilterFactoryTest extends BaseTokenFilterFactoryTe
             .put("index.analysis.analyzer.text.filter", "jmorphy2")
             .build();
 
-        AnalysisService analysisService = createAnalysisService(settings);
-        TokenFilterFactory filterFactory = analysisService.tokenFilter("jmorphy2");
-        assertThat(filterFactory, instanceOf(Jmorphy2StemTokenFilterFactory.class));
-        Analyzer analyzer = analysisService.analyzer("text");
+        copyFilesFromResources(settings, "ru");
 
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings);
+        TestAnalysis analysis = createTestAnalysis
+            (new Index("test", "_na_"), settings, plugin);
+        assertThat(analysis.tokenFilter.get("jmorphy2"),
+                   instanceOf(Jmorphy2StemTokenFilterFactory.class));
+
+        Analyzer analyzer = analysis.indexAnalyzers.get("text").analyzer();
         assertAnalyzesTo(analyzer,
                          "",
                          new String[0],

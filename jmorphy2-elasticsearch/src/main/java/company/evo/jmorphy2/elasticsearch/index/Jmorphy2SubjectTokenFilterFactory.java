@@ -2,38 +2,43 @@ package company.evo.jmorphy2.elasticsearch.index;
 
 import java.util.Set;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.lucene.analysis.TokenStream;
 
-import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.analysis.AnalysisSettingsRequired;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
-import org.elasticsearch.index.settings.IndexSettingsService;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.nlp.SubjectExtractor;
 import company.evo.jmorphy2.lucene.Jmorphy2SubjectFilter;
-import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Analysis;
+import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 
 
-@AnalysisSettingsRequired
 public class Jmorphy2SubjectTokenFilterFactory extends AbstractTokenFilterFactory {
     private final SubjectExtractor subjExtractor;
     private final int maxSentenceLength;
 
-    @Inject
-    public Jmorphy2SubjectTokenFilterFactory(Index index,
-                                             IndexSettingsService indexSettingsService,
-                                             @Assisted String name,
-                                             @Assisted Settings settings,
-                                             Jmorphy2Analysis jmorphy2Service) {
-        super(index, indexSettingsService.getSettings(), name, settings);
+    public Jmorphy2SubjectTokenFilterFactory(IndexSettings indexSettings,
+                                             Environment environment,
+                                             String name,
+                                             Settings settings,
+                                             Jmorphy2Service jmorphy2Service) {
+        super(indexSettings, name, settings);
 
-        String dictName = settings.get("name");
-        subjExtractor = jmorphy2Service.getSubjectExtractor(dictName);
+        String lang = settings.get("name");
+        if (lang == null) {
+            throw new IllegalArgumentException
+                ("Missing [lang] configuration for jmorphy2 subject token filter");
+        }
+        subjExtractor = jmorphy2Service.getSubjectExtractor(lang);
+        if (subjExtractor == null) {
+            throw new IllegalArgumentException
+                (String.format(Locale.ROOT, "Cannot find subject extractor for lang: %s", lang));
+        }
 
         maxSentenceLength = settings.getAsInt("max_sentence_length", 10);
     }

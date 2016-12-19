@@ -17,6 +17,7 @@ target/
 .vagga/
 .ipython/
 build/
+.local-*-test-execution-times.log
 
 # pymorphy2 dicts #
 pymorphy2-dicts-*

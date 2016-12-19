@@ -1,3 +1,6 @@
+import java.nio.file.Paths
+
+
 description = 'Java port of pymorphy2'
 
 dependencies {
@@ -17,6 +20,19 @@ task benchmark(type: Test) {
     }
 }
 
+task testJar(type: Jar, dependsOn: testClasses) {
+    classifier = 'tests'
+    from sourceSets.test.output
+}
+
+configurations {
+    tests
+}
+
+artifacts {
+    tests testJar
+}
+
 task fetchPymorphy2Dicts() << {
     downloadAndUnpackDicts('pymorphy2-dicts-ru', '2.4.393658.3725883', 'bdd5d23660f2ad5e8ec2721743a8b419')
     downloadAndUnpackDicts('pymorphy2-dicts-uk', '2.4.1.1.1460299261', 'f193a4ac7a8e6124e6fd8846f06ccca0')
@@ -29,37 +45,41 @@ def downloadAndUnpackDicts(packageName, version, md5) {
     String fullName = "${packageName}-${version}"
     String filename = "${fullName}.tar.gz"
     String url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5}"
-    def resourcesPath = sourceSets.test.resources.getSrcDirs().iterator()[0]
-    def dictsFile = new File("${resourcesPath}/${filename}")
-    if (!dictsFile.exists()) {
-        println "Downloading ${packageName} dicts..."
-        new URL(url).withInputStream{ i -> dictsFile.withOutputStream{ it << i }}
-    }
+    def baseDictsPath = Paths.get(
+        sourceSets.test.resources.getSrcDirs().iterator()[0].toString(),
+        "company", "evo", "jmorphy2"
+    )
     def dirName = packageName.replaceAll('-', "_")
-    def dictsDir = new File("${resourcesPath}/${dirName}")
-    if (dictsDir.lastModified() < dictsFile.lastModified()) {
-        dictsDir.deleteDir()
+    def dictsDir = baseDictsPath.resolve(dirName).toFile()
+    if (dictsDir.exists()) {
+        return
     }
-    if (!dictsDir.exists()) {
-        println "Unpacking ${packageName} dicts..."
-        dictsDir.mkdirs()
-        copy {
-            from tarTree(resources.gzip(dictsFile))
-            into dictsDir
-            includeEmptyDirs = false
-            eachFile { FileCopyDetails fcp ->
-               String zip_root_path = "${fullName}/${dirName}/data/"
-               Integer strip_segments = zip_root_path.length() - zip_root_path.replace('/', '').length()
-               if (fcp.relativePath.pathString.startsWith(zip_root_path)) {
-                   fcp.relativePath = new RelativePath(
-                       !fcp.file.isDirectory(),
-                       fcp.relativePath.segments[strip_segments..-1] as String[]
-                   )
-               }
-               else {
-                   fcp.exclude()
-               }
+    def dictsFile = baseDictsPath.resolve(filename).toFile()
+    if (dictsFile.exists()) {
+        dictsFile.delete()
+    }
+
+    println "Downloading ${packageName} dicts..."
+    new URL(url).withInputStream{ i -> dictsFile.withOutputStream{ it << i }}
+
+    println "Unpacking ${packageName} dicts..."
+    dictsDir.mkdirs()
+    copy {
+        from tarTree(resources.gzip(dictsFile))
+        into dictsDir
+        includeEmptyDirs = false
+        eachFile { FileCopyDetails fcp ->
+            String zip_root_path = "${fullName}/${dirName}/data/"
+            Integer strip_segments = zip_root_path.length() - zip_root_path.replace('/', '').length()
+            if (fcp.relativePath.pathString.startsWith(zip_root_path)) {
+                fcp.relativePath = new RelativePath(
+                    !fcp.file.isDirectory(),
+                    fcp.relativePath.segments[strip_segments..-1] as String[]
+                )
+            } else {
+              fcp.exclude()
             }
         }
     }
+    dictsFile.delete()
 }
