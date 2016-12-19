@@ -2,7 +2,7 @@ description = 'Jmorphy2 plugin for ElasticSearch'
 
 ext {
     pluginName = 'analysis-jmorphy2'
-    pluginClassname = 'net.uaprom.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
+    pluginClassname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
     pluginMetadataFilename = 'plugin-descriptor.properties'
     dependenciesDir = "${buildDir}/dependencies"
 }
