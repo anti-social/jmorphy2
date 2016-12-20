@@ -11,6 +11,7 @@ minimum-vagga: v0.6.1-119
 containers:
   java:
     environ:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
       GRADLE_USER_HOME: *gradle_home
       LANG: en_US.UTF-8
     setup:
@@ -20,9 +21,9 @@ containers:
       - openjdk-8-jdk-headless
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-3.1-bin.zip
-      sha256: c7de3442432253525902f7e8d7eac8b5fd6ce1623f96d76916af6d0e383010fc
-      subdir: gradle-3.1
+      url: https://services.gradle.org/distributions/gradle-2.13-bin.zip
+      sha256: 0f665ec6a5a67865faf7ba0d825afb19c26705ea0597cec80dd191b0f2cbb664
+      subdir: gradle-2.13
       path: /opt/gradle
     - !Sh |
         ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
@@ -75,12 +76,17 @@ commands:
       # --foreground option runs daemon with different jvm options
       # so then another gradle process rejects to connect to the daemon
       gradle --dry-run --daemon build
-      tail -f /work/.gradle/daemon/3.1/daemon-*.out.log
+      tail -f /work/.gradle/daemon/2.13/daemon-*.out.log
 
   compile: !Command
     <<: *cmd_opts
     description: Compile all source files
     run: [gradle, compileJava]
+
+  compile-test: !Command
+    <<: *cmd_opts
+    description: Compile all test source files
+    run: [gradle, compileTestJava]
 
   build: !Command
     <<: *cmd_opts

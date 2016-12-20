@@ -18,7 +18,7 @@ import org.elasticsearch.env.Environment;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.component.AbstractComponent;
-import org.elasticsearch.indices.analysis.IndicesAnalysisService;
+// import org.elasticsearch.indices.analysis.IndicesAnalysisService;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.nlp.Ruleset;
@@ -72,7 +72,7 @@ public class Jmorphy2Analysis extends AbstractComponent {
     public SubjectExtractor getSubjectExtractor(String name) {
         return subjectExtractors.getUnchecked(name);
     }
-    
+
     private SubjectExtractor loadSubjectExtractor(String name, Settings settings, Environment env) throws IOException {
         MorphAnalyzer morph = getMorphAnalyzer(name);
         File dicDir = new File(jmorphy2Dir, name);
@@ -101,7 +101,9 @@ public class Jmorphy2Analysis extends AbstractComponent {
         return new File(env.configFile().toFile(), "jmorphy2");
     }
 
-    private MorphAnalyzer loadMorphAnalyzer(String name, Settings settings, Environment env) throws IOException {
+    private MorphAnalyzer loadMorphAnalyzer(String name, Settings settings, Environment env)
+        throws IOException
+    {
         File dicDir = new File(jmorphy2Dir, name);
         if (!dicDir.exists() || !dicDir.isDirectory()) {
             throw new ElasticsearchException(String.format(Locale.ROOT, "Could not find jmorphy2 dictionary [%s]", name));
