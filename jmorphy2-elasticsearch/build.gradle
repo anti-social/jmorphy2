@@ -54,7 +54,7 @@ dependencies {
 // processTestResources {
 //     ext.resourcesMain = "${buildDir}/resources/main"
 //     ext.inputDicts = "${project(':jmorphy2-core').sourceSets['test'].output.resourcesDir}/pymorphy2_dicts_ru"
-//     ext.outputDicts = "${sourceSets['test'].output.resourcesDir}/indices/analyze/config/jmorphy2/ru/pymorphy2_dicts"
+//     ext.outputDicts = "${sourceSets['test'].output.resourcesDir}/company/evo/jmorphy2/ru/pymorphy2_dicts"
 //     outputs.dir resourcesMain
 //     inputs.dir inputDicts
 //     outputs.dir outputDicts
@@ -65,8 +65,8 @@ dependencies {
 //     mkdir resourcesMain
 
 //     copy {
-//       from inputDicts
-//       into outputDicts
+//         from inputDicts
+//         into outputDicts
 //     }
 // }
 

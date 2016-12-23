@@ -10,13 +10,16 @@ import company.evo.jmorphy2.MorphAnalyzer;
 
 
 public class Jmorphy2TestsHelpers {
-    public static MorphAnalyzer newMorphAnalyzer(String dictPath) throws IOException {
-        return newMorphAnalyzer(dictPath, null);
+    public static MorphAnalyzer newMorphAnalyzer(String lang) throws IOException {
+        return newMorphAnalyzer(lang, null);
     }
 
-    public static MorphAnalyzer newMorphAnalyzer(String dictPath, Map<Character,String> replaceChars) throws IOException {
+    public static MorphAnalyzer newMorphAnalyzer(String lang, Map<Character,String> replaceChars)
+        throws IOException
+    {
+        String dictResourcePath = String.format("/company/evo/jmorphy2/pymorphy2_dicts_%s", lang);
         return new MorphAnalyzer.Builder()
-            .fileLoader(new ResourceFileLoader(dictPath))
+            .fileLoader(new ResourceFileLoader(dictResourcePath))
             .charSubstitutes(replaceChars)
             .cacheSize(0)
             .build();

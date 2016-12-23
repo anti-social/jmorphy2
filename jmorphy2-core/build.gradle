@@ -1,3 +1,6 @@
+import java.nio.file.Paths
+
+
 description = 'Java port of pymorphy2'
 
 dependencies {
@@ -29,14 +32,17 @@ def downloadAndUnpackDicts(packageName, version, md5) {
     String fullName = "${packageName}-${version}"
     String filename = "${fullName}.tar.gz"
     String url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5}"
-    def resourcesPath = sourceSets.test.resources.getSrcDirs().iterator()[0]
-    def dictsFile = new File("${resourcesPath}/${filename}")
+    def baseDictsPath = Paths.get(
+        sourceSets.test.resources.getSrcDirs().iterator()[0].toString(),
+        "company", "evo", "jmorphy2"
+    )
+    def dictsFile = baseDictsPath.resolve(filename).toFile()
     if (!dictsFile.exists()) {
         println "Downloading ${packageName} dicts..."
         new URL(url).withInputStream{ i -> dictsFile.withOutputStream{ it << i }}
     }
     def dirName = packageName.replaceAll('-', "_")
-    def dictsDir = new File("${resourcesPath}/${dirName}")
+    def dictsDir = baseDictsPath.resolve(dirName).toFile()
     if (dictsDir.lastModified() < dictsFile.lastModified()) {
         dictsDir.deleteDir()
     }
