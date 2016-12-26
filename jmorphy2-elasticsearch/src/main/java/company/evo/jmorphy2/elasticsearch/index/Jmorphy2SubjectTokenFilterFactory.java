@@ -14,7 +14,7 @@ import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.nlp.SubjectExtractor;
 import company.evo.jmorphy2.lucene.Jmorphy2SubjectFilter;
-import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Analysis;
+import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 
 
 public class Jmorphy2SubjectTokenFilterFactory extends AbstractTokenFilterFactory {

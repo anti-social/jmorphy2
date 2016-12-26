@@ -12,7 +12,6 @@ import org.apache.lucene.analysis.Analyzer;
 import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.analysis.AnalysisService;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.test.ESTestCase;

@@ -33,16 +33,19 @@ containers:
   elastic:
     setup:
     - !Ubuntu xenial
+    - !Install [ca-certificates]
     - !AptTrust
       server: pgp.mit.edu
       keys: [D88E42B4]
     - !UbuntuRepo
-      url: http://packages.elastic.co/elasticsearch/2.x/debian
+      url: https://artifacts.elastic.co/packages/5.x/apt
       suite: stable
       components: [main]
+    - !Env
+      ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=2.4.0
+      - elasticsearch=5.1.1
     - !EnsureDir /var/elasticsearch
     - !EnsureDir /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
     - !EnsureDir /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts
@@ -116,22 +119,22 @@ commands:
     prerequisites: [_build-plugin]
     volumes:
       /usr/share/elasticsearch/plugins: !Tmpfs
-      /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_ru
-      /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_uk
+      /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/company/evo/jmorphy2/pymorphy2_dicts_ru
+      /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/company/evo/jmorphy2/pymorphy2_dicts_uk
     run: |
       rm -rf /usr/share/elasticsearch/plugins/analysis-jmorphy2
-      /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+      /usr/share/elasticsearch/bin/elasticsearch-plugin install \
+        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT.zip
       /usr/share/elasticsearch/bin/elasticsearch \
-        --path.conf=/etc/elasticsearch \
-        --path.logs=/var/elasticsearch/logs \
-        --path.data=/var/elasticsearch/data \
-        --security.manager.enabled=false
+        -E path.conf=/etc/elasticsearch \
+        -E path.logs=/var/elasticsearch/logs \
+        -E path.data=/var/elasticsearch/data
 
   _build-plugin: !Command
     <<: *cmd_opts
     run: |
       set -ex
-      gradle clean build -x test -p jmorphy2-elasticsearch
+      gradle clean assemble -p jmorphy2-elasticsearch
       gradle processTestResources -p jmorphy2-core
 
   python: !Command
