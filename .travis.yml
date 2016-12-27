@@ -1,5 +1,13 @@
 language: java
 
+install:
+  - wget http://services.gradle.org/distributions/gradle-2.13-bin.zip
+  - unzip -qq gradle-2.13-bin.zip
+  - export GRADLE_HOME=$PWD/gradle-2.13
+  - export PATH=$GRADLE_HOME/bin:$PATH
+  # just to test gradle version, against our provided one
+  - gradle -v
+
 cache:
   directories:
   - $HOME/.gradle/caches/
