@@ -1,5 +1,5 @@
-[![Travis Status](https://travis-ci.org/anti-social/jmorphy2.svg)](https://travis-ci.org/anti-social/jmorphy2)
-[![Appveyor Status](https://ci.appveyor.com/api/projects/status/x9df34q1er8r5kc0?svg=true)](https://ci.appveyor.com/project/anti-social/jmorphy2)
+[![Travis Status](https://travis-ci.org/anti-social/jmorphy2.svg?branch=master)](https://travis-ci.org/anti-social/jmorphy2)
+[![Appveyor status](https://ci.appveyor.com/api/projects/status/x9df34q1er8r5kc0/branch/master?svg=true)](https://ci.appveyor.com/project/anti-social/jmorphy2/branch/master)
 
 Jmorphy2
 ========
