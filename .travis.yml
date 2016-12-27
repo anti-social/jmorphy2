@@ -7,6 +7,8 @@ _defaults:
 language: java
 
 install:
+  - sudo add-apt-repository universe
+  - sudo apt-get update
   - sudo apt-get install openjdk-8-jdk-headless
   - wget http://services.gradle.org/distributions/gradle-2.13-bin.zip
   - unzip -qq gradle-2.13-bin.zip
