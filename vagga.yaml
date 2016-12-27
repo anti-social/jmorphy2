@@ -96,6 +96,11 @@ commands:
     description: Compile, run tests and make packages
     run: [gradle, build]
 
+  assemble: !Command
+    <<: *cmd_opts
+    description: Build and assemple package
+    run: [gradle, assemble]
+
   clean: !Command
     <<: *cmd_opts
     description: Clean all building files
@@ -103,8 +108,13 @@ commands:
 
   test: !Command
     <<: *cmd_opts
-    description: Run tests
+    description: Run unit tests
     run: [gradle, test]
+
+  check: !Command
+    <<: *cmd_opts
+    description: Run all checks and tests
+    run: [gradle, check]
 
   benchmark: !Command
     <<: *cmd_opts

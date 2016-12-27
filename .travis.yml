@@ -1,5 +1,25 @@
-language: java
+os: linux
+dist: trusty
+sudo: required
+
+install:
+- sudo apt-get install -y uidmap
+- wget http://files.zerogw.com/vagga/vagga-0.6.1-231-ga954eb0.tar.xz
+- tar -xJf vagga-0.6.1-231-ga954eb0.tar.xz -C ~
+- |
+  echo "cache-dir: ~/.cache" >> ~/.vagga.yaml
+  echo "ubuntu-mirror: http://mirrors.us.kernel.org/ubuntu/" >> ~/.vagga.yaml
+  echo "alpine-mirror: http://mirrors.gigenet.com/alpinelinux/" >> ~/.vagga.yaml
+- export PATH=~/vagga:$PATH
+- vagga _build java
+
+script:
+- |
+  set -ex
+  vagga assemble
+  vagga test
+  # vagga check
 
 cache:
   directories:
-  - $HOME/.gradle/caches/
+  - $HOME/.cache
