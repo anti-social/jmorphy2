@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Alexander Koval
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package company.evo.jmorphy2.elasticsearch.index;
 
 import java.io.BufferedReader;
@@ -41,7 +57,7 @@ class Utils {
             "words.dawg",
         };
         String pymorphy2ResourcePath = String.format
-            ("/company/evo/jmorphy2/pymorphy2_dicts_%s", lang);
+            (Locale.ROOT, "/company/evo/jmorphy2/pymorphy2_dicts_%s", lang);
         for (String fileName : pymorphy2Files) {
             String resourcePath = String.format
                 (Locale.ROOT, "%s/%s", pymorphy2ResourcePath, fileName);
@@ -58,7 +74,7 @@ class Utils {
             "extract_rules.txt",
         };
         String nlpResourcePath = String.format
-            ("/company/evo/jmorphy2/elasticsearch/index/%s", lang);
+            (Locale.ROOT, "/company/evo/jmorphy2/elasticsearch/index/%s", lang);
         for (String fileName : nlpFiles) {
             String resourcePath = String.format
                 (Locale.ROOT, "%s/%s", nlpResourcePath, fileName);
