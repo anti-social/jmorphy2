@@ -1,5 +1,5 @@
 install:
-- choco install gradle
+- choco install gradle --version 2.13
 
 build_script:
 - gradle assemble --no-daemon
