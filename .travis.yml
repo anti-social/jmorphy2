@@ -1,5 +1,8 @@
 language: java
 
+jdk:
+  - openjdk8
+
 install:
   - wget http://services.gradle.org/distributions/gradle-2.13-bin.zip
   - unzip -qq gradle-2.13-bin.zip
