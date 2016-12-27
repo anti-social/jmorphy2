@@ -15,7 +15,8 @@ import java.util.ArrayList;
 
 @RunWith(JUnit4.class)
 public class MorphAnalyzerBenchmark {
-    private static final String WORDS_FREQ_RESOURCE = "/unigrams.txt";
+    private static final String WORDS_FREQ_RESOURCE =
+        "/company/evo/jmorphy2/unigrams.txt";
     private static final int DEFAULT_REPEATS = 20;
 
     private MorphAnalyzer morph;

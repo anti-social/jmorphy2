@@ -38,7 +38,6 @@ public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
                                           Jmorphy2Service jmorphy2Service) {
         super(indexSettings, name, settings);
 
-        // System.out.println(name);
         String lang = settings.get("name");
         if (lang == null) {
             throw new IllegalArgumentException

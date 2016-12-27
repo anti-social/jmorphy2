@@ -7,13 +7,11 @@ import company.evo.jmorphy2.Jmorphy2TestsHelpers;
 
 
 public class BaseFilterTestCase {
-    protected MorphAnalyzer morph;
-    protected boolean initialized = false;
+    protected MorphAnalyzer morph = null;
 
     protected void init() throws IOException {
-        if (!initialized) {
-            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
-            initialized = true;
+        if (morph == null) {
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         }
     }
 }

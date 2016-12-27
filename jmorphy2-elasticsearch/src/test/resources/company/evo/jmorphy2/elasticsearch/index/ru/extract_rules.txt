@@ -1,0 +1,1 @@
++NP,nomn +NP,accs -PP NOUN,nomn NOUN,accs LATN NUMB

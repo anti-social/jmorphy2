@@ -37,12 +37,16 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
         init();
     }
 
-    protected Analyzer getAnalyzer(final List<Set<String>> includeTags, final List<Set<String>> excludeTags, final boolean enablePositionIncrements) {
+    protected Analyzer getAnalyzer(final List<Set<String>> includeTags,
+                                   final List<Set<String>> excludeTags,
+                                   final boolean enablePositionIncrements)
+    {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName) {
                 Tokenizer source = new WhitespaceTokenizer();
-                TokenFilter filter = new Jmorphy2StemFilter(source, morph, includeTags, excludeTags, enablePositionIncrements);
+                TokenFilter filter = new Jmorphy2StemFilter
+                    (source, morph, includeTags, excludeTags, enablePositionIncrements);
                 return new TokenStreamComponents(source, filter);
             }
         };

@@ -2,6 +2,7 @@ package company.evo.jmorphy2.elasticsearch.index;
 
 import java.util.Set;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.lucene.analysis.TokenStream;
 
@@ -24,11 +25,20 @@ public class Jmorphy2SubjectTokenFilterFactory extends AbstractTokenFilterFactor
     public Jmorphy2SubjectTokenFilterFactory(IndexSettings indexSettings,
                                              Environment environment,
                                              String name,
-                                             Settings settings) {
+                                             Settings settings,
+                                             Jmorphy2Service jmorphy2Service) {
         super(indexSettings, name, settings);
 
-        // subjExtractor = getSubjectExtractor(dictName);
-        subjExtractor = null;
+        String lang = settings.get("name");
+        if (lang == null) {
+            throw new IllegalArgumentException
+                ("Missing [lang] configuration for jmorphy2 subject token filter");
+        }
+        subjExtractor = jmorphy2Service.getSubjectExtractor(lang);
+        if (subjExtractor == null) {
+            throw new IllegalArgumentException
+                (String.format(Locale.ROOT, "Cannot find subject extractor for lang: %s", lang));
+        }
 
         maxSentenceLength = settings.getAsInt("max_sentence_length", 10);
     }
@@ -37,27 +47,4 @@ public class Jmorphy2SubjectTokenFilterFactory extends AbstractTokenFilterFactor
     public TokenStream create(TokenStream tokenStream) {
         return new Jmorphy2SubjectFilter(tokenStream, subjExtractor, maxSentenceLength);
     }
-
-    // private SubjectExtractor getSubjectExtractor(String name, Settings settings, Environment env)
-    //     throws IOException
-    // {
-    //     String dictName = settings.get("name");
-    //     MorphAnalyzer morph = getMorphAnalyzer(name);
-    //     File dicDir = new File(jmorphy2Dir, name);
-    //     File taggerRulesFile = new File(dicDir, "tagger_rules.txt");
-    //     Tagger tagger =
-    //         new SimpleTagger(morph,
-    //                          new Ruleset(new FileInputStream(taggerRulesFile)),
-    //                          settings.getAsInt("tagger_threshold", SimpleTagger.DEFAULT_THRESHOLD));
-    //     File parserRulesFile = new File(dicDir, "parser_rules.txt");
-    //     Parser parser =
-    //         new SimpleParser(morph,
-    //                          tagger,
-    //                          new Ruleset(new FileInputStream(parserRulesFile)),
-    //                          settings.getAsInt("parser_threshold", SimpleParser.DEFAULT_THRESHOLD));
-
-    //     Path extractionRulesPath = Paths.get(dicDir.getPath(), "extract_rules.txt");
-    //     String extractionRules = new String(Files.readAllBytes(extractionRulesPath));
-    //     return new SubjectExtractor(parser, extractionRules, true);
-    // }
 }

@@ -28,7 +28,7 @@ public class SimpleTaggerTest {
         if (initialized) {
             return;
         }
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         tagger = new SimpleTagger(morph,
                                   new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE)));
         initialized = true;

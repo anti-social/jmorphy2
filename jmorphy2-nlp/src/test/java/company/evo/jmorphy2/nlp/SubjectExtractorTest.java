@@ -24,7 +24,7 @@ public class SubjectExtractorTest {
         if (initialized) {
             return;
         }
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_ru");
+        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         Parser parser = new SimpleParser(morph, new SimpleTagger(morph), 100);
         subjExtractor =
             new SubjectExtractor(parser,

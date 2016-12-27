@@ -28,7 +28,6 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
 
     public AnalysisJmorphy2Plugin(Settings settings) throws IOException {
         super();
-        System.out.println(settings.get(Environment.PATH_CONF_SETTING.getKey()));
         jmorphy2Service = new Jmorphy2Service(settings);
     }
 
@@ -43,6 +42,16 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
                                               String name,
                                               Settings settings) {
                     return new Jmorphy2StemTokenFilterFactory
+                        (indexSettings, environment, name, settings, jmorphy2Service);
+                }
+            });
+        tokenFilters.put("jmorphy2_subject", new Jmorphy2AnalysisProvider() {
+                @Override
+                public TokenFilterFactory get(IndexSettings indexSettings,
+                                              Environment environment,
+                                              String name,
+                                              Settings settings) {
+                    return new Jmorphy2SubjectTokenFilterFactory
                         (indexSettings, environment, name, settings, jmorphy2Service);
                 }
             });
