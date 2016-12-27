@@ -16,9 +16,9 @@ install:
 script:
 - |
   set -ex
-  vagga assemble
-  vagga test
-  # vagga check
+  vagga assemble --no-daemon
+  vagga test --no-daemon
+  # vagga check --no-daemon
 
 cache:
   directories:
