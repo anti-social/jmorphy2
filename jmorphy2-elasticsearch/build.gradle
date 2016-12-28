@@ -31,3 +31,7 @@ dependencies {
 
     testCompile project(path: ':jmorphy2-core', configuration: 'tests')
 }
+
+thirdPartyAudit.enabled = false
+// TODO: write integration tests
+integTest.enabled = false
