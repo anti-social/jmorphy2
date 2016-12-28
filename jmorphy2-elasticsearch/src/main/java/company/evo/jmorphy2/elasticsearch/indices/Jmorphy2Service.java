@@ -33,7 +33,9 @@ import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.component.AbstractComponent;
 
+import company.evo.jmorphy2.FileLoader;
 import company.evo.jmorphy2.MorphAnalyzer;
+import company.evo.jmorphy2.ResourceFileLoader;
 import company.evo.jmorphy2.nlp.Ruleset;
 import company.evo.jmorphy2.nlp.Tagger;
 import company.evo.jmorphy2.nlp.Parser;
@@ -71,7 +73,31 @@ public class Jmorphy2Service extends AbstractComponent {
     }
 
     public MorphAnalyzer getMorphAnalyzer(String lang) {
-        return morphAnalyzers.get(lang);
+        MorphAnalyzer morph = morphAnalyzers.get(lang);
+        if (morph != null) {
+            return morph;
+        }
+        // Try to load from resources
+        // TODO: Make as jmorphy2-core api
+        FileLoader loader = new ResourceFileLoader
+            (String.format(Locale.ROOT, "/company/evo/jmorphy2/%s/pymorphy2_dicts", lang));
+        try {
+            InputStream metaStream = loader.newStream("meta.json");
+            if (metaStream == null) {
+                return null;
+            }
+            metaStream.close();
+            Path replacesPath = jmorphy2Dir.resolve(lang).resolve("replaces.json");
+            int cacheSize = settings.getAsInt("cache_size", DEFAULT_CACHE_SIZE);
+            return new MorphAnalyzer.Builder()
+                .fileLoader(loader)
+                .charSubstitutes(parseReplaces(replacesPath))
+                .cacheSize(cacheSize)
+                .build();
+        } catch (IOException e) {
+            throw new IllegalStateException
+                (String.format(Locale.ROOT, "Error when loading jmorphy2 dictionary: [%s]", lang), e);
+        }
     }
 
     public SubjectExtractor getSubjectExtractor(String lang) {
@@ -129,23 +155,24 @@ public class Jmorphy2Service extends AbstractComponent {
         throws IOException
     {
         Path pymorphy2DictsDir = path.resolve("pymorphy2_dicts");
-        Path replacesFile = path.resolve("replaces.json");
-        Map<Character, String> replaces = null;
-        if (Files.isRegularFile(replacesFile)) {
-            replaces = Jmorphy2StemFilterFactory
-                .parseReplaces(Files.newInputStream(replacesFile));
-        }
-
         int cacheSize = settings.getAsInt("cache_size", DEFAULT_CACHE_SIZE);
-
         return new MorphAnalyzer.Builder()
             .dictPath(pymorphy2DictsDir.toString())
-            .charSubstitutes(replaces)
+            .charSubstitutes(parseReplaces(path.resolve("replaces.json")))
             .cacheSize(cacheSize)
             .build();
     }
 
+    private Map<Character, String> parseReplaces(Path path) throws IOException {
+        if (Files.isRegularFile(path)) {
+            return Jmorphy2StemFilterFactory
+                .parseReplaces(Files.newInputStream(path));
+        }
+        return null;
+    }
+
     private void scanAndLoad() throws IOException {
+        // Scan dictionaries inside config directory
         if (Files.isDirectory(jmorphy2Dir)) {
             DirectoryStream<Path> dir = Files.newDirectoryStream(jmorphy2Dir);
             for (Path path : dir) {

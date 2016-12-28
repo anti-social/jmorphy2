@@ -17,7 +17,7 @@ public class Jmorphy2TestsHelpers {
     public static MorphAnalyzer newMorphAnalyzer(String lang, Map<Character,String> replaceChars)
         throws IOException
     {
-        String dictResourcePath = String.format("/company/evo/jmorphy2/pymorphy2_dicts_%s", lang);
+        String dictResourcePath = String.format("/company/evo/jmorphy2/%s/pymorphy2_dicts", lang);
         return new MorphAnalyzer.Builder()
             .fileLoader(new ResourceFileLoader(dictResourcePath))
             .charSubstitutes(replaceChars)
