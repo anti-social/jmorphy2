@@ -66,6 +66,7 @@ class Utils {
                 continue;
             }
             Files.copy(resourceStream, pymorphy2DictsPath.resolve(fileName));
+            resourceStream.close();
         }
 
         String[] nlpFiles = new String[] {
@@ -83,6 +84,7 @@ class Utils {
                 continue;
             }
             Files.copy(resourceStream, jmorphy2Path.resolve(fileName));
+            resourceStream.close();
         }
     }
 }

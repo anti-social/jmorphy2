@@ -5,5 +5,5 @@ import java.io.InputStream;
 
 
 public abstract class FileLoader {
-    public abstract InputStream getStream(String filename) throws IOException;
+    public abstract InputStream newStream(String filename) throws IOException;
 }
