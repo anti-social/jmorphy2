@@ -71,12 +71,9 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
                         (indexSettings, environment, name, settings, jmorphy2Service);
                 }
             });
-        // tokenFilters.put("jmorphy2_stemmer", Jmorphy2StemTokenFilterFactory::new);
-        // tokenFilters.put("jmorphy2_subject", Jmorphy2SubjectTokenFilterFactory::new);
         return tokenFilters;
     }
 
-    // @Override
     // public Map<String, AnalysisProvider<AnalyzerProvider<? extends Analyzer>>> getAnalyzers() {
     //     return Collections.singletonMap("jmorphy2_analyzer", Jmorphy2AnalyzerProvider::new);
     // }

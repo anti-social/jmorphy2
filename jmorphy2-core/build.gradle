@@ -9,7 +9,10 @@ dependencies {
     compile 'com.google.guava:guava:18.0'
 
     compile project(':dawg')
+
     testCompile 'junit:junit:4.11'
+    testCompile project(':jmorphy2-dicts-ru')
+    testCompile project(':jmorphy2-dicts-uk')
 }
 
 task benchmark(type: Test) {
@@ -33,26 +36,18 @@ artifacts {
     tests testJar
 }
 
-task fetchPymorphy2Dicts() << {
-    downloadAndUnpackDicts('pymorphy2-dicts-ru', '2.4.393658.3725883', 'bdd5d23660f2ad5e8ec2721743a8b419')
-    downloadAndUnpackDicts('pymorphy2-dicts-uk', '2.4.1.1.1460299261', 'f193a4ac7a8e6124e6fd8846f06ccca0')
-}
-
-processTestResources.dependsOn fetchPymorphy2Dicts
-
-
-def downloadAndUnpackDicts(packageName, version, md5) {
+def downloadAndUnpackDicts(packageName, version, md5, destPath) {
     String fullName = "${packageName}-${version}"
     String filename = "${fullName}.tar.gz"
     String url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5}"
-    def baseDictsPath = Paths.get(
-        sourceSets.test.resources.getSrcDirs().iterator()[0].toString(),
-        "company", "evo", "jmorphy2"
-    )
-    def dirName = packageName.replaceAll('-', "_")
-    def dictsDir = baseDictsPath.resolve(dirName).toFile()
-    if (dictsDir.exists()) {
+    def baseDictsPath = destPath
+    def versionFile = baseDictsPath.resolve('version.txt').toFile()
+    if (versionFile.exists() && versionFile.getText('UTF-8') == version) {
         return
+    }
+    def dictsDir = baseDictsPath.resolve('pymorphy2_dicts')
+    if (dictsDir.toFile().exists()) {
+        dictsDir.delete()
     }
     def dictsFile = baseDictsPath.resolve(filename).toFile()
     if (dictsFile.exists()) {
@@ -60,18 +55,19 @@ def downloadAndUnpackDicts(packageName, version, md5) {
     }
 
     println "Downloading ${packageName} dicts..."
+    dictsDir.toFile().mkdirs()
     new URL(url).withInputStream{ i -> dictsFile.withOutputStream{ it << i }}
 
     println "Unpacking ${packageName} dicts..."
-    dictsDir.mkdirs()
+    def zipRootDirName = packageName.replaceAll('-', "_")
     copy {
         from tarTree(resources.gzip(dictsFile))
-        into dictsDir
+        into dictsDir.toFile()
         includeEmptyDirs = false
         eachFile { FileCopyDetails fcp ->
-            String zip_root_path = "${fullName}/${dirName}/data/"
-            Integer strip_segments = zip_root_path.length() - zip_root_path.replace('/', '').length()
-            if (fcp.relativePath.pathString.startsWith(zip_root_path)) {
+            String zipRootPath = "${fullName}/${zipRootDirName}/data/"
+            Integer strip_segments = zipRootPath.length() - zipRootPath.replace('/', '').length()
+            if (fcp.relativePath.pathString.startsWith(zipRootPath)) {
                 fcp.relativePath = new RelativePath(
                     !fcp.file.isDirectory(),
                     fcp.relativePath.segments[strip_segments..-1] as String[]
@@ -80,6 +76,10 @@ def downloadAndUnpackDicts(packageName, version, md5) {
               fcp.exclude()
             }
         }
+    }
+    // Store pymorhpy2 dictionary version
+    baseDictsPath.resolve('version.txt').toFile().withWriter('UTF-8') { writer ->
+      writer.write(version)
     }
     dictsFile.delete()
 }

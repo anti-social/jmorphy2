@@ -57,7 +57,7 @@ class Utils {
             "words.dawg",
         };
         String pymorphy2ResourcePath = String.format
-            (Locale.ROOT, "/company/evo/jmorphy2/pymorphy2_dicts_%s", lang);
+            (Locale.ROOT, "/company/evo/jmorphy2/%s/pymorphy2_dicts", lang);
         for (String fileName : pymorphy2Files) {
             String resourcePath = String.format
                 (Locale.ROOT, "%s/%s", pymorphy2ResourcePath, fileName);

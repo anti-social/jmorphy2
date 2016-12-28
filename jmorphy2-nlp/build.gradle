@@ -4,6 +4,7 @@ dependencies {
     compile project(':jmorphy2-core')
 
     testCompile 'junit:junit:4.11'
+    testCompile project(':jmorphy2-dicts-ru')
     testCompile project(':jmorphy2-core').sourceSets.test.output
 }
 
