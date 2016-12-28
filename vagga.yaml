@@ -4,7 +4,8 @@ _default:
     container: java
     user-id: 1
     external-user-id: 0
-
+    volumes:
+      /work/.gradle/caches: !BindRW /vagga/cache/gradle-cache
 
 minimum-vagga: v0.6.1-119
 
@@ -29,6 +30,7 @@ containers:
         ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
     - !Env
       GRADLE_USER_HOME: *gradle_home
+    - !CacheDirs {"/work/.gradle/caches": "gradle-cache"}
 
   elastic:
     setup:
