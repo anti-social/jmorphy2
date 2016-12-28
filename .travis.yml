@@ -17,6 +17,7 @@ script:
 - |
   set -ex
   vagga assemble --no-daemon
+  vagga gradle updateSHAs --no-daemon
   vagga check --no-daemon
 
 cache:
