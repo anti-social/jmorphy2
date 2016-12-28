@@ -77,7 +77,9 @@ public final class Dictionary {
         {
             SuffixesDAWG[] predictionSuffixes = new SuffixesDAWG[num];
             for (int i = 0; i < num; i++) {
-                predictionSuffixes[i] = new SuffixesDAWG(loader.getStream(String.format(filenameTemplate, i)));
+                InputStream suffixesStream = loader.newStream(String.format(filenameTemplate, i));
+                predictionSuffixes[i] = new SuffixesDAWG(suffixesStream);
+                suffixesStream.close();
             }
             return predictionSuffixes;
         }
@@ -117,17 +119,29 @@ public final class Dictionary {
 
         public Dictionary build(Tag.Storage tagStorage) throws IOException {
             if (cachedDict == null) {
-                Meta meta = parseMeta(loader.getStream(META_FILENAME));
-                loadGrammemes(tagStorage, loader.getStream(GRAMMEMES_FILENAME));
+                InputStream metaStream = loader.newStream(META_FILENAME);
+                Meta meta = parseMeta(metaStream);
+                metaStream.close();
+                InputStream grammemesStream = loader.newStream(GRAMMEMES_FILENAME);
+                loadGrammemes(tagStorage, grammemesStream);
+                grammemesStream.close();
+                InputStream wordsStream = loader.newStream(WORDS_FILENAME);
+                InputStream paradigmsStream = loader.newStream(PARADIGMS_FILENAME);
+                InputStream suffixesStream = loader.newStream(SUFFIXES_FILENAME);
+                InputStream gramtabStream = loader.newStream(GRAMTAB_OPENCORPORA_FILENAME);
                 cachedDict = new Dictionary(tagStorage,
                                             meta,
-                                            new WordsDAWG(loader.getStream(WORDS_FILENAME)),
+                                            new WordsDAWG(wordsStream),
                                             parsePredictionSuffixes(loader,
                                                                     PREDICTION_SUFFIXES_FILENAME_TEMPLATE,
                                                                     meta.compileOptions.paradigmPrefixes.length),
-                                            parseParadigms(loader.getStream(PARADIGMS_FILENAME)),
-                                            parseSuffixes(loader.getStream(SUFFIXES_FILENAME)),
-                                            parseGramtab(tagStorage, loader.getStream(GRAMTAB_OPENCORPORA_FILENAME)));
+                                            parseParadigms(paradigmsStream),
+                                            parseSuffixes(suffixesStream),
+                                            parseGramtab(tagStorage, gramtabStream));
+                wordsStream.close();
+                paradigmsStream.close();
+                suffixesStream.close();
+                gramtabStream.close();
             }
             return cachedDict;
         }

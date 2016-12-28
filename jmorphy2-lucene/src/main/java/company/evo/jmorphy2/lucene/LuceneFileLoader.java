@@ -19,7 +19,7 @@ public class LuceneFileLoader extends FileLoader {
     }
 
     @Override
-    public InputStream getStream(String filename) throws IOException {
+    public InputStream newStream(String filename) throws IOException {
         return loader.openResource((new File(basePath, filename)).getPath());
     }
 }
