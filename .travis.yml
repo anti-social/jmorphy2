@@ -17,8 +17,7 @@ script:
 - |
   set -ex
   vagga assemble --no-daemon
-  vagga test --no-daemon
-  # vagga check --no-daemon
+  vagga check --no-daemon
 
 cache:
   directories:
