@@ -1,0 +1,2 @@
+This product includes data from LanguageTool (https://languagetool.org)
+
