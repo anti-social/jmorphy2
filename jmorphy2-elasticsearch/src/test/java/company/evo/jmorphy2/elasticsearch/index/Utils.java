@@ -61,12 +61,9 @@ class Utils {
         for (String fileName : pymorphy2Files) {
             String resourcePath = String.format
                 (Locale.ROOT, "%s/%s", pymorphy2ResourcePath, fileName);
-            InputStream resourceStream = Utils.class.getResourceAsStream(resourcePath);
-            if (resourceStream == null) {
-                continue;
+            try (InputStream resourceStream = Utils.class.getResourceAsStream(resourcePath)) {
+                Files.copy(resourceStream, pymorphy2DictsPath.resolve(fileName));
             }
-            Files.copy(resourceStream, pymorphy2DictsPath.resolve(fileName));
-            resourceStream.close();
         }
 
         String[] nlpFiles = new String[] {
@@ -79,12 +76,9 @@ class Utils {
         for (String fileName : nlpFiles) {
             String resourcePath = String.format
                 (Locale.ROOT, "%s/%s", nlpResourcePath, fileName);
-            InputStream resourceStream = Utils.class.getResourceAsStream(resourcePath);
-            if (resourceStream == null) {
-                continue;
+            try (InputStream resourceStream = Utils.class.getResourceAsStream(resourcePath)) {
+                Files.copy(resourceStream, jmorphy2Path.resolve(fileName));
             }
-            Files.copy(resourceStream, jmorphy2Path.resolve(fileName));
-            resourceStream.close();
         }
     }
 }
