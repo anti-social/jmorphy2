@@ -111,23 +111,23 @@ public class Jmorphy2Service extends AbstractComponent {
         Path taggerRulesPath = path.resolve("tagger_rules.txt");
         Tagger tagger;
         if (Files.isRegularFile(taggerRulesPath)) {
-            InputStream rulesStream = Files.newInputStream(taggerRulesPath);
-            tagger = new SimpleTagger(morph,
-                                      new Ruleset(rulesStream),
-                                      taggerThreshold);
-            rulesStream.close();
+            try (InputStream rulesStream = Files.newInputStream(taggerRulesPath)) {
+                tagger = new SimpleTagger(morph,
+                                          new Ruleset(rulesStream),
+                                          taggerThreshold);
+            }
         } else {
             tagger = new SimpleTagger(morph, taggerThreshold);
         }
         Path parserRulesPath = path.resolve("parser_rules.txt");
         Parser parser;
         if (Files.isRegularFile(parserRulesPath)) {
-            InputStream rulesStream = Files.newInputStream(parserRulesPath);
-            parser = new SimpleParser(morph,
-                                      tagger,
-                                      new Ruleset(rulesStream),
-                                      parserThreshold);
-            rulesStream.close();
+            try (InputStream rulesStream = Files.newInputStream(parserRulesPath)) {
+                parser = new SimpleParser(morph,
+                                          tagger,
+                                          new Ruleset(rulesStream),
+                                          parserThreshold);
+            }
         } else {
             parser = new SimpleParser(morph, tagger, parserThreshold);
         }
@@ -174,19 +174,19 @@ public class Jmorphy2Service extends AbstractComponent {
     private void scanAndLoad() throws IOException {
         // Scan dictionaries inside config directory
         if (Files.isDirectory(jmorphy2Dir)) {
-            DirectoryStream<Path> dir = Files.newDirectoryStream(jmorphy2Dir);
-            for (Path path : dir) {
-                if (Files.isDirectory(path)) {
-                    Path pymorphy2DictsDir = path.resolve("pymorphy2_dicts");
-                    if (Files.isDirectory(pymorphy2DictsDir)) {
-                        String lang = path.getFileName().toString();
-                        MorphAnalyzer morph = loadMorphAnalyzer(path);
-                        morphAnalyzers.put(lang, morph);
-                        subjectExtractors.put(lang, loadSubjectExtractor(path, morph));
+            try (DirectoryStream<Path> dir = Files.newDirectoryStream(jmorphy2Dir)) {
+                for (Path path : dir) {
+                    if (Files.isDirectory(path)) {
+                        Path pymorphy2DictsDir = path.resolve("pymorphy2_dicts");
+                        if (Files.isDirectory(pymorphy2DictsDir)) {
+                            String lang = path.getFileName().toString();
+                            MorphAnalyzer morph = loadMorphAnalyzer(path);
+                            morphAnalyzers.put(lang, morph);
+                            subjectExtractors.put(lang, loadSubjectExtractor(path, morph));
+                        }
                     }
                 }
             }
-            dir.close();
         }
     }
 }
