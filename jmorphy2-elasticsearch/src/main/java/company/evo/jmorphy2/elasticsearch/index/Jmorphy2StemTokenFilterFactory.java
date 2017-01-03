@@ -42,6 +42,8 @@ import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 
 
 public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
+    public static final int DEFAULT_CACHE_SIZE = 10000;
+
     private final MorphAnalyzer morph;
 
     private final List<Set<String>> includeTags;
@@ -54,15 +56,17 @@ public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
                                           Jmorphy2Service jmorphy2Service) {
         super(indexSettings, name, settings);
 
-        String lang = settings.get("name");
+        String lang = settings.get("lang", settings.get("name"));
+        String substitutesPath = settings.get("char_substitutes_path");
+        Integer cacheSize = settings.getAsInt("cache_size", DEFAULT_CACHE_SIZE);
         if (lang == null) {
             throw new IllegalArgumentException
                 ("Missing [lang] configuration for jmorphy2 token filter");
         }
-        morph = jmorphy2Service.getMorphAnalyzer(lang);
+        morph = jmorphy2Service.getMorphAnalyzer(lang, substitutesPath, cacheSize);
         if (morph == null) {
             throw new IllegalArgumentException
-                (String.format(Locale.ROOT, "Cannot find dictionary for lang: %s", lang));
+                (String.format(Locale.ROOT, "Cannot find dictionary for lang: [%s]", lang));
         }
         includeTags = parseTags(settings.get("include_tags"));
         excludeTags = parseTags(settings.get("exclude_tags"));

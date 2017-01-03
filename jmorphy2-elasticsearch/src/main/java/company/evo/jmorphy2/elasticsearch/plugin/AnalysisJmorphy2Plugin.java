@@ -28,7 +28,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AnalyzerProvider;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
-// import org.elasticsearch.index.analysis.compound.DictionaryCompoundWordTokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
@@ -44,7 +43,8 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
 
     public AnalysisJmorphy2Plugin(Settings settings) throws IOException {
         super();
-        jmorphy2Service = new Jmorphy2Service(settings);
+        Environment env = new Environment(settings);
+        jmorphy2Service = new Jmorphy2Service(settings, env);
     }
 
     @Override
