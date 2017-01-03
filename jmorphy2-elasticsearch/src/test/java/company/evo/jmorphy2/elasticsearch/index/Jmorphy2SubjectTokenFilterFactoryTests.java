@@ -42,6 +42,12 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
             .put(Environment.PATH_CONF_SETTING.getKey(), home.resolve("config"))
             .put("index.analysis.filter.jmorphy2_subject.type", "jmorphy2_subject")
             .put("index.analysis.filter.jmorphy2_subject.name", "ru")
+            .put("index.analysis.filter.jmorphy2_subject.tagger_rules_path",
+                 "jmorphy2/ru/tagger_rules.txt")
+            .put("index.analysis.filter.jmorphy2_subject.parser_rules_path",
+                 "jmorphy2/ru/parser_rules.txt")
+            .put("index.analysis.filter.jmorphy2_subject.extractor_rules_path",
+                 "jmorphy2/ru/extract_rules.txt")
             .put("index.analysis.analyzer.text.tokenizer", "standard")
             .put("index.analysis.analyzer.text.filter", "jmorphy2_subject")
             .build();
