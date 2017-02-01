@@ -22,6 +22,8 @@ esplugin {
 
 }
 
+version = "${version}-es-${elasticsearchVersion}"
+
 ext {
     dependenciesDir = "${buildDir}/dependencies"
 }
