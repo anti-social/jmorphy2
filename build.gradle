@@ -18,8 +18,8 @@ subprojects {
     javadoc.options.charSet = 'UTF-8'
 
     ext {
-        defaultEsVersion = '5.1.1'
-        defaultLuceneVersion = '6.3.1'
+        defaultEsVersion = '5.1.2'
+        defaultLuceneVersion = '6.3.0'
 
         esLuceneVersions = [
           // '5.0': '6.2.1',
