@@ -3,7 +3,8 @@ package company.evo.jmorphy2.lucene;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import com.carrotsearch.randomizedtesting.RandomizedRunner;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -24,7 +25,7 @@ import company.evo.jmorphy2.nlp.SimpleParser;
 import company.evo.jmorphy2.nlp.SubjectExtractor;
 
 
-@RunWith(JUnit4.class)
+@RunWith(RandomizedRunner.class)
 public class Jmorphy2SubjectFilterTest extends BaseFilterTestCase {
     private static final String TAGGER_RULES_RESOURCE = "/tagger_rules.txt";
     private static final String PARSER_RULES_RESOURCE = "/parser_rules.txt";

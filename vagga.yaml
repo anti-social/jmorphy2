@@ -116,6 +116,15 @@ commands:
     description: Run all checks and tests
     run: [gradle, check]
 
+  update-shas: !Command
+    <<: *cmd_opts
+    description: Clean up and update sha hashsums for local artifacts
+    run: |
+      cd /work/jmorphy2-elasticsearch/licenses
+      rm -rf dawg-*.sha1 jmorphy2-*.sha1
+      cd ..
+      gradle updateShas
+
   benchmark: !Command
     <<: *cmd_opts
     description: Run benchmarks
