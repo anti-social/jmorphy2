@@ -14,11 +14,9 @@ public class ProbabilityEstimator {
     private IntegerDAWG dict;
 
     public ProbabilityEstimator(FileLoader loader) throws IOException {
-        this(loader.getStream(PROBABILITY_FILENAME));
-    }
-
-    public ProbabilityEstimator(InputStream stream) throws IOException {
+        InputStream stream = loader.newStream(PROBABILITY_FILENAME);
         dict = new IntegerDAWG(stream);
+        stream.close();
     }
 
     public float getProbability(String word, Tag tag) throws IOException {

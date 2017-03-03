@@ -71,7 +71,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
             for (String value : valueSet) {
                 grammemeSet.add(morph.getGrammeme(value));
             }
-            
+
             if (!grammemeSet.isEmpty()) {
                 grammemesSets.add(grammemeSet);
             }
@@ -79,7 +79,7 @@ public class Jmorphy2StemFilter extends TokenFilter {
 
         return grammemesSets;
     }
-    
+
     @Override
     public void reset() throws IOException {
         super.reset();

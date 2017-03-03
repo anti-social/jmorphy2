@@ -4,13 +4,15 @@ _default:
     container: java
     user-id: 1
     external-user-id: 0
-
+    volumes:
+      /work/.gradle/caches: !BindRW /vagga/cache/gradle-cache
 
 minimum-vagga: v0.6.1-119
 
 containers:
   java:
     environ:
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
       GRADLE_USER_HOME: *gradle_home
       LANG: en_US.UTF-8
     setup:
@@ -20,31 +22,33 @@ containers:
       - openjdk-8-jdk-headless
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-3.1-bin.zip
-      sha256: c7de3442432253525902f7e8d7eac8b5fd6ce1623f96d76916af6d0e383010fc
-      subdir: gradle-3.1
+      url: https://services.gradle.org/distributions/gradle-2.13-bin.zip
+      sha256: 0f665ec6a5a67865faf7ba0d825afb19c26705ea0597cec80dd191b0f2cbb664
+      subdir: gradle-2.13
       path: /opt/gradle
     - !Sh |
         ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
     - !Env
       GRADLE_USER_HOME: *gradle_home
+    - !CacheDirs {"/work/.gradle/caches": "gradle-cache"}
 
   elastic:
     setup:
     - !Ubuntu xenial
+    - !Install [ca-certificates]
     - !AptTrust
       server: pgp.mit.edu
       keys: [D88E42B4]
     - !UbuntuRepo
-      url: http://packages.elastic.co/elasticsearch/2.x/debian
+      url: https://artifacts.elastic.co/packages/5.x/apt
       suite: stable
       components: [main]
+    - !Env
+      ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=2.4.0
+      - elasticsearch=5.1.1
     - !EnsureDir /var/elasticsearch
-    - !EnsureDir /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts
-    - !EnsureDir /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
     auto-clean: true
@@ -75,17 +79,27 @@ commands:
       # --foreground option runs daemon with different jvm options
       # so then another gradle process rejects to connect to the daemon
       gradle --dry-run --daemon build
-      tail -f /work/.gradle/daemon/3.1/daemon-*.out.log
+      tail -f /work/.gradle/daemon/2.13/daemon-*.out.log
 
   compile: !Command
     <<: *cmd_opts
     description: Compile all source files
     run: [gradle, compileJava]
 
+  compile-test: !Command
+    <<: *cmd_opts
+    description: Compile all test source files
+    run: [gradle, compileTestJava]
+
   build: !Command
     <<: *cmd_opts
     description: Compile, run tests and make packages
     run: [gradle, build]
+
+  assemble: !Command
+    <<: *cmd_opts
+    description: Build and assemple package
+    run: [gradle, assemble]
 
   clean: !Command
     <<: *cmd_opts
@@ -94,8 +108,22 @@ commands:
 
   test: !Command
     <<: *cmd_opts
-    description: Run tests
+    description: Run unit tests
     run: [gradle, test]
+
+  check: !Command
+    <<: *cmd_opts
+    description: Run all checks and tests
+    run: [gradle, check]
+
+  update-shas: !Command
+    <<: *cmd_opts
+    description: Clean up and update sha hashsums for local artifacts
+    run: |
+      cd /work/jmorphy2-elasticsearch/licenses
+      rm -rf dawg-*.sha1 jmorphy2-*.sha1
+      cd ..
+      gradle updateShas
 
   benchmark: !Command
     <<: *cmd_opts
@@ -107,26 +135,15 @@ commands:
     container: elastic
     user-id: 1
     external-user-id: 0
-    prerequisites: [_build-plugin]
     volumes:
       /usr/share/elasticsearch/plugins: !Tmpfs
-      /etc/elasticsearch/jmorphy2/ru/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_ru
-      /etc/elasticsearch/jmorphy2/uk/pymorphy2_dicts: !BindRO /work/jmorphy2-core/src/test/resources/pymorphy2_dicts_uk
     run: |
-      rm -rf /usr/share/elasticsearch/plugins/analysis-jmorphy2
-      /usr/share/elasticsearch/bin/plugin install file:/work/jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+      /usr/share/elasticsearch/bin/elasticsearch-plugin install \
+        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT.zip
       /usr/share/elasticsearch/bin/elasticsearch \
-        --path.conf=/etc/elasticsearch \
-        --path.logs=/var/elasticsearch/logs \
-        --path.data=/var/elasticsearch/data \
-        --security.manager.enabled=false
-
-  _build-plugin: !Command
-    <<: *cmd_opts
-    run: |
-      set -ex
-      gradle clean build -x test -p jmorphy2-elasticsearch
-      gradle processTestResources -p jmorphy2-core
+        -E path.conf=/etc/elasticsearch \
+        -E path.logs=/var/elasticsearch/logs \
+        -E path.data=/var/elasticsearch/data
 
   python: !Command
     description: Run python shell with pymorphy2 package installed

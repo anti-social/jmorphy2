@@ -12,7 +12,7 @@ public class ResourceFileLoader extends FileLoader {
     }
 
     @Override
-    public InputStream getStream(String filename) throws IOException {
+    public InputStream newStream(String filename) throws IOException {
         return getClass().getResourceAsStream(basePath + "/" + filename);
     }
 }

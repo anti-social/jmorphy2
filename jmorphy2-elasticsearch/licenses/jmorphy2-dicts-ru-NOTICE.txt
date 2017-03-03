@@ -1,0 +1,1 @@
+This product includes data from OpenCorpora (http://opencorpora.org)

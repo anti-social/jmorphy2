@@ -1,0 +1,18 @@
+import java.nio.file.Paths
+
+
+description = 'Russian pymorphy2 dictionaries'
+
+task fetchPymorphy2Dicts() << {
+    def dictsPath = Paths.get(
+        sourceSets.main.resources.getSrcDirs().iterator()[0].toString(),
+        "company", "evo", "jmorphy2", "ru"
+    )
+    project(':jmorphy2-core')
+    .downloadAndUnpackDicts('pymorphy2-dicts-ru',
+                            '2.4.393658.3725883',
+                            'bdd5d23660f2ad5e8ec2721743a8b419',
+                            dictsPath)
+}
+
+processResources.dependsOn fetchPymorphy2Dicts

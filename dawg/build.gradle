@@ -2,5 +2,5 @@ description = 'Java library to read dawg files'
 
 dependencies {
     compile 'commons-io:commons-io:2.4'
-    compile 'commons-codec:commons-codec:1.9'
+    compile 'commons-codec:commons-codec:1.10'
 }

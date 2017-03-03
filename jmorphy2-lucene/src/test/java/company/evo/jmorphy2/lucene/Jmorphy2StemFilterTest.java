@@ -3,7 +3,8 @@ package company.evo.jmorphy2.lucene;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+
+import com.carrotsearch.randomizedtesting.RandomizedRunner;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -22,7 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 
 
-@RunWith(JUnit4.class)
+@RunWith(RandomizedRunner.class)
 public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
     private static List<Set<String>> DEFAULT_INCLUDE_TAGS =
         ImmutableList.<Set<String>>of(ImmutableSet.of("NOUN"),
@@ -37,12 +38,16 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
         init();
     }
 
-    protected Analyzer getAnalyzer(final List<Set<String>> includeTags, final List<Set<String>> excludeTags, final boolean enablePositionIncrements) {
+    protected Analyzer getAnalyzer(final List<Set<String>> includeTags,
+                                   final List<Set<String>> excludeTags,
+                                   final boolean enablePositionIncrements)
+    {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName) {
                 Tokenizer source = new WhitespaceTokenizer();
-                TokenFilter filter = new Jmorphy2StemFilter(source, morph, includeTags, excludeTags, enablePositionIncrements);
+                TokenFilter filter = new Jmorphy2StemFilter
+                    (source, morph, includeTags, excludeTags, enablePositionIncrements);
                 return new TokenStreamComponents(source, filter);
             }
         };
