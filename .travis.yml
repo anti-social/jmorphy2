@@ -4,13 +4,13 @@ sudo: required
 
 install:
 - sudo apt-get install -y uidmap
-- wget http://files.zerogw.com/vagga/vagga-0.6.1-231-ga954eb0.tar.xz
-- tar -xJf vagga-0.6.1-231-ga954eb0.tar.xz -C ~
+- echo 'deb [arch=amd64 trusted=yes] https://ubuntu.zerogw.com vagga main' | sudo tee /etc/apt/sources.list.d/vagga.list
+- sudo apt-get update
+- sudo apt-get install vagga
 - |
   echo "cache-dir: ~/.cache" >> ~/.vagga.yaml
   echo "ubuntu-mirror: http://mirrors.us.kernel.org/ubuntu/" >> ~/.vagga.yaml
   echo "alpine-mirror: http://mirrors.gigenet.com/alpinelinux/" >> ~/.vagga.yaml
-- export PATH=~/vagga:$PATH
 - vagga _build java
 
 script:
