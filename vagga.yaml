@@ -47,7 +47,7 @@ containers:
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=5.1.1
+      - elasticsearch=5.2.2
     - !EnsureDir /var/elasticsearch
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
@@ -139,7 +139,7 @@ commands:
       /usr/share/elasticsearch/plugins: !Tmpfs
     run: |
       /usr/share/elasticsearch/bin/elasticsearch-plugin install \
-        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT.zip
+        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.2.2.zip
       /usr/share/elasticsearch/bin/elasticsearch \
         -E path.conf=/etc/elasticsearch \
         -E path.logs=/var/elasticsearch/logs \
