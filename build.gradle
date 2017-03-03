@@ -18,12 +18,12 @@ subprojects {
     javadoc.options.charSet = 'UTF-8'
 
     ext {
-        defaultEsVersion = '5.2.1'
+        defaultEsVersion = '5.2.2'
         defaultLuceneVersion = '6.4.1'
 
         esLuceneVersions = [
             // '5.0': '6.2.1',
-            '5.1': '6.3.0',
+            // '5.1': '6.3.0',
             '5.2': '6.4.1',
         ]
         elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
