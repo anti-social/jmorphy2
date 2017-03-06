@@ -7,5 +7,7 @@ dependencies {
 
     compile project(':jmorphy2-core')
     compile project(':jmorphy2-nlp')
+    compile project(':jmorphy2-dicts-ru')
+
     testCompile project(':jmorphy2-core').sourceSets.test.output
 }

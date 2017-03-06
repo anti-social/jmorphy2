@@ -11,14 +11,14 @@ Compile project, build jars and run tests:
 ```sh
 git clone https://github.com/anti-social/jmorphy2
 cd jmorphy2
-gradle build
+gradle build -x dependencyLicense
 ```
 
 Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubuntu)
 (no java and gradle needed):
 
 ```sh
-vagga build
+vagga build -x dependencyLicense
 ```
 
 To see all available vagga commands just type ``vagga``
@@ -27,33 +27,27 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 2.4.1
+Default elasticsearch version against which plugin is built is 5.2.2
 
 To build for specific elastisearch version run build as:
 
 ```sh
-gradle build -PesVersion=2.2.1
+gradle assemble -PesVersion=5.1.2
 ```
 
 Or:
 
 ```sh
-vagga build -PesVersion=2.2.1
+vagga assemble -PesVersion=5.1.2
 ```
 
-Supported elasticsearch versions: 2.1, 2.2, 2.3, 2.4
+Supported elasticsearch versions: 5.1.x, 5.2.x
 
 Install plugin:
 
 ```sh
-export es_home=/usr/share/elasticsearch
-cd ${es_home}
-
-./bin/plugin install file:jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
-
-# Put `pymorphy2_dicts` into `config/jmorphy2/ru` direcotory:
-mkdir -p /etc/elasticsearch/jmorphy2/ru/
-cp -r jmorphy2-core/src/test/resources/pymorphy2_dicts /etc/elasticsearch/jmorphy2/ru/
+export es_home=/opt/elasticsearch
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
 ```
 
 Or just run elasticsearch inside the container:
@@ -105,7 +99,7 @@ settings:
 
 # Test russian analyzer
 curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'Привет, лошарики!'
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж'
+curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж ежики'
 
 # Test ukrainian analyzer
 curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d 'Пригоди Котигорошка'

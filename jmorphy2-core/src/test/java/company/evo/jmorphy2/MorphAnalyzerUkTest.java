@@ -22,7 +22,7 @@ public class MorphAnalyzerUkTest {
     @Before
     public void setUp() throws IOException {
         if (!initialized) {
-            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("/pymorphy2_dicts_uk");
+            morph = Jmorphy2TestsHelpers.newMorphAnalyzer("uk");
         }
     }
 
