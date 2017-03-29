@@ -6,7 +6,6 @@ install:
 
 build_script:
 - gradle assemble --no-daemon
-- gradle updateSHAs --no-daemon
 
 test_script:
 - gradle check --no-daemon
