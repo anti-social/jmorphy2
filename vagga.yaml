@@ -5,9 +5,9 @@ _default:
     user-id: 1
     external-user-id: 0
     volumes:
-      /work/.gradle/caches: !BindRW /vagga/cache/gradle-cache
+      /work/.gradle/caches: !CacheDir gradle-cache
 
-minimum-vagga: v0.6.1-119
+minimum-vagga: v0.7.1
 
 containers:
   java:
