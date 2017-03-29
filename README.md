@@ -18,7 +18,7 @@ Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubunt
 (no java and gradle needed):
 
 ```sh
-vagga build -x dependencyLicense
+vagga build
 ```
 
 To see all available vagga commands just type ``vagga``
@@ -27,18 +27,25 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 5.2.2
+Default elasticsearch version against which plugin is built is 5.3.0
 
 To build for specific elastisearch version run build as:
 
 ```sh
-gradle assemble -PesVersion=5.1.2
+gradle assemble -PesVersion=5.2.2
 ```
 
 Or:
 
 ```sh
-vagga assemble -PesVersion=5.1.2
+vagga assemble -PesVersion=5.2.2
+```
+
+If you want to run tests against older Elasticsearch version you should disable
+`dependencyLicense` task:
+
+```sh
+vagga check -PesVersion=5.2.2 -x dependencyLicense
 ```
 
 Supported elasticsearch versions: 5.1.x, 5.2.x
@@ -47,7 +54,7 @@ Install plugin:
 
 ```sh
 export es_home=/opt/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/jmorphy2-elasticsearch-0.2-dev.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.3.0.zip
 ```
 
 Or just run elasticsearch inside the container:
