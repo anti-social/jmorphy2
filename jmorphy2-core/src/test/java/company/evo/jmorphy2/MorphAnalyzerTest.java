@@ -46,6 +46,8 @@ public class MorphAnalyzerTest {
         assertFalse(tag.contains("NOUN"));
         assertFalse(tag.containsAllValues(Arrays.asList("ADJF", "nomn")));
 
+        assertParseds("сегодня:ADVB:сегодня:сегодня:1.0", morph.parse("сегодня"), true);
+
         // dictionary word: capitalized
         assertParseds("украину:NOUN,inan,femn,Sgtm,Geox sing,accs:украина:украину:1.0",
                       morph.parse("Украину"));
@@ -86,7 +88,7 @@ public class MorphAnalyzerTest {
                       morph.parse("шуруповерт"));
         assertParseds("шуруповертами:NOUN,inan,masc plur,ablt:шуруповерт:ртами:1.0\n",
                       morph.parse("шуруповертами"));
-        
+
         // known suffix: with paradigm prefix
         assertParseds("наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:няшный:ейший:0.25\n" +
                       "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:няшный:ейший:0.25\n" +
