@@ -6,13 +6,14 @@ Jmorphy2
 
 Java port of the [pymorphy2](https://github.com/kmike/pymorphy2)
 
-Compile project, build jars and run tests:
+Clone project:
 
 ```sh
 git clone https://github.com/anti-social/jmorphy2
 cd jmorphy2
-gradle build -x dependencyLicense
 ```
+
+Compile project, build jars and run tests:
 
 Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubuntu)
 (no java and gradle needed):
@@ -21,40 +22,39 @@ Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubunt
 vagga build
 ```
 
+Same with gradle (minimum gradle version is `3.3`):
+
+```
+gradle build
+```
+
 To see all available vagga commands just type ``vagga``
 
 
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 5.3.0
+Default elasticsearch version against which plugin is built is 5.4.0
 
 To build for specific elastisearch version run build as:
 
 ```sh
-gradle assemble -PesVersion=5.2.2
+vagga assemble -PesVersion=5.4.1
 ```
 
 Or:
 
 ```sh
-vagga assemble -PesVersion=5.2.2
+gradle assemble -PesVersion=5.4.1
 ```
 
-If you want to run tests against older Elasticsearch version you should disable
-`dependencyLicense` task:
-
-```sh
-vagga check -PesVersion=5.2.2 -x dependencyLicense
-```
-
-Supported elasticsearch versions: 5.1.x, 5.2.x
+Supported elasticsearch versions: `5.4.x`
 
 Install plugin:
 
 ```sh
 export es_home=/opt/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.3.0.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.4.0.zip
 ```
 
 Or just run elasticsearch inside the container:

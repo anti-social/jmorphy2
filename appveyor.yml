@@ -1,6 +1,5 @@
 install:
-- choco install gradle -version 2.13
-- set PATH=C:\tools\Gradle\bin;%PATH%
+- choco install gradle -version 3.4.1
 - set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 - gradle -version
 
@@ -13,5 +12,3 @@ test_script:
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml
 - C:\ProgramData\chocolatey\lib -> appveyor.yml
-- C:\tools -> appveyor.yml
-- C:\Users\appveyor\.gradle

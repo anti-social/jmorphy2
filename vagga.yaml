@@ -6,6 +6,7 @@ _default:
     external-user-id: 0
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
+  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.4.0.zip
 
 minimum-vagga: v0.7.1
 
@@ -22,12 +23,11 @@ containers:
       - openjdk-8-jdk-headless
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-2.13-bin.zip
-      sha256: 0f665ec6a5a67865faf7ba0d825afb19c26705ea0597cec80dd191b0f2cbb664
-      subdir: gradle-2.13
+      url: https://services.gradle.org/distributions/gradle-3.5-bin.zip
+      sha256: 0b7450798c190ff76b9f9a3d02e18b33d94553f708ebc08ebe09bdf99111d110
+      subdir: gradle-3.5
       path: /opt/gradle
-    - !Sh |
-        ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
+    - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
     - !Env
       GRADLE_USER_HOME: *gradle_home
     - !CacheDirs {"/work/.gradle/caches": "gradle-cache"}
@@ -47,7 +47,7 @@ containers:
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=5.3.0
+      - elasticsearch=5.4.0
     - !EnsureDir /var/elasticsearch
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
@@ -79,7 +79,7 @@ commands:
       # --foreground option runs daemon with different jvm options
       # so then another gradle process rejects to connect to the daemon
       gradle --dry-run --daemon build
-      tail -f /work/.gradle/daemon/2.13/daemon-*.out.log
+      tail -f /work/.gradle/daemon/3.5/daemon-*.out.log
 
   compile: !Command
     <<: *cmd_opts
@@ -137,14 +137,26 @@ commands:
     external-user-id: 0
     volumes:
       /usr/share/elasticsearch/plugins: !Tmpfs
+    prerequisites:
+    - _maybe-assemble-plugin
+    environ:
+      PLUGIN_PATH: *plugin_path
     run: |
       set -e
-      /usr/share/elasticsearch/bin/elasticsearch-plugin install \
-        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.3.0.zip
+      /usr/share/elasticsearch/bin/elasticsearch-plugin install file:${PLUGIN_PATH}
       /usr/share/elasticsearch/bin/elasticsearch \
         -E path.conf=/etc/elasticsearch \
         -E path.logs=/var/elasticsearch/logs \
         -E path.data=/var/elasticsearch/data
+
+  _maybe-assemble-plugin: !Command
+    <<: *cmd_opts
+    environ:
+      PLUGIN_PATH: *plugin_path
+    run: |
+      if [ ! -f ${PLUGIN_PATH} ]; then
+        gradle assemble -p jmorphy2-elasticsearch
+      fi
 
   python: !Command
     description: Run python shell with pymorphy2 package installed
