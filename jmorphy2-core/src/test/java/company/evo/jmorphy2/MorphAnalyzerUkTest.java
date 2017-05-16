@@ -60,6 +60,9 @@ public class MorphAnalyzerUkTest {
                       "3d-графіка:NOUN,anim masc,accs:3d-графік:графіка:0.75\n" +
                       "3d-графіка:NOUN,inan femn,nomn:3d-графіка:графіка:0.75\n",
                       parseds);
+
+        parseds = morph.parse("сьогодні");
+        assertParseds("сьогодні:ADVB:сьогодні:сьогодні:1.0", parseds, true);
     }
 
     @Test
