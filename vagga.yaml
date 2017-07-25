@@ -1,11 +1,13 @@
 _default:
-  gradle_home: &gradle_home /work/.gradle
+  gradle-uid: &gradle-uid 900
+  gradle_home: &gradle-home /work/.gradle
   command_options: &cmd_opts
     container: java
-    user-id: 1
+    user-id: *gradle-uid
     external-user-id: 0
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
+      /work/.gradle/.m2: !CacheDir maven-cache
   plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.4.0.zip
 
 minimum-vagga: v0.7.1
@@ -14,13 +16,19 @@ containers:
   java:
     environ:
       JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
-      GRADLE_USER_HOME: *gradle_home
+      GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
-    - !UbuntuRelease { codename: xenial }
+    - !Ubuntu xenial
     - !UbuntuUniverse
     - !Install
       - openjdk-8-jdk-headless
+    - !Env
+      GRADLE_USER_HOME: *gradle-home
+      GRADLE_UID: *gradle-uid
+    - !Sh |
+        groupadd -g $GRADLE_UID gradle
+        useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
     - !EnsureDir /opt/gradle
     - !Unzip
       url: https://services.gradle.org/distributions/gradle-3.5-bin.zip
@@ -28,9 +36,6 @@ containers:
       subdir: gradle-3.5
       path: /opt/gradle
     - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
-    - !Env
-      GRADLE_USER_HOME: *gradle_home
-    - !CacheDirs {"/work/.gradle/caches": "gradle-cache"}
 
   elastic:
     setup:

@@ -134,7 +134,7 @@ public class SimpleParserTest {
                            "(NP,gent,sing " +
                              "(NOUN,gent,inan,masc,sing льда)))))",
                      parser.parse(new String[]{"уборка", "и", "вывоз", "снега", "и", "льда"}).toString());
-        
+
         assertEquals("(TOP " +
                        "(NP,nomn,sing " +
                          "(NP,nomn,sing " +
