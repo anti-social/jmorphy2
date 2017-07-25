@@ -1,6 +1,7 @@
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'signing'
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
@@ -37,4 +38,54 @@ subprojects {
     test {
         exclude '**/*Benchmark*'
     }
+
+    // signing {
+    //     sign configurations.archives
+    // }
+
+    // uploadArchives {
+    //     repositories {
+    //         mavenDeployer {
+    //             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+    //             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+    //                 authentication(userName: ossrhUsername, password: ossrhPassword)
+    //             }
+
+    //             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+    //                 authentication(userName: ossrhUsername, password: ossrhPassword)
+    //             }
+
+    //             pom.project {
+    //                 name 'Example Application'
+    //                 packaging 'jar'
+    //                 // optionally artifactId can be defined here
+    //                 description 'A application used as an example on how to set up \
+    //                     pushing  its components to the Central Repository.'
+    //                 url 'http://www.example.com/example-application'
+
+    //                 scm {
+    //                     connection 'scm:git:https://github.com/anti-social/jmorphy2/'
+    //                     developerConnection 'scm:git:https://github.com/anti-social/jmorphy2/'
+    //                     url 'https://github.com/anti-social/jmorphy2/'
+    //                 }
+
+    //                 licenses {
+    //                     license {
+    //                         name 'The Apache License, Version 2.0'
+    //                         url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    //                     }
+    //                 }
+
+    //                 developers {
+    //                     developer {
+    //                         id 'anti-social'
+    //                         name 'Alexander Koval'
+    //                         email 'kovalidis@gmail.com'
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
