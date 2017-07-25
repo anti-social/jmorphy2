@@ -53,6 +53,23 @@ containers:
       /var/elasticsearch: !Persistent { name: elastic }
     auto-clean: true
 
+  elastic-snapshot:
+    setup:
+    - !Ubuntu xenial
+    - !Install [ca-certificates]
+    - !Unzip
+      url: https://oss.sonatype.org/content/repositories/snapshots/org/elasticsearch/distribution/zip/elasticsearch/5.3.0-SNAPSHOT/elasticsearch-5.3.0-20170305.173030-58.zip
+      subdir: elasticsearch-5.3.0-SNAPSHOT
+      path: /opt/elasticsearch
+    - !Install
+      - openjdk-8-jre-headless
+    - !EnsureDir /opt/elasticsearch/config/scripts
+    - !EnsureDir /var/elasticsearch
+    volumes:
+      /opt/elasticsearch/plugins: !Tmpfs
+      /var/elasticsearch: !Tmpfs { size: 1Gi }
+    auto-clean: true
+
   pymorphy2:
     environ:
       HOME: /work
@@ -142,6 +159,19 @@ commands:
         file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.2.2.zip
       /usr/share/elasticsearch/bin/elasticsearch \
         -E path.conf=/etc/elasticsearch \
+        -E path.logs=/var/elasticsearch/logs \
+        -E path.data=/var/elasticsearch/data
+
+  elastic-snapshot: !Command
+    description: Run snapshot version of elasticsearch
+    container: elastic-snapshot
+    user-id: 1
+    external-user-id: 0
+    run: |
+      /opt/elasticsearch/bin/elasticsearch-plugin install \
+        file:/work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.3.0-SNAPSHOT.zip
+      /opt/elasticsearch/bin/elasticsearch \
+        -E path.conf=/opt/elasticsearch/config \
         -E path.logs=/var/elasticsearch/logs \
         -E path.data=/var/elasticsearch/data
 

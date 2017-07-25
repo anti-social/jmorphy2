@@ -196,7 +196,7 @@ public class Jmorphy2Service extends AbstractComponent {
         public final String substitutesPath;
         public final int cacheSize;
 
-        public MorphAnalyzerCacheKey(String lang, String substitutesPath, int cacheSize) {
+        MorphAnalyzerCacheKey(String lang, String substitutesPath, int cacheSize) {
             this.lang = lang;
             this.substitutesPath = substitutesPath;
             this.cacheSize = cacheSize;
@@ -237,7 +237,7 @@ public class Jmorphy2Service extends AbstractComponent {
         public final int taggerThreshold;
         public final int parserThreshold;
 
-        public SubjectExtractorCacheKey
+        SubjectExtractorCacheKey
             (String lang, String substitutesPath, int analyzerCacheSize,
              String taggerRulesPath, String parserRulesPath, String extractorRulesPath,
              int taggerThreshold, int parserThreshold)

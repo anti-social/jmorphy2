@@ -12,6 +12,14 @@ buildscript {
     }
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        name 'sonatype-snapshots'
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
 
