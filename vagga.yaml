@@ -1,10 +1,11 @@
 _default:
   gradle-uid: &gradle-uid 900
   gradle_home: &gradle-home /work/.gradle
-  command_options: &cmd_opts
+  command_options: &cmd-opts
     container: java
     user-id: *gradle-uid
     external-user-id: 0
+    prerequisites: [_mk-gradle-user-home]
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
       /work/.gradle/.m2: !CacheDir maven-cache
@@ -72,13 +73,17 @@ containers:
       - ipython
 
 commands:
+  _mk-gradle-user-home: !Command
+    container: java
+    run: mkdir -p $GRADLE_USER_HOME/caches $GRADLE_USER_HOME/.m2
+
   gradle: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Run arbitrary gradle command
     run: [gradle]
 
   daemon: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Run gradle daemon
     run: |
       # --foreground option runs daemon with different jvm options
@@ -87,42 +92,42 @@ commands:
       tail -f /work/.gradle/daemon/3.5/daemon-*.out.log
 
   compile: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Compile all source files
     run: [gradle, compileJava]
 
   compile-test: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Compile all test source files
     run: [gradle, compileTestJava]
 
   build: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Compile, run tests and make packages
     run: [gradle, build]
 
   assemble: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Build and assemple package
     run: [gradle, assemble]
 
   clean: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Clean all building files
     run: [gradle, clean]
 
   test: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Run unit tests
     run: [gradle, test]
 
   check: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Run all checks and tests
     run: [gradle, check]
 
   update-shas: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Clean up and update sha hashsums for local artifacts
     run: |
       cd /work/jmorphy2-elasticsearch/licenses
@@ -131,7 +136,7 @@ commands:
       gradle updateShas
 
   benchmark: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     description: Run benchmarks
     run: [gradle, benchmark]
 
@@ -155,7 +160,7 @@ commands:
         -E path.data=/var/elasticsearch/data
 
   _maybe-assemble-plugin: !Command
-    <<: *cmd_opts
+    <<: *cmd-opts
     environ:
       PLUGIN_PATH: *plugin_path
     run: |
