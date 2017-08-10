@@ -9,7 +9,7 @@ _default:
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
       /work/.gradle/.m2: !CacheDir maven-cache
-  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.4.0.zip
+  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.5.1.zip
 
 minimum-vagga: v0.7.1
 
@@ -32,9 +32,9 @@ containers:
         useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-3.5-bin.zip
-      sha256: 0b7450798c190ff76b9f9a3d02e18b33d94553f708ebc08ebe09bdf99111d110
-      subdir: gradle-3.5
+      url: https://services.gradle.org/distributions/gradle-4.0-bin.zip
+      sha256: 56bd2dde29ba2a93903c557da1745cafd72cdd8b6b0b83c05a40ed7896b79dfe
+      subdir: gradle-4.0
       path: /opt/gradle
     - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
@@ -53,7 +53,7 @@ containers:
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=5.4.0
+      - elasticsearch=5.5.1
     - !EnsureDir /var/elasticsearch
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
