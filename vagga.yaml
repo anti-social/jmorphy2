@@ -9,7 +9,7 @@ _default:
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
       /work/.gradle/.m2: !CacheDir maven-cache
-  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.5.1.zip
+  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.5.2.zip
 
 minimum-vagga: v0.7.1
 
@@ -53,7 +53,7 @@ containers:
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=5.5.1
+      - elasticsearch=5.5.2
     - !EnsureDir /var/elasticsearch
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
