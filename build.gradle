@@ -24,12 +24,16 @@ subprojects {
         defaultLuceneVersion = '6.6.1'
 
         esLuceneVersions = [
-                '5.4': '6.5.0',
+                '5.4.0': '6.5.0',
+                '5.4': '6.5.1',
                 '5.5': '6.6.0',
                 '5.6': defaultLuceneVersion
         ]
         elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
-        luceneVersion = esLuceneVersions.get(elasticsearchVersion[0..2], defaultLuceneVersion)
+        luceneVersion = esLuceneVersions.get(
+                elasticsearchVersion,
+                esLuceneVersions.get(elasticsearchVersion[0..2], defaultLuceneVersion)
+        )
     }
 
     repositories {
