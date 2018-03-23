@@ -38,7 +38,7 @@ class Utils {
     public static void copyFilesFromResources(Settings settings, String lang)
         throws IOException
     {
-        Path confPath = PathUtils.get(settings.get(Environment.PATH_CONF_SETTING.getKey()));
+        Path confPath = PathUtils.get(settings.get(Environment.PATH_HOME_SETTING.getKey())).resolve("config");
         Path jmorphy2Path = confPath.resolve("jmorphy2").resolve(lang);
         Path pymorphy2DictsPath = jmorphy2Path.resolve("pymorphy2_dicts");
         Files.createDirectories(pymorphy2DictsPath);

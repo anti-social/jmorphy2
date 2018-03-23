@@ -40,7 +40,6 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
         Path home = createTempDir();
         Settings settings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
-            .put(Environment.PATH_CONF_SETTING.getKey(), home.resolve("config"))
             .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
             .put("index.analysis.filter.jmorphy2.name", "ru")
             .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
@@ -48,7 +47,7 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
             .put("index.analysis.analyzer.text.filter", "jmorphy2")
             .build();
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings);
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
         TestAnalysis analysis = createTestAnalysis
             (new Index("test", "_na_"), settings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2"),

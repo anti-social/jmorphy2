@@ -15,9 +15,6 @@ buildscript {
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
 
-// Will be removed after upgrading Elasticsearch to 6.x
-ext.projectSubstitutions = [:]
-
 esplugin {
     name = 'analysis-jmorphy2'
     description 'Jmorphy2 plugin for ElasticSearch'
@@ -25,12 +22,8 @@ esplugin {
 
 }
 
-if (project.hasProperty('licenseFile')) {
-    project.licenseFile = project.file('LICENSE.txt')
-}
-if (project.hasProperty('noticeFile')) {
-    project.noticeFile = project.file('NOTICE.txt')
-}
+project.licenseFile = project.file('LICENSE.txt')
+project.noticeFile = project.file('NOTICE.txt')
 
 version = "${version}-es-${elasticsearchVersion}"
 
@@ -42,8 +35,6 @@ dependencies {
     compile project(':jmorphy2-lucene')
     compile project(':jmorphy2-dicts-ru')
     compile project(':jmorphy2-dicts-uk')
-
-    testCompile project(path: ':jmorphy2-core', configuration: 'tests')
 }
 
 dependencyLicenses {
@@ -53,10 +44,6 @@ dependencyLicenses {
     ignoreSha 'jmorphy2-dicts-uk'
     ignoreSha 'jmorphy2-lucene'
     ignoreSha 'jmorphy2-nlp'
-}
-
-test {
-    testClassesDir = sourceSets.test.output.classesDir
 }
 
 thirdPartyAudit.enabled = false
