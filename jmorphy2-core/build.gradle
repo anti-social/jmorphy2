@@ -45,8 +45,8 @@ def downloadAndUnpackDicts(packageName, version, md5, destPath) {
     if (versionFile.exists() && versionFile.getText('UTF-8') == version) {
         return
     }
-    def dictsDir = baseDictsPath.resolve('pymorphy2_dicts')
-    if (dictsDir.toFile().exists()) {
+    def dictsDir = baseDictsPath.resolve('pymorphy2_dicts').toFile()
+    if (dictsDir.exists()) {
         dictsDir.delete()
     }
     def dictsFile = baseDictsPath.resolve(filename).toFile()
@@ -55,14 +55,14 @@ def downloadAndUnpackDicts(packageName, version, md5, destPath) {
     }
 
     println "Downloading ${packageName} dicts..."
-    dictsDir.toFile().mkdirs()
+    dictsDir.mkdirs()
     new URL(url).withInputStream{ i -> dictsFile.withOutputStream{ it << i }}
 
     println "Unpacking ${packageName} dicts..."
     def zipRootDirName = packageName.replaceAll('-', "_")
     copy {
         from tarTree(resources.gzip(dictsFile))
-        into dictsDir.toFile()
+        into dictsDir
         includeEmptyDirs = false
         eachFile { FileCopyDetails fcp ->
             String zipRootPath = "${fullName}/${zipRootDirName}/data/"
