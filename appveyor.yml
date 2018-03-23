@@ -1,5 +1,5 @@
 install:
-- choco install gradle -version 3.4.1
+- choco install gradle -version 4.6
 - set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 - gradle -version
 
