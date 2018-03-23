@@ -25,8 +25,12 @@ esplugin {
 
 }
 
-project.licenseFile = project.file('LICENSE.txt')
-project.noticeFile = project.file('NOTICE.txt')
+if (project.hasProperty('licenseFile')) {
+    project.licenseFile = project.file('LICENSE.txt')
+}
+if (project.hasProperty('noticeFile')) {
+    project.noticeFile = project.file('NOTICE.txt')
+}
 
 version = "${version}-es-${elasticsearchVersion}"
 
