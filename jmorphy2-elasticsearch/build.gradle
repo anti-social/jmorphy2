@@ -15,12 +15,18 @@ buildscript {
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
 
+// Will be removed after upgrading Elasticsearch to 6.x
+ext.projectSubstitutions = [:]
+
 esplugin {
     name = 'analysis-jmorphy2'
     description 'Jmorphy2 plugin for ElasticSearch'
     classname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
 
 }
+
+project.licenseFile = project.file('LICENSE.txt')
+project.noticeFile = project.file('NOTICE.txt')
 
 version = "${version}-es-${elasticsearchVersion}"
 
