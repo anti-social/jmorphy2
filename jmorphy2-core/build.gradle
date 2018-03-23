@@ -39,7 +39,7 @@ artifacts {
 def downloadAndUnpackDicts(packageName, version, md5, destPath) {
     String fullName = "${packageName}-${version}"
     String filename = "${fullName}.tar.gz"
-    String url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5}"
+    String url = "https://pypi.io/packages/source/p/${packageName}/${filename}?md5=${md5}"
     def baseDictsPath = destPath
     def versionFile = baseDictsPath.resolve('version.txt').toFile()
     if (versionFile.exists() && versionFile.getText('UTF-8') == version) {
@@ -47,7 +47,7 @@ def downloadAndUnpackDicts(packageName, version, md5, destPath) {
     }
     def dictsDir = baseDictsPath.resolve('pymorphy2_dicts')
     if (dictsDir.toFile().exists()) {
-        dictsDir.delete()
+        dictsDir.deleteDir()
     }
     def dictsFile = baseDictsPath.resolve(filename).toFile()
     if (dictsFile.exists()) {

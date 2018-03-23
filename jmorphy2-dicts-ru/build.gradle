@@ -10,8 +10,8 @@ task fetchPymorphy2Dicts() << {
     )
     project(':jmorphy2-core')
     .downloadAndUnpackDicts('pymorphy2-dicts-ru',
-                            '2.4.393658.3725883',
-                            'bdd5d23660f2ad5e8ec2721743a8b419',
+                            '2.4.404381.4453942',
+                            'ecfa3aa6b91dc17b1b717a18ee662daa',
                             dictsPath)
 }
 

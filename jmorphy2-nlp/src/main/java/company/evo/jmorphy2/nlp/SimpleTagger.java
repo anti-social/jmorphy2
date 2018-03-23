@@ -45,7 +45,10 @@ public class SimpleTagger extends Tagger {
         List<Node.Top> results = new ArrayList<Node.Top>();
         if (tokens.length != 0) {
             tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
-            Collections.sort(results, Collections.reverseOrder(Node.scoreComparator()));
+            Collections.sort(results, Node.scoreComparator());
+        }
+        for (Node.Top t : results) {
+            System.out.println(t.score);
         }
         return results;
     }

@@ -36,15 +36,15 @@ public class SimpleTaggerTest {
 
     @Test
     public void testTagger() throws IOException {
-        assertSents(Lists.newArrayList("(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
-                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
-                                       "(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги))",
-                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги))"),
+        assertSents(Lists.newArrayList("(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги))",
+                                       "(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
+                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги))",
+                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги))"),
                     tagger.tagAll(new String[]{"женские", "сапоги"}));
-        assertSents(Lists.newArrayList("(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
-                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
-                                       "(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
-                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))"),
+        assertSents(Lists.newArrayList("(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                                       "(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                                       "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))"),
                     tagger.tagAll(new String[]{"женские", "сапоги", "на", "зиму"}));
         assertSents(Lists.newArrayList("(TOP (NOUN,inan,masc,nomn,sing чехол) (PREP для) (LATN iphone) (LATN 4s))",
                                        "(TOP (NOUN,accs,inan,masc,sing чехол) (PREP для) (LATN iphone) (LATN 4s))"),
@@ -57,6 +57,7 @@ public class SimpleTaggerTest {
     private void assertSents(List<String> expected, List<Node.Top> sents) {
         List<String> stringSents = Lists.newArrayList();
         for (Node sent : sents) {
+            System.out.println(String.format("%s %s", sent.toString(), sent.score));
             stringSents.add(sent.toString());
         }
         assertEquals(expected, stringSents);

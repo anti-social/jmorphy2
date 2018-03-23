@@ -3,8 +3,8 @@ _default:
   gradle_home: &gradle-home /work/.gradle
   command_options: &cmd-opts
     container: java
-    user-id: *gradle-uid
-    external-user-id: 0
+    # user-id: *gradle-uid
+    # external-user-id: 0
     prerequisites: [_mk-gradle-user-home]
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
