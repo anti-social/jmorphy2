@@ -34,30 +34,37 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 5.6.8
+Default elasticsearch version against which plugin is built is 6.0.1
 
 To build for specific elastisearch version run build as:
 
 ```sh
-vagga assemble -PesVersion=5.5.3
+vagga assemble -PesVersion=6.0.0
 ```
 
 Or:
 
 ```sh
-gradle assemble -PesVersion=5.5.3
+gradle assemble -PesVersion=6.0.0
 ```
 
-Supported elasticsearch versions: `5.4.x`, `5.5.x`, `5.6.x`
+Supported elasticsearch versions: `6.0.x`
+
+For older elasticsearch version use specific branches:
+
+- `es-5.4` for Elasticsearch `5.4.x`, `5.5.x` and `5.6.x`
+- `es-5.1` for Elasticsearch `5.1.x`, `5.2.x` and `5.3.x`
 
 Install plugin:
 
 ```sh
+# Specify correct path of your Elasticsearch installation
 export es_home=/opt/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.6.8.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.0.1.zip
 ```
 
-Or just run elasticsearch inside the container:
+Or just run elasticsearch inside the container 
+(only works for plugin built for default Elasticsearch version):
 
 ```sh
 # build container and run elasticsearch with jmorphy2 plugin
@@ -71,11 +78,7 @@ Create index with specific analyzer and test it:
 
 
 ```sh
-cd ${es_home}
-bin/elasticsearch
-
-# open new tab
-curl -XPUT 'localhost:9200/test_index' -d '---
+curl -X PUT -H 'Content-Type: application/yaml' 'localhost:9200/test_index' -d '---
 settings:
   index:
     analysis:
@@ -105,11 +108,26 @@ settings:
 '
 
 # Test russian analyzer
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'Привет, лошарики!'
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_ru&pretty' -d 'ёж еж ежики'
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
+analyzer: text_ru
+text: Привет, лошарики!
+'
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
+analyzer: text_ru
+text: ёж еж ежики
+'
 
 # Test ukrainian analyzer
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d 'Пригоди Котигорошка'
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d 'їжаки'
-curl -XGET 'localhost:9200/test_index/_analyze?analyzer=text_uk&pretty' -d "комп'ютером"
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
+analyzer: text_uk
+text: Пригоди Котигорошка
+'
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
+analyzer: text_uk
+text: їжаки
+'
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d $'---
+analyzer: text_uk
+text: комп\'ютером
+'
 ```

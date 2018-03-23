@@ -9,7 +9,7 @@ _default:
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
       /work/.gradle/.m2: !CacheDir maven-cache
-  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-5.6.8.zip
+  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.0.1.zip
 
 minimum-vagga: v0.7.1
 
@@ -45,14 +45,14 @@ containers:
       server: pgp.mit.edu
       keys: [D88E42B4]
     - !UbuntuRepo
-      url: https://artifacts.elastic.co/packages/5.x/apt
+      url: https://artifacts.elastic.co/packages/6.x/apt
       suite: stable
       components: [main]
     - !Env
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-8-jre-headless
-      - elasticsearch=5.6.8
+      - elasticsearch=6.0.1
     - !EnsureDir /var/elasticsearch
     volumes:
       /var/elasticsearch: !Persistent { name: elastic }
@@ -154,7 +154,6 @@ commands:
       set -e
       /usr/share/elasticsearch/bin/elasticsearch-plugin install file:${PLUGIN_PATH}
       /usr/share/elasticsearch/bin/elasticsearch \
-        -E path.conf=/etc/elasticsearch \
         -E path.logs=/var/elasticsearch/logs \
         -E path.data=/var/elasticsearch/data
 

@@ -39,7 +39,6 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
         Path home = createTempDir();
         Settings settings = Settings.builder()
             .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
-            .put(Environment.PATH_CONF_SETTING.getKey(), home.resolve("config"))
             .put("index.analysis.filter.jmorphy2_subject.type", "jmorphy2_subject")
             .put("index.analysis.filter.jmorphy2_subject.name", "ru")
             .put("index.analysis.filter.jmorphy2_subject.tagger_rules_path",
@@ -54,7 +53,7 @@ public class Jmorphy2SubjectTokenFilterFactoryTests extends ESTestCase {
 
         copyFilesFromResources(settings, "ru");
 
-        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings);
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
         TestAnalysis analysis = createTestAnalysis
             (new Index("test", "_na_"), settings, plugin);
         assertThat(analysis.tokenFilter.get("jmorphy2_subject"),
