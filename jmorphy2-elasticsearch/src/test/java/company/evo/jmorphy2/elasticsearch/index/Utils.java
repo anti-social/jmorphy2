@@ -16,13 +16,8 @@
 
 package company.evo.jmorphy2.elasticsearch.index;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -31,13 +26,8 @@ import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 
-import company.evo.jmorphy2.Jmorphy2TestsHelpers;
-
-
 class Utils {
-    public static void copyFilesFromResources(Settings settings, String lang)
-        throws IOException
-    {
+    static void copyFilesFromResources(Settings settings, String lang) throws IOException {
         Path confPath = PathUtils.get(settings.get(Environment.PATH_HOME_SETTING.getKey())).resolve("config");
         Path jmorphy2Path = confPath.resolve("jmorphy2").resolve(lang);
         Path pymorphy2DictsPath = jmorphy2Path.resolve("pymorphy2_dicts");

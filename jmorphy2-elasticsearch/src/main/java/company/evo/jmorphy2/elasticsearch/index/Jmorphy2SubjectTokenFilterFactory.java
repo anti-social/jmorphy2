@@ -16,19 +16,15 @@
 
 package company.evo.jmorphy2.elasticsearch.index;
 
-import java.util.Set;
-import java.util.List;
 import java.util.Locale;
 
 import org.apache.lucene.analysis.TokenStream;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
-import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.nlp.SimpleParser;
 import company.evo.jmorphy2.nlp.SimpleTagger;
 import company.evo.jmorphy2.nlp.SubjectExtractor;
