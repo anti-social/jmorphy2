@@ -16,27 +16,19 @@
 
 package company.evo.jmorphy2.elasticsearch.index;
 
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 import org.apache.lucene.analysis.TokenStream;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.lucene.Jmorphy2StemFilter;
-import company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory;
 import static company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory.parseTags;
 import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 

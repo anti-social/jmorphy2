@@ -16,23 +16,17 @@
 
 package company.evo.jmorphy2.elasticsearch.indices;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.component.AbstractComponent;
 
@@ -49,9 +43,9 @@ import company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory;
 
 
 public class Jmorphy2Service extends AbstractComponent {
-    public static final String JMORPHY2_DICT_LOCATION_SETTING =
+    private static final String JMORPHY2_DICT_LOCATION_SETTING =
         "indices.analysis.jmorphy2.dictionary.location";
-    public static final String DEFAULT_JMORPHY2_DICT_LOCATION = "jmorphy2";
+    private static final String DEFAULT_JMORPHY2_DICT_LOCATION = "jmorphy2";
 
     private final Environment env;
 
@@ -60,7 +54,7 @@ public class Jmorphy2Service extends AbstractComponent {
     private final Map<MorphAnalyzerCacheKey, MorphAnalyzer> morphAnalyzers = new ConcurrentHashMap<>();
     private final Map<SubjectExtractorCacheKey, SubjectExtractor> subjectExtractors = new ConcurrentHashMap<>();
 
-    public Jmorphy2Service(final Settings settings, final Environment env) throws IOException {
+    public Jmorphy2Service(final Settings settings, final Environment env) {
         super(settings);
         this.env = env;
         this.jmorphy2Dir = resolveJmorphy2Directory(settings, env);
@@ -139,7 +133,7 @@ public class Jmorphy2Service extends AbstractComponent {
             Tagger tagger;
             if (key.taggerRulesPath != null) {
                 try (InputStream rulesStream =
-                     Files.newInputStream(env.configFile().resolve(key.taggerRulesPath))) {
+                             Files.newInputStream(env.configFile().resolve(key.taggerRulesPath))) {
                     tagger = new SimpleTagger(morph,
                                               new Ruleset(rulesStream),
                                               key.taggerThreshold);
@@ -192,9 +186,9 @@ public class Jmorphy2Service extends AbstractComponent {
     }
 
     private static class MorphAnalyzerCacheKey {
-        public final String lang;
-        public final String substitutesPath;
-        public final int cacheSize;
+        private final String lang;
+        private final String substitutesPath;
+        private final int cacheSize;
 
         MorphAnalyzerCacheKey(String lang, String substitutesPath, int cacheSize) {
             this.lang = lang;
@@ -228,14 +222,14 @@ public class Jmorphy2Service extends AbstractComponent {
     }
 
     private static class SubjectExtractorCacheKey {
-        public final String lang;
-        public final String substitutesPath;
-        public final int analyzerCacheSize;
-        public final String taggerRulesPath;
-        public final String parserRulesPath;
-        public final String extractorRulesPath;
-        public final int taggerThreshold;
-        public final int parserThreshold;
+        private final String lang;
+        private final String substitutesPath;
+        private final int analyzerCacheSize;
+        private final String taggerRulesPath;
+        private final String parserRulesPath;
+        private final String extractorRulesPath;
+        private final int taggerThreshold;
+        private final int parserThreshold;
 
         SubjectExtractorCacheKey
             (String lang, String substitutesPath, int analyzerCacheSize,

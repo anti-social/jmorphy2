@@ -18,22 +18,16 @@ package company.evo.jmorphy2.elasticsearch.plugin;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.IndexSettings;
-import org.elasticsearch.index.analysis.AnalyzerProvider;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
 
-import company.evo.jmorphy2.elasticsearch.index.Jmorphy2AnalyzerProvider;
 import company.evo.jmorphy2.elasticsearch.index.Jmorphy2StemTokenFilterFactory;
 import company.evo.jmorphy2.elasticsearch.index.Jmorphy2SubjectTokenFilterFactory;
 import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
@@ -52,26 +46,16 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
     public Map<String, AnalysisProvider<TokenFilterFactory>> getTokenFilters() {
 
         Map<String, AnalysisProvider<TokenFilterFactory>> tokenFilters = new HashMap<>();
-        tokenFilters.put("jmorphy2_stemmer", new Jmorphy2AnalysisProvider() {
-                @Override
-                public TokenFilterFactory get(IndexSettings indexSettings,
-                                              Environment environment,
-                                              String name,
-                                              Settings settings) {
-                    return new Jmorphy2StemTokenFilterFactory
-                        (indexSettings, environment, name, settings, jmorphy2Service);
-                }
-            });
-        tokenFilters.put("jmorphy2_subject", new Jmorphy2AnalysisProvider() {
-                @Override
-                public TokenFilterFactory get(IndexSettings indexSettings,
-                                              Environment environment,
-                                              String name,
-                                              Settings settings) {
-                    return new Jmorphy2SubjectTokenFilterFactory
-                        (indexSettings, environment, name, settings, jmorphy2Service);
-                }
-            });
+        tokenFilters.put("jmorphy2_stemmer",
+                (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
+                        new Jmorphy2StemTokenFilterFactory
+                                (indexSettings, environment, name, settings, jmorphy2Service)
+        );
+        tokenFilters.put("jmorphy2_subject",
+                (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
+                        new Jmorphy2SubjectTokenFilterFactory
+                                (indexSettings, environment, name, settings, jmorphy2Service)
+        );
         return tokenFilters;
     }
 

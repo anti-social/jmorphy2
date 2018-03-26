@@ -27,11 +27,9 @@ import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesT
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.Index;
-import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.test.ESTestCase;
 
 import company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin;
-import static company.evo.jmorphy2.elasticsearch.index.Utils.copyFilesFromResources;
 
 
 public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
