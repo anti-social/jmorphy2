@@ -9,21 +9,23 @@ _default:
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
       /work/.gradle/.m2: !CacheDir maven-cache
-  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.1.3.zip
+  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.2.3.zip
 
 minimum-vagga: v0.7.1
 
 containers:
   java:
     environ:
-      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-9-openjdk-amd64
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
-    - !Ubuntu xenial
+    - !UbuntuRelease {codename: artful}
     - !UbuntuUniverse
     - !Install
-      - openjdk-8-jdk-headless
+      - ca-certificates-java
+      - openjdk-9-jdk-headless
+    - !Sh update-ca-certificates
     - !Env
       GRADLE_USER_HOME: *gradle-home
       GRADLE_UID: *gradle-uid
@@ -39,23 +41,24 @@ containers:
 
   elastic:
     setup:
-    - !Ubuntu xenial
+    - !UbuntuRelease {codename: artful}
+    - !UbuntuUniverse
     - !Install [ca-certificates]
-    - !AptTrust
-      server: pgp.mit.edu
-      keys: [D88E42B4]
     - !UbuntuRepo
       url: https://artifacts.elastic.co/packages/6.x/apt
+      trusted: true
       suite: stable
       components: [main]
     - !Env
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
-      - openjdk-8-jre-headless
-      - elasticsearch=6.1.3
-    - !EnsureDir /var/elasticsearch
+      - openjdk-9-jre-headless
+      - elasticsearch=6.2.3
+    - !EnsureDir /var/lib/elasticsearch
+    - !EnsureDir /var/log/elasticsearch
     volumes:
-      /var/elasticsearch: !Persistent { name: elastic }
+      /var/lib/elasticsearch: !Persistent { name: elastic-data }
+      /var/log/elasticsearch: !Persistent { name: elastic-logs }
     auto-clean: true
 
   pymorphy2:
@@ -154,8 +157,8 @@ commands:
       set -e
       /usr/share/elasticsearch/bin/elasticsearch-plugin install file:${PLUGIN_PATH}
       /usr/share/elasticsearch/bin/elasticsearch \
-        -E path.logs=/var/elasticsearch/logs \
-        -E path.data=/var/elasticsearch/data
+        -E path.data=/var/lib/elasticsearch \
+        -E path.logs=/var/log/elasticsearch
 
   _maybe-assemble-plugin: !Command
     <<: *cmd-opts
