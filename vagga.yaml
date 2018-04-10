@@ -89,8 +89,10 @@ commands:
     run: |
       # --foreground option runs daemon with different jvm options
       # so then another gradle process rejects to connect to the daemon
-      gradle --dry-run --daemon build
-      tail -f /work/.gradle/daemon/3.5/daemon-*.out.log
+      gradle --dry-run --daemon
+      GRADLE_PID=$(pidof java)
+      echo "Gradle daemon successfully started [PID: $GRADLE_PID]."
+      while [ -e /proc/$GRADLE_PID ]; do sleep 1; done
 
   compile: !Command
     <<: *cmd-opts
