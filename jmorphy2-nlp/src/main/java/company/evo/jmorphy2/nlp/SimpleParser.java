@@ -1,14 +1,10 @@
 package company.evo.jmorphy2.nlp;
 
-import java.io.IOException;
 import java.lang.Math;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.Arrays;
 import java.util.Collections;
 
 import com.google.common.collect.Sets;
@@ -28,19 +24,19 @@ public class SimpleParser extends Parser {
 
     public static final int DEFAULT_THRESHOLD = 100;
 
-    public SimpleParser(MorphAnalyzer morph, Tagger tagger) throws IOException {
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger) {
         this(morph, tagger, defaultRules);
     }
 
-    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules) throws IOException {
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules) {
         this(morph, tagger, rules, DEFAULT_THRESHOLD);
     }
 
-    public SimpleParser(MorphAnalyzer morph, Tagger tagger, int threshold) throws IOException {
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, int threshold) {
         this(morph, tagger, defaultRules, threshold);
     }
 
-    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules, int threshold) throws IOException {
+    public SimpleParser(MorphAnalyzer morph, Tagger tagger, Ruleset rules, int threshold) {
         super(morph, tagger);
         this.rules = rules;
         this.threshold = threshold;
@@ -49,10 +45,13 @@ public class SimpleParser extends Parser {
     }
 
     private Set<String> getGrammemeValuesFor(String rootValue) {
-        Set<String> values = new HashSet<String>();
+        Set<String> values = new HashSet<>();
+        Grammeme rootGrammeme = morph.getGrammeme(rootValue);
+        if (rootGrammeme == null) {
+            return Collections.emptySet();
+        }
         for (Grammeme grammeme : morph.getAllGrammemes()) {
-            Grammeme rootGrammeme = grammeme.getRoot();
-            if (rootGrammeme != null && rootGrammeme.equals(rootValue)) {
+            if (rootGrammeme.equals(grammeme.getRoot())) {
                 values.add(grammeme.value);
             }
         }
@@ -62,7 +61,7 @@ public class SimpleParser extends Parser {
     public Node.Top parse(List<Node.Top> sentences) {
         List<Node.Top> tops = parseAll(sentences);
         if (tops.isEmpty()) {
-            return new Node.Top(ImmutableList.<Node>of(), 0.0f);
+            return new Node.Top(ImmutableList.of(), 0.0f);
         }
         return tops.get(0);
     }

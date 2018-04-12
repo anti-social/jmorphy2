@@ -1,7 +1,5 @@
 package company.evo.jmorphy2;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -62,15 +60,10 @@ public class Grammeme {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof String) {
-            return value.equals((String) obj);
+        if (obj instanceof Grammeme) {
+            return value.equals(((Grammeme) obj).value);
         }
-
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-
-        return value.equals(((Grammeme) obj).value);
+        return false;
     }
 
     @Override

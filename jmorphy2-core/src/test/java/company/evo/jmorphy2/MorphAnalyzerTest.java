@@ -210,7 +210,7 @@ public class MorphAnalyzerTest {
     }
 
     @Test
-    public void testInflectIncludeGrammemes() throws IOException {
+    public void test_inflect_includeGrammemes() throws IOException {
         List<ParsedWord> parseds;
         List<ParsedWord> paradigm;
 
@@ -232,7 +232,7 @@ public class MorphAnalyzerTest {
     }
 
     @Test
-    public void testInflectIncludeAndExcludeGrammemes() throws IOException {
+    public void test_inflect_includeAndExcludeGrammemes() throws IOException {
         List<ParsedWord> parseds;
         List<ParsedWord> paradigm;
 

@@ -1,14 +1,11 @@
 package company.evo.jmorphy2;
 
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
@@ -75,9 +72,12 @@ public class Tag {
     }
 
     private Grammeme getGrammemeFor(String rootValue) {
+        Grammeme rootGrammeme = storage.getGrammeme(rootValue);
+        if (rootGrammeme == null) {
+            return null;
+        }
         for (Grammeme grammeme : this.grammemes) {
-            Grammeme rootGrammeme = grammeme.getRoot();
-            if (rootGrammeme != null && rootGrammeme.equals(rootValue)) {
+            if (rootGrammeme.equals(grammeme.getRoot())) {
                 return grammeme;
             }
         }
@@ -85,7 +85,7 @@ public class Tag {
     }
 
     public Set<String> getGrammemeValues() {
-        Set<String> grammemeValues = new HashSet<String>();
+        Set<String> grammemeValues = new HashSet<>();
         for (Grammeme grammeme : grammemes) {
             grammemeValues.add(grammeme.value);
         }
@@ -156,8 +156,8 @@ public class Tag {
 
     // TODO: make as API
     static public class Storage {
-        private final Map<String,Tag> tags = new HashMap<String,Tag>();
-        private final Map<String,Grammeme> grammemes = new HashMap<String,Grammeme>();
+        private final Map<String,Tag> tags = new HashMap<>();
+        private final Map<String,Grammeme> grammemes = new HashMap<>();
 
         public Tag getTag(String tagString) {
             return tags.get(tagString);
