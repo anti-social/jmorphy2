@@ -1,6 +1,7 @@
 package company.evo.jmorphy2;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class Grammeme {
@@ -61,9 +62,16 @@ public class Grammeme {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Grammeme) {
-            return value.equals(((Grammeme) obj).value);
+            Grammeme other = (Grammeme) obj;
+            return key.equals(other.key) &&
+                    storage == other.storage;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key);
     }
 
     @Override

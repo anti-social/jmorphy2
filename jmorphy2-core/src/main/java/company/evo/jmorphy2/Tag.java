@@ -1,11 +1,6 @@
 package company.evo.jmorphy2;
 
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
+import java.util.*;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
@@ -141,12 +136,17 @@ public class Tag {
 
     @Override
     public boolean equals(Object obj) {
-        if (getClass() != obj.getClass()) {
-            return false;
+        if (obj instanceof Tag) {
+            Tag other = (Tag) obj;
+            return grammemes.equals(other.grammemes) &&
+                    storage == other.storage;
         }
+        return false;
+    }
 
-        Tag other = (Tag) obj;
-        return grammemes.equals(other.grammemes);
+    @Override
+    public int hashCode() {
+        return Objects.hash(grammemes);
     }
 
     @Override
