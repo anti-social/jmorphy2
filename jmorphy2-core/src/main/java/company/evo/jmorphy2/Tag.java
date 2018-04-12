@@ -2,6 +2,7 @@ package company.evo.jmorphy2;
 
 import java.util.*;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
 
@@ -23,6 +24,7 @@ public class Tag {
         ImmutableSet.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
 
     private final String originalTagString;
+    private final String normalizedTagString;
     private final Storage storage;
 
     public final ImmutableSet<Grammeme> grammemes;
@@ -43,14 +45,21 @@ public class Tag {
         this.originalTagString = tagString;
         this.storage = storage;
 
-        Set<Grammeme> grammemes = new HashSet<Grammeme>();
-        String[] grammemeStrings = tagString.replace(" ", ",").split(",");
+        Set<Grammeme> grammemes = new HashSet<>();
+        String[] grammemeStrings = Storage.splitTagString(tagString);
+        List<String> normalizedGrammemeValues = new ArrayList<>(grammemeStrings.length);
         for (String grammemeValue : grammemeStrings) {
-            if (grammemeValue != null) {
-                grammemes.add(storage.getGrammeme(grammemeValue));
+            Grammeme grammeme = storage.getGrammeme(grammemeValue);
+            if (grammeme == null) {
+                continue;
             }
+            grammemes.add(grammeme);
+            normalizedGrammemeValues.add(grammeme.key);
         }
         this.grammemes = ImmutableSet.copyOf(grammemes);
+
+        Collections.sort(normalizedGrammemeValues);
+        this.normalizedTagString = String.join(" ", normalizedGrammemeValues);
 
         POS = getGrammemeFor(PART_OF_SPEECH);
         anymacy = getGrammemeFor(ANIMACY);
@@ -130,10 +139,6 @@ public class Tag {
         return Sets.intersection(getGrammemeValues(), NON_PRODUCTIVE_GRAMMEMES).isEmpty();
     }
 
-    public String getTagString() {
-        return originalTagString;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Tag) {
@@ -159,8 +164,26 @@ public class Tag {
         private final Map<String,Tag> tags = new HashMap<>();
         private final Map<String,Grammeme> grammemes = new HashMap<>();
 
+        static String normalizeGrammemeValue(String grammemeValue) {
+            return grammemeValue.toLowerCase();
+        }
+
+        private static String[] splitTagString(String tagString) {
+            return tagString.replace(" ", ",").split(",");
+        }
+
+        private static String normalizeTagString(String tagString) {
+            String[] grammemeStrings = splitTagString(tagString);
+            List<String> normalizedGrammemeValues = new ArrayList<>(grammemeStrings.length);
+            for (String grammemeValue : grammemeStrings) {
+                normalizedGrammemeValues.add(normalizeGrammemeValue(grammemeValue));
+            }
+            Collections.sort(normalizedGrammemeValues);
+            return String.join(" ", normalizedGrammemeValues);
+        }
+
         public Tag getTag(String tagString) {
-            return tags.get(tagString);
+            return tags.get(normalizeTagString(tagString));
         }
 
         public Collection<Tag> getAllTags() {
@@ -168,7 +191,7 @@ public class Tag {
         }
 
         private void addTag(Tag tag) {
-            tags.put(tag.getTagString(), tag);
+            tags.put(tag.normalizedTagString, tag);
         }
 
         public Tag newTag(String tagString) {
@@ -184,7 +207,7 @@ public class Tag {
             if (grammemeValue == null) {
                 return null;
             }
-            return grammemes.get(grammemeValue.toLowerCase());
+            return grammemes.get(normalizeGrammemeValue(grammemeValue));
         }
 
         public Collection<Grammeme> getAllGrammemes() {
