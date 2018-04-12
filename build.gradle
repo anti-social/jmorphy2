@@ -10,7 +10,14 @@ subprojects {
     }
 
     group = 'company.evo.jmorphy2'
-    version = '0.2.0-SNAPSHOT'
+    def libVersion = rootProject.file('project.version')
+            .readLines()
+            .first()
+            .toUpperCase()
+    if (project.hasProperty("release")) {
+        libVersion = libVersion - "-SNAPSHOT"
+    }
+    version = libVersion
 
     sourceCompatibility = '1.8'
 
@@ -20,7 +27,9 @@ subprojects {
     javadoc.options.charSet = 'UTF-8'
 
     ext {
-        defaultEsVersion = '6.2.3'
+        defaultEsVersion = rootProject.file('es.version')
+                .readLines()
+                .first()
         defaultLuceneVersion = '7.2.1'
 
         esLuceneVersions = [

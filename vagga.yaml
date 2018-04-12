@@ -8,7 +8,6 @@ _default:
     prerequisites: [_mk-gradle-user-home]
     volumes:
       /work/.gradle/caches: !CacheDir gradle-cache
-  plugin_path: &plugin_path /work/jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.2.3.zip
 
 minimum-vagga: v0.7.1
 
@@ -52,7 +51,7 @@ containers:
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
       - openjdk-9-jre-headless
-      - elasticsearch=6.2.3
+    - !Sh apt-get install elasticsearch=$(cat es.version)
     - !EnsureDir /var/lib/elasticsearch
     - !EnsureDir /var/log/elasticsearch
     volumes:
@@ -152,20 +151,20 @@ commands:
       /usr/share/elasticsearch/plugins: !Tmpfs
     prerequisites:
     - _maybe-assemble-plugin
-    environ:
-      PLUGIN_PATH: *plugin_path
     run: |
       set -e
-      /usr/share/elasticsearch/bin/elasticsearch-plugin install file:${PLUGIN_PATH}
+      DISTRIBUTION_DIR=/work/jmorphy2-elasticsearch/build/distributions
+      PLUGIN_PATH=$DISTRIBUTION_DIR/analysis-jmorphy2-$(cat project.version)-es$(cat es.version).zip
+      /usr/share/elasticsearch/bin/elasticsearch-plugin install file:$PLUGIN_PATH
       /usr/share/elasticsearch/bin/elasticsearch \
         -E path.data=/var/lib/elasticsearch \
         -E path.logs=/var/log/elasticsearch
 
   _maybe-assemble-plugin: !Command
     <<: *cmd-opts
-    environ:
-      PLUGIN_PATH: *plugin_path
     run: |
+      DISTRIBUTION_DIR=/work/jmorphy2-elasticsearch/build/distributions
+      PLUGIN_PATH=$DISTRIBUTION_DIR/analysis-jmorphy2-$(cat project.version)-es$(cat es.version).zip
       if [ ! -f ${PLUGIN_PATH} ]; then
         gradle assemble -p jmorphy2-elasticsearch
       fi

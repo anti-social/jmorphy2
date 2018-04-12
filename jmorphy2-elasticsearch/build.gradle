@@ -9,23 +9,25 @@ buildscript {
     }
     dependencies {
         classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
     }
 }
 
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
+apply plugin: 'com.jfrog.bintray'
 
 esplugin {
     name = 'analysis-jmorphy2'
     description 'Jmorphy2 plugin for ElasticSearch'
     classname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
-
 }
 
 project.licenseFile = project.file('LICENSE.txt')
 project.noticeFile = project.file('NOTICE.txt')
 
-version = "${version}-es-${elasticsearchVersion}"
+def pluginVersion = version
+version = "${pluginVersion}-es${elasticsearchVersion}"
 
 ext {
     dependenciesDir = "${buildDir}/dependencies"
@@ -49,3 +51,33 @@ dependencyLicenses {
 thirdPartyAudit.enabled = false
 // TODO: write integration tests
 integTest.enabled = false
+
+bintray {
+    user = project.hasProperty("bintrayUser") ?
+        project.property("bintrayUser").toString() :
+        System.getenv("BINTRAY_USER")
+    key = project.hasProperty("bintrayApiKey") ?
+        project.property("bintrayApiKey").toString() :
+        System.getenv("BINTRAY_API_KEY")
+    pkg {
+        repo = "elasticsearch"
+        name = project.name
+        userOrg = "evo"
+        licenses = ["Apache-2.0"]
+        labels = ["elasticsearch-plugin", "analysis-plugin", "jmorphy2", "pymorphy2"]
+        vcsUrl = "https://github.com/anti-social/jmorphy2.git"
+        version {
+            name = pluginVersion
+            released = new Date().toString()
+            vcsTag = "v$pluginVersion"
+        }
+    }
+    filesSpec {
+        def distributionsDir = buildDir.toPath().resolve("distributions")
+        from distributionsDir
+        include "*-$pluginVersion-*.zip"
+        into "."
+    }
+    publish = true
+    dryRun = project.hasProperty("bintrayDryRun")
+}
