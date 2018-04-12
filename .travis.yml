@@ -8,17 +8,28 @@ install:
 - sudo apt-get update
 - sudo apt-get install vagga
 - |
-  echo "cache-dir: ~/.cache" >> ~/.vagga.yaml
+  echo "cache-dir: ~/.cache/vagga" >> ~/.vagga.yaml
   echo "ubuntu-mirror: http://mirrors.us.kernel.org/ubuntu/" >> ~/.vagga.yaml
   echo "alpine-mirror: http://mirrors.gigenet.com/alpinelinux/" >> ~/.vagga.yaml
+
+before_script:
 - vagga _build java
 
 script:
 - |
-  set -ex
-  vagga assemble --no-daemon
-  vagga check --no-daemon
+  GRADLE_ARGS="--no-daemon"
+  if [[ $TRAVIS_TAG == v* ]]; then
+    GRADLE_ARGS="$GRADLE_ARGS -Prelease=true"
+  fi
+  vagga assemble $GRADLE_ARGS
+  vagga check $GRADLE_ARGS
+
+after_success:
+- |
+  if [[ $TRAVIS_TAG == v* ]]; then
+    vagga -e BINTRAY_USER -e BINTRAY_API_KEY gradle bintrayUpload -Prelease=true --info --no-daemon
+  fi
 
 cache:
   directories:
-  - $HOME/.cache
+  - $HOME/.cache/vagga/gradle-cache
