@@ -210,13 +210,38 @@ public class MorphAnalyzerTest {
     }
 
     @Test
-    public void test_inflect() throws IOException {
+    public void testInflectIncludeGrammemes() throws IOException {
         List<ParsedWord> parseds;
         List<ParsedWord> paradigm;
 
         parseds = morph.parse("красивого");
-        paradigm = parseds.get(0).inflect(Arrays.asList(morph.getGrammeme("ADJF"), morph.getGrammeme("femn")),
-                                          Arrays.asList(morph.getGrammeme("Supr")));
+        paradigm = parseds.get(0)
+                .inflect(
+                        Arrays.asList(
+                                morph.getGrammeme("ADJF"),
+                                morph.getGrammeme("femn"),
+                                morph.getGrammeme("nomn")
+                        )
+                );
+        assertParseds(
+                "красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:0.5\n" +
+                        "красивейшая:ADJF,Supr,Qual femn,sing,nomn:красивый:красивейшая:0.5\n" +
+                        "наикрасивейшая:ADJF,Supr,Qual femn,sing,nomn:красивый:наикрасивейшая:0.5",
+                paradigm
+        );
+    }
+
+    @Test
+    public void testInflectIncludeAndExcludeGrammemes() throws IOException {
+        List<ParsedWord> parseds;
+        List<ParsedWord> paradigm;
+
+        parseds = morph.parse("красивого");
+        paradigm = parseds.get(0)
+                .inflect(
+                        Arrays.asList(morph.getGrammeme("ADJF"), morph.getGrammeme("femn")),
+                        Arrays.asList(morph.getGrammeme("Supr"))
+                );
         assertParseds("красивая:ADJF,Qual femn,sing,nomn:красивый:красивая:0.5\n" +
                       "красивой:ADJF,Qual femn,sing,gent:красивый:красивой:0.5\n" +
                       "красивой:ADJF,Qual femn,sing,datv:красивый:красивой:0.5\n" +

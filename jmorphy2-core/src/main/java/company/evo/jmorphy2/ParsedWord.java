@@ -1,9 +1,8 @@
 package company.evo.jmorphy2;
 
-import java.io.IOException;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -29,7 +28,7 @@ public abstract class ParsedWord implements Comparable {
     public abstract List<ParsedWord> getLexeme();
 
     public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes) {
-        return inflect(requiredGrammemes, null);
+        return inflect(requiredGrammemes, Collections.emptyList());
     }
 
     public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes,
