@@ -14,15 +14,15 @@ minimum-vagga: v0.7.1
 containers:
   java:
     environ:
-      JAVA_HOME: /usr/lib/jvm/java-9-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
-    - !UbuntuRelease {codename: artful}
+    - !Ubuntu bionic
     - !UbuntuUniverse
     - !Install
       - ca-certificates-java
-      - openjdk-9-jdk-headless
+      - openjdk-11-jdk-headless
     - !Sh update-ca-certificates
     - !Env
       GRADLE_USER_HOME: *gradle-home
@@ -39,7 +39,7 @@ containers:
 
   elastic:
     setup:
-    - !UbuntuRelease {codename: artful}
+    - !Ubuntu bionic
     - !UbuntuUniverse
     - !Install [ca-certificates]
     - !UbuntuRepo
@@ -50,7 +50,7 @@ containers:
     - !Env
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
-      - openjdk-9-jre-headless
+      - openjdk-11-jre-headless
     - !Sh apt-get install elasticsearch=$(cat es.version)
     - !EnsureDir /var/lib/elasticsearch
     - !EnsureDir /var/log/elasticsearch

@@ -34,21 +34,21 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 6.2.3
+Default elasticsearch version against which plugin is built is 6.3.2
 
 To build for specific elastisearch version run build as:
 
 ```sh
-vagga assemble -PesVersion=6.1.3
+vagga assemble -PesVersion=6.2.3
 ```
 
 Or:
 
 ```sh
-gradle assemble -PesVersion=6.1.3
+gradle assemble -PesVersion=6.2.3
 ```
 
-Supported elasticsearch versions: `6.0.x`, `6.1.x`, `6.2.x`
+Supported elasticsearch versions: `6.0.x`, `6.1.x`, `6.2.x`, `6.3.x`
 
 For older elasticsearch version use specific branches:
 
