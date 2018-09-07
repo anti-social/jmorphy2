@@ -26,8 +26,13 @@ esplugin {
 project.licenseFile = project.file('LICENSE.txt')
 project.noticeFile = project.file('NOTICE.txt')
 
-def pluginVersion = version
-version = "${pluginVersion}-es${elasticsearchVersion}"
+def tag = grgit.describe(match: ["*-es*"])
+def libVersion = version
+if (tag) {
+    version = tag
+} else {
+    version = "${libVersion}-es${elasticsearchVersion}"
+}
 
 ext {
     dependenciesDir = "${buildDir}/dependencies"
@@ -67,15 +72,15 @@ bintray {
         labels = ["elasticsearch-plugin", "analysis-plugin", "jmorphy2", "pymorphy2"]
         vcsUrl = "https://github.com/anti-social/jmorphy2.git"
         version {
-            name = pluginVersion
+            name = libVersion
             released = new Date().toString()
-            vcsTag = "v$pluginVersion"
+            vcsTag = "v$libVersion"
         }
     }
     filesSpec {
         def distributionsDir = buildDir.toPath().resolve("distributions")
         from distributionsDir
-        include "*-$pluginVersion-*.zip"
+        include "*-${version}.zip"
         into "."
     }
     publish = true

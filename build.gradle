@@ -1,6 +1,11 @@
+plugins {
+    id "org.ajoberstar.grgit" version "2.3.0"
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
+    apply plugin: 'org.ajoberstar.grgit'
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
