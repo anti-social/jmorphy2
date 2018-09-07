@@ -26,10 +26,11 @@ esplugin {
 project.licenseFile = project.file('LICENSE.txt')
 project.noticeFile = project.file('NOTICE.txt')
 
-def tag = grgit.describe(match: ["*-es*"])
+def verPrefix = "v"
+def tag = grgit.describe(match: ["${verPrefix}*-es*"])
 def libVersion = version
 if (tag) {
-    version = tag
+    version = tag - ~/^${verPrefix}/
 } else {
     version = "${libVersion}-es${elasticsearchVersion}"
 }
