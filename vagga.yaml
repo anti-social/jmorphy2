@@ -14,7 +14,7 @@ minimum-vagga: v0.7.1
 containers:
   java:
     environ:
-      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-12-openjdk-amd64
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
@@ -22,7 +22,7 @@ containers:
     - !UbuntuUniverse
     - !Install
       - ca-certificates-java
-      - openjdk-11-jdk-headless
+      - openjdk-12-jdk-headless
     - !Sh update-ca-certificates
     - !Env
       GRADLE_USER_HOME: *gradle-home
@@ -32,7 +32,7 @@ containers:
         useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-4.6-bin.zip
+      url: https://services.gradle.org/distributions/gradle-5.2.1-bin.zip
       subdir: gradle-4.6
       path: /opt/gradle
     - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
