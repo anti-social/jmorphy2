@@ -16,8 +16,16 @@
 
 package company.evo.jmorphy2.elasticsearch.indices;
 
-import java.io.InputStream;
+import company.evo.jmorphy2.FileLoader;
+import company.evo.jmorphy2.MorphAnalyzer;
+import company.evo.jmorphy2.ResourceFileLoader;
+import company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory;
+import company.evo.jmorphy2.nlp.*;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,23 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.component.AbstractComponent;
 
-import company.evo.jmorphy2.FileLoader;
-import company.evo.jmorphy2.MorphAnalyzer;
-import company.evo.jmorphy2.ResourceFileLoader;
-import company.evo.jmorphy2.nlp.Parser;
-import company.evo.jmorphy2.nlp.Ruleset;
-import company.evo.jmorphy2.nlp.Tagger;
-import company.evo.jmorphy2.nlp.SimpleParser;
-import company.evo.jmorphy2.nlp.SimpleTagger;
-import company.evo.jmorphy2.nlp.SubjectExtractor;
-import company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory;
-
-
-public class Jmorphy2Service extends AbstractComponent {
+public class Jmorphy2Service {
     private static final String JMORPHY2_DICT_LOCATION_SETTING =
         "indices.analysis.jmorphy2.dictionary.location";
     private static final String DEFAULT_JMORPHY2_DICT_LOCATION = "jmorphy2";
@@ -55,7 +48,6 @@ public class Jmorphy2Service extends AbstractComponent {
     private final Map<SubjectExtractorCacheKey, SubjectExtractor> subjectExtractors = new ConcurrentHashMap<>();
 
     public Jmorphy2Service(final Settings settings, final Environment env) {
-        super(settings);
         this.env = env;
         this.jmorphy2Dir = resolveJmorphy2Directory(settings, env);
     }

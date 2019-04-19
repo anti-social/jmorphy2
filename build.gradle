@@ -24,7 +24,7 @@ subprojects {
     }
     version = libVersion
 
-    sourceCompatibility = '1.8'
+    sourceCompatibility = '12'
 
     compileJava.options.encoding = 'UTF-8'
     compileJava.options.compilerArgs << "-Xlint:unchecked"
@@ -35,13 +35,14 @@ subprojects {
         defaultEsVersion = rootProject.file('es.version')
                 .readLines()
                 .first()
-        defaultLuceneVersion = '7.3.1'
+        defaultLuceneVersion = '7.7.0'
 
         esLuceneVersions = [
                 '6.0': '7.0.1',
                 '6.1': '7.1.0',
                 '6.2': '7.2.1',
-                '6.3': defaultLuceneVersion
+                '6.3': '7.3.1',
+                '6.7': defaultLuceneVersion
         ]
         elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
         luceneVersion = esLuceneVersions.get(
