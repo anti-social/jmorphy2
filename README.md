@@ -22,10 +22,9 @@ Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubunt
 vagga build
 ```
 
-Same with gradle (minimum gradle version is `4.3`):
 
 ```
-gradle build
+./gradlew build
 ```
 
 To see all available vagga commands just type ``vagga``
@@ -34,21 +33,21 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 6.3.2
+Default elasticsearch version against which plugin is built is 6.7.1
 
 To build for specific elastisearch version run build as:
 
 ```sh
-vagga assemble -PesVersion=6.2.3
+vagga assemble -PesVersion=6.6.2
 ```
 
 Or:
 
 ```sh
-gradle assemble -PesVersion=6.2.3
+./gradlew assemble -PesVersion=6.6.2
 ```
 
-Supported elasticsearch versions: `6.0.x`, `6.1.x`, `6.2.x`, `6.3.x`
+Supported elasticsearch versions: `6.6.x`, `6.7.x`
 
 For older elasticsearch version use specific branches:
 
@@ -60,7 +59,7 @@ Install plugin:
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/opt/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.0-SNAPSHOT-es-6.2.3zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es6.7.1.zip
 ```
 
 Or just run elasticsearch inside the container 
@@ -94,13 +93,13 @@ settings:
           name: uk
       analyzer:
         text_ru:
-          tokenizer: whitespace
+          tokenizer: standard
           filter:
           - delimiter
           - lowercase
           - jmorphy2_russian
         text_uk:
-          tokenizer: whitespace
+          tokenizer: standard
           filter:
           - delimiter
           - lowercase
