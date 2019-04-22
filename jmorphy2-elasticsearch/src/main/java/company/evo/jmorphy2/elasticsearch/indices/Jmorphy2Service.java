@@ -20,7 +20,13 @@ import company.evo.jmorphy2.FileLoader;
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.ResourceFileLoader;
 import company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory;
-import company.evo.jmorphy2.nlp.*;
+import company.evo.jmorphy2.nlp.Parser;
+import company.evo.jmorphy2.nlp.Ruleset;
+import company.evo.jmorphy2.nlp.SimpleParser;
+import company.evo.jmorphy2.nlp.SimpleTagger;
+import company.evo.jmorphy2.nlp.SubjectExtractor;
+import company.evo.jmorphy2.nlp.Tagger;
+
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 
