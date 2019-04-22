@@ -89,7 +89,6 @@ public class MorphAnalyzerUkTest {
         // known prefix
         parseds = morph.parse("авіаквиток");
         lexeme = parseds.get(0).getLexeme();
-        System.out.println(lexeme);
         assertParseds("авіаквиток:NOUN,inan masc,nomn:авіаквиток:квиток:1.0\n" +
                       "авіаквитка:NOUN,inan masc,gent:авіаквиток:квитка:1.0",
                       lexeme,

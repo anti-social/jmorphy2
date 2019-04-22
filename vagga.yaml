@@ -18,7 +18,7 @@ containers:
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
-    - !Ubuntu bionic
+    - !Ubuntu disco
     - !UbuntuUniverse
     - !Install
       - ca-certificates-java
@@ -33,7 +33,7 @@ containers:
     - !EnsureDir /opt/gradle
     - !Unzip
       url: https://services.gradle.org/distributions/gradle-5.2.1-bin.zip
-      subdir: gradle-4.6
+      subdir: gradle-5.2.1
       path: /opt/gradle
     - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
