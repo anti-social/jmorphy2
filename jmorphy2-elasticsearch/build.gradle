@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
 
