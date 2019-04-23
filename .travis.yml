@@ -27,7 +27,7 @@ script:
 after_success:
 - |
   if [[ $TRAVIS_TAG == v*-es* ]]; then
-    vagga -e BINTRAY_USER -e BINTRAY_API_KEY gradle bintrayUpload -Prelease=true --info --no-daemon
+    vagga -e BINTRAY_USER -e BINTRAY_API_KEY gradle bintrayUpload -Prelease=true --info --stacktrace --no-daemon
   fi
 
 cache:
