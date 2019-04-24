@@ -1,8 +1,7 @@
 [![Travis Status](https://travis-ci.org/anti-social/jmorphy2.svg?branch=master)](https://travis-ci.org/anti-social/jmorphy2)
 [![Appveyor status](https://ci.appveyor.com/api/projects/status/x9df34q1er8r5kc0/branch/master?svg=true)](https://ci.appveyor.com/project/anti-social/jmorphy2/branch/master)
 
-Jmorphy2
-========
+# Jmorphy2
 
 Java port of the [pymorphy2](https://github.com/kmike/pymorphy2)
 
@@ -30,8 +29,17 @@ vagga build
 To see all available vagga commands just type ``vagga``
 
 
-Elasticsearch plugin
-====================
+## Elasticsearch plugin
+
+### Plugin installation
+
+```sh
+# Specify correct path of your Elasticsearch installation
+export es_home=/usr/share/elasticsearch
+${es_home}/bin/elasticsearch-plugin install "https://bintray.com/evo/elasticsearch/download_file?file_path=analysis-jmorphy2-0.2.1-es7.0.0.zip"
+```
+
+### Building plugin
 
 Default elasticsearch version against which plugin is built is 7.0.0
 
@@ -54,11 +62,11 @@ For older elasticsearch version use specific branches:
 - `es-5.4` for Elasticsearch `5.4.x`, `5.5.x` and `5.6.x`
 - `es-5.1` for Elasticsearch `5.1.x`, `5.2.x` and `5.3.x`
 
-Install plugin:
+And install assembled plugin:
 
 ```sh
 # Specify correct path of your Elasticsearch installation
-export es_home=/opt/elasticsearch
+export es_home=/usr/share/elasticsearch
 sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es7.0.0.zip
 ```
 
@@ -70,8 +78,7 @@ Or just run elasticsearch inside the container
 vagga elastic
 ```
 
-Test elasticsearch with jmorphy2 plugin
----------------------------------------
+### Test elasticsearch with jmorphy2 plugin
 
 Create index with specific analyzer and test it:
 
@@ -125,7 +132,7 @@ curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_anal
 analyzer: text_uk
 text: їжаки
 '
-curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d $'---
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
 analyzer: text_uk
 text: комп\'ютером
 '
