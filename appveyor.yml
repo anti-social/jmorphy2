@@ -5,10 +5,11 @@ install:
 - gradle -version
 
 build_script:
-- gradle assemble --no-daemon
+- gradle assemble --no-daemon --info
+- gradle updateSHAs --no-daemon --info
 
 test_script:
-- gradle check --no-daemon
+- gradle check --no-daemon --info
 
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml

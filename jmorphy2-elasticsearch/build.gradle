@@ -38,14 +38,14 @@ dependencies {
     compile project(':jmorphy2-dicts-uk')
 }
 
-dependencyLicenses {
-    ignoreSha 'dawg'
-    ignoreSha 'jmorphy2-core'
-    ignoreSha 'jmorphy2-dicts-ru'
-    ignoreSha 'jmorphy2-dicts-uk'
-    ignoreSha 'jmorphy2-lucene'
-    ignoreSha 'jmorphy2-nlp'
-}
+//dependencyLicenses {
+//    ignoreSha 'dawg'
+//    ignoreSha 'jmorphy2-core'
+//    ignoreSha 'jmorphy2-dicts-ru'
+//    ignoreSha 'jmorphy2-dicts-uk'
+//    ignoreSha 'jmorphy2-lucene'
+//    ignoreSha 'jmorphy2-nlp'
+//}
 
 thirdPartyAudit.enabled = false
 // TODO: write integration tests

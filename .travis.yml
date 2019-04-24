@@ -26,6 +26,7 @@ script:
     GRADLE_ARGS="$GRADLE_ARGS -PesVersion=$ES_VERSION"
   fi
   vagga assemble $GRADLE_ARGS
+  vagga gradle updateSHAs $GRADLE_ARGS
   vagga check $GRADLE_ARGS
 
 after_success:
