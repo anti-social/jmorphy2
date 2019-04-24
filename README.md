@@ -33,21 +33,21 @@ To see all available vagga commands just type ``vagga``
 Elasticsearch plugin
 ====================
 
-Default elasticsearch version against which plugin is built is 6.7.1
+Default elasticsearch version against which plugin is built is 7.0.0
 
 To build for specific elastisearch version run build as:
 
 ```sh
-vagga assemble -PesVersion=6.6.2
+vagga assemble -PesVersion=6.7.1
 ```
 
 Or:
 
 ```sh
-./gradlew assemble -PesVersion=6.6.2
+./gradlew assemble -PesVersion=6.7.1
 ```
 
-Supported elasticsearch versions: `6.6.x`, `6.7.x`
+Supported elasticsearch versions: `6.6.x`, `6.7.x`, `7.0.x`
 
 For older elasticsearch version use specific branches:
 
@@ -59,7 +59,7 @@ Install plugin:
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/opt/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es6.7.1.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es7.0.0.zip
 ```
 
 Or just run elasticsearch inside the container 

@@ -21,10 +21,9 @@ esplugin {
     name = 'analysis-jmorphy2'
     description 'Jmorphy2 plugin for ElasticSearch'
     classname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
+    licenseFile project.file('LICENSE.txt')
+    noticeFile project.file('NOTICE.txt')
 }
-
-project.licenseFile = project.file('LICENSE.txt')
-project.noticeFile = project.file('NOTICE.txt')
 
 def libVersion = version
 version = "${libVersion}-es${elasticsearchVersion}"

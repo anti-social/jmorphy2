@@ -43,7 +43,7 @@ containers:
     - !UbuntuUniverse
     - !Install [ca-certificates]
     - !UbuntuRepo
-      url: https://artifacts.elastic.co/packages/6.x/apt
+      url: https://artifacts.elastic.co/packages/7.x/apt
       trusted: true
       suite: stable
       components: [main]
