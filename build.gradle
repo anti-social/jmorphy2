@@ -31,7 +31,7 @@ subprojects {
         defaultEsVersion = rootProject.file('es.version')
                 .readLines()
                 .first()
-        defaultLuceneVersion = '8.1.0'
+        defaultLuceneVersion = '8.2.0'
 
         esLuceneVersions = [
                 '6.6': '7.6.0',
@@ -39,7 +39,8 @@ subprojects {
                 '7.0': '8.0.0',
                 '7.1': '8.0.0',
                 '7.2': '8.0.0',
-                '7.3': defaultLuceneVersion
+                '7.3': '8.1.0',
+                '7.4': defaultLuceneVersion
         ]
         elasticsearchVersion = project.hasProperty('esVersion') ? project.getProperty('esVersion') : defaultEsVersion
         luceneVersion = esLuceneVersions.get(
