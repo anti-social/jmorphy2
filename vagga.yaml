@@ -32,8 +32,8 @@ containers:
         useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
     - !EnsureDir /opt/gradle
     - !Unzip
-      url: https://services.gradle.org/distributions/gradle-5.2.1-bin.zip
-      subdir: gradle-5.2.1
+      url: https://services.gradle.org/distributions/gradle-5.4.1-bin.zip
+      subdir: gradle-5.4.1
       path: /opt/gradle
     - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
