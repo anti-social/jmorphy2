@@ -36,7 +36,7 @@ To see all available vagga commands just type ``vagga``
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-${es_home}/bin/elasticsearch-plugin install "https://bintray.com/evo/elasticsearch/download_file?file_path=analysis-jmorphy2-0.2.1-es7.1.1.zip"
+${es_home}/bin/elasticsearch-plugin install "https://bintray.com/evo/elasticsearch/download_file?file_path=analysis-jmorphy2-0.2.1-es7.2.1.zip"
 ```
 
 ### Building plugin
@@ -67,7 +67,7 @@ And install assembled plugin:
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es7.1.1.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.1-SNAPSHOT-es7.2.1.zip
 ```
 
 Or just run elasticsearch inside the container 
