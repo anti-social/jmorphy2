@@ -13,7 +13,7 @@ install:
   echo "alpine-mirror: http://mirrors.gigenet.com/alpinelinux/" >> ~/.vagga.yaml
 
 before_script:
-- vagga _build java
+- vagga _build jdk
 
 script:
 - |

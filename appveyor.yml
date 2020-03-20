@@ -1,15 +1,14 @@
 install:
-- choco install gradle -version 5.6.2
-- set JAVA_HOME=C:\Program Files\Java\jdk12
+- set JAVA_HOME=C:\Program Files\Java\jdk13
 - set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
-- gradle -version
+- ./gradlew -version
 
 build_script:
-- gradle assemble --no-daemon --info
-- gradle updateSHAs --no-daemon --info
+- ./gradlew assemble --no-daemon --info
+- ./gradlew updateSHAs --no-daemon --info
 
 test_script:
-- gradle check --no-daemon --info -x integTest
+- ./gradlew check --no-daemon --info -x integTest
 
 cache:
 - C:\ProgramData\chocolatey\bin -> appveyor.yml

@@ -2,7 +2,7 @@ _default:
   gradle-uid: &gradle-uid 900
   gradle_home: &gradle-home /work/.gradle
   command_options: &cmd-opts
-    container: java
+    container: jdk
     user-id: *gradle-uid
     external-user-id: 0
     prerequisites: [_mk-gradle-user-home]
@@ -12,9 +12,9 @@ _default:
 minimum-vagga: v0.7.1
 
 containers:
-  java:
+  jdk:
     environ:
-      JAVA_HOME: /usr/lib/jvm/java-12-openjdk-amd64
+      JAVA_HOME: /usr/lib/jvm/java-13-openjdk-amd64
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
@@ -22,26 +22,24 @@ containers:
     - !UbuntuUniverse
     - !Install
       - ca-certificates-java
-      - openjdk-12-jdk-headless
-      - openjdk-12-source
-      - libatk-wrapper-java-jni
+      - openjdk-13-jdk-headless
     - !Sh update-ca-certificates
-    - !Env
-      GRADLE_USER_HOME: *gradle-home
-      GRADLE_UID: *gradle-uid
-    - !Sh |
-        groupadd -g $GRADLE_UID gradle
-        useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
-    - !EnsureDir /opt/gradle
-    - !Unzip
-      url: https://services.gradle.org/distributions/gradle-5.6.2-bin.zip
-      subdir: gradle-5.6.2
-      path: /opt/gradle
-    - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
+#    - !Env
+#      GRADLE_USER_HOME: *gradle-home
+#      GRADLE_UID: *gradle-uid
+#    - !Sh |
+#        groupadd -g $GRADLE_UID gradle
+#        useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
+#    - !EnsureDir /opt/gradle
+#    - !Unzip
+#      url: https://services.gradle.org/distributions/gradle-6.2.1-bin.zip
+#      subdir: gradle-6.2.1
+#      path: /opt/gradle
+#    - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
   elastic:
     setup:
-    - !Ubuntu bionic
+    - !Ubuntu disco
     - !UbuntuUniverse
     - !Install [ca-certificates]
     - !UbuntuRepo
@@ -52,7 +50,7 @@ containers:
     - !Env
       ES_SKIP_SET_KERNEL_PARAMETERS: true
     - !Install
-      - openjdk-11-jre-headless
+      - openjdk-13-jre-headless
     - !Sh apt-get install elasticsearch=$(cat es.version)
     - !EnsureDir /var/lib/elasticsearch
     - !EnsureDir /var/log/elasticsearch
@@ -76,13 +74,13 @@ containers:
 
 commands:
   _mk-gradle-user-home: !Command
-    container: java
+    container: jdk
     run: mkdir -p $GRADLE_USER_HOME/caches
 
   gradle: !Command
     <<: *cmd-opts
     description: Run arbitrary gradle command
-    run: [gradle]
+    run: [./gradlew]
 
   daemon: !Command
     <<: *cmd-opts
@@ -90,7 +88,7 @@ commands:
     run: |
       # --foreground option runs daemon with different jvm options
       # so then another gradle process rejects to connect to the daemon
-      gradle --dry-run --daemon
+      ./gradlew --dry-run --daemon
       GRADLE_PID=$(pidof java)
       echo "Gradle daemon successfully started [PID: $GRADLE_PID]."
       while [ -e /proc/$GRADLE_PID ]; do sleep 1; done
@@ -98,37 +96,37 @@ commands:
   compile: !Command
     <<: *cmd-opts
     description: Compile all source files
-    run: [gradle, compileJava]
+    run: [./gradlew, compileJava]
 
   compile-test: !Command
     <<: *cmd-opts
     description: Compile all test source files
-    run: [gradle, compileTestJava]
+    run: [./gradlew, compileTestJava]
 
   build: !Command
     <<: *cmd-opts
     description: Compile, run tests and make packages
-    run: [gradle, build]
+    run: [./gradlew, build]
 
   assemble: !Command
     <<: *cmd-opts
     description: Build and assemple package
-    run: [gradle, assemble]
+    run: [./gradlew, assemble]
 
   clean: !Command
     <<: *cmd-opts
     description: Clean all building files
-    run: [gradle, clean]
+    run: [./gradlew, clean]
 
   test: !Command
     <<: *cmd-opts
     description: Run unit tests
-    run: [gradle, test]
+    run: [./gradlew, test]
 
   check: !Command
     <<: *cmd-opts
     description: Run all checks and tests
-    run: [gradle, check]
+    run: [./gradlew, check]
 
   update-shas: !Command
     <<: *cmd-opts
@@ -137,12 +135,12 @@ commands:
       cd /work/jmorphy2-elasticsearch/licenses
       rm -rf dawg-*.sha1 jmorphy2-*.sha1
       cd ..
-      gradle updateShas
+      ./gradlew updateShas
 
   benchmark: !Command
     <<: *cmd-opts
     description: Run benchmarks
-    run: [gradle, benchmark]
+    run: [./gradlew, benchmark]
 
   elastic: !Command
     description: Run elasticsearch
@@ -168,7 +166,7 @@ commands:
       DISTRIBUTION_DIR=/work/jmorphy2-elasticsearch/build/distributions
       PLUGIN_PATH=$DISTRIBUTION_DIR/analysis-jmorphy2-$(cat project.version)-es$(cat es.version).zip
       if [ ! -f ${PLUGIN_PATH} ]; then
-        gradle assemble -p jmorphy2-elasticsearch
+        ./gradlew assemble -p jmorphy2-elasticsearch
       fi
 
   python: !Command
