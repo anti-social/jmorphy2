@@ -27,7 +27,7 @@ script:
   fi
   vagga assemble $GRADLE_ARGS
   vagga gradle updateSHAs $GRADLE_ARGS
-  vagga check $GRADLE_ARGS
+  vagga check $GRADLE_ARGS -x integTest
 
 after_success:
 - |
