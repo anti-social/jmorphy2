@@ -3,6 +3,7 @@ package company.evo.jmorphy2.units;
 import java.io.IOException;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -90,6 +91,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
         String[] paradigmPrefixes = dict.getParadigmPrefixes();
         int maxSuffixLength = Math.min(this.maxSuffixLength, wordLen);
         int[] totalCounts = new int[paradigmPrefixes.length];
+        Arrays.fill(totalCounts, 1);
         for (int prefixId = 0; prefixId < paradigmPrefixes.length; prefixId++) {
             String prefix = paradigmPrefixes[prefixId];
             if (!wordLower.startsWith(prefix)) {
