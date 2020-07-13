@@ -90,11 +90,11 @@ public class MorphAnalyzerTest {
                       morph.parse("шуруповертами"));
 
         // known suffix: with paradigm prefix
-        assertParseds("наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:няшный:ейший:0.25\n" +
-                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:няшный:ейший:0.25\n" +
-                      "наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:наиняшный:ейший:0.248387\n" +
-                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:наиняшный:ейший:0.248387\n" +
-                      "наиняшнейший:NOUN,anim,masc sing,nomn:наиняшнейший:ейший:0.003226\n",
+        assertParseds("наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:наиняшный:ейший:0.252275\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:наиняшный:ейший:0.252275\n" +
+                      "наиняшнейший:ADJF,Supr,Qual masc,sing,nomn:няшный:ейший:0.246087\n" +
+                      "наиняшнейший:ADJF,Supr,Qual inan,masc,sing,accs:няшный:ейший:0.246087\n" +
+                      "наиняшнейший:NOUN,anim,masc sing,nomn:наиняшнейший:ейший:0.003276\n",
                       morph.parse("наиняшнейший"));
 
         // gen2, loct, loc2
