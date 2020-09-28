@@ -18,28 +18,16 @@ containers:
       GRADLE_USER_HOME: *gradle-home
       LANG: en_US.UTF-8
     setup:
-    - !Ubuntu disco
+    - !Ubuntu focal
     - !UbuntuUniverse
     - !Install
       - ca-certificates-java
       - openjdk-13-jdk-headless
     - !Sh update-ca-certificates
-#    - !Env
-#      GRADLE_USER_HOME: *gradle-home
-#      GRADLE_UID: *gradle-uid
-#    - !Sh |
-#        groupadd -g $GRADLE_UID gradle
-#        useradd -u $GRADLE_UID -g gradle -d $GRADLE_USER_HOME gradle
-#    - !EnsureDir /opt/gradle
-#    - !Unzip
-#      url: https://services.gradle.org/distributions/gradle-6.2.1-bin.zip
-#      subdir: gradle-6.2.1
-#      path: /opt/gradle
-#    - !Sh ln -s /opt/gradle/bin/gradle /usr/local/bin/gradle
 
   elastic:
     setup:
-    - !Ubuntu disco
+    - !Ubuntu focal
     - !UbuntuUniverse
     - !Install [ca-certificates]
     - !UbuntuRepo
