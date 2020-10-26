@@ -49,7 +49,9 @@ dependencies {
 
 licenseHeaders.enabled = false
 dependencyLicenses.enabled = false
-validateNebulaPom.enabled = false
+if (project.hasProperty('validateNebulaPom')) {
+    validateNebulaPom.enabled = false
+}
 thirdPartyAudit.enabled = false
 
 // TODO: write integration tests
