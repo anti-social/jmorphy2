@@ -17,7 +17,10 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts') }}
         restore-keys: ${{ runner.os }}-gradle
-    - name: Assemble
+    - name: Assemble and run tests
       run: |
         GRADLE_ARGS="--info --stacktrace --no-daemon"
         ./gradlew assemble $GRADLE_ARGS
+        # integTest task fails starting with 7.5.0
+        # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
+        ./gradlew check $GRADLE_ARGS -x integTest
