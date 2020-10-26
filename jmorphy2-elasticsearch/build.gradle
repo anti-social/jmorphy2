@@ -24,6 +24,8 @@ esplugin {
     classname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
     licenseFile project.file('LICENSE.txt')
     noticeFile project.file('NOTICE.txt')
+    // Fix plugin publication
+    hasClientJar = true
 }
 
 def libVersion = version
