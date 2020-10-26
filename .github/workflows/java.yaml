@@ -50,6 +50,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ES_VERSION=$(echo ${GITHUB_REF:10} | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
+        ES_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
         ./gradlew publishPluginPublicationToGitHubPackagesRepository \
           $GRADLE_ARGS -Prelease=true -PesVersion=$ES_VERSION
