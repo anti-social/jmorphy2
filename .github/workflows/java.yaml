@@ -2,6 +2,9 @@ name: Java CI
 
 on: [push]
 
+env:
+  GRADLE_ARGS: "--info --stacktrace --no-daemon"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,10 +20,36 @@ jobs:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts') }}
         restore-keys: ${{ runner.os }}-gradle
+
     - name: Assemble and run tests
       run: |
-        GRADLE_ARGS="--info --stacktrace --no-daemon"
         ./gradlew assemble $GRADLE_ARGS
         # integTest task fails starting with 7.5.0
         # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
         ./gradlew check $GRADLE_ARGS -x integTest
+
+  deploy_es_plugin:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-es')
+    needs:
+    - build
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 13
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts') }}
+        restore-keys: ${{ runner.os }}-gradle
+
+    - name: Publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ES_VERSION=$(echo ${GITHUB_REF:10} | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
+        ./gradlew publishPluginPublicationToGitHubPackagesRepository \
+          $GRADLE_ARGS -Prelease=true -PesVersion=$ES_VERSION

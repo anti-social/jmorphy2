@@ -84,3 +84,39 @@ bintray {
     publish = true
     dryRun = project.hasProperty("bintrayDryRun")
 }
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/anti-social/jmorphy2"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        plugin(MavenPublication) {
+            artifact source: bundlePlugin
+            pom {
+                name = 'analysis-jmorphy2'
+                description = esplugin.description
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "anti-social"
+                        name = "Alexander Koval"
+                        email = "kovalidis@gmail.com"
+                        url = "https://github.com/anti-social"
+                    }
+                }
+            }
+        }
+    }
+}
