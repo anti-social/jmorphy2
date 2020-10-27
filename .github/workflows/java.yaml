@@ -44,7 +44,10 @@ jobs:
         contains(github.ref, '-es')
       with:
         name: elasticsearch-plugin
-        path: jmorphy2-elasticsearch/build/distributions
+        # .gradle directory is needed to prevent deleting stale build files
+        path: |
+          .gradle
+          jmorphy2-elasticsearch/build/distributions
 
   deploy_es_plugin:
     runs-on: ubuntu-latest
@@ -70,7 +73,6 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: elasticsearch-plugin
-        path: jmorphy2-elasticsearch/build/distributions
 
     - name: Publish
       env:
