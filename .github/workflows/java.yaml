@@ -48,7 +48,8 @@ jobs:
 
     - name: Publish
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+        BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
       run: |
         ES_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
         ./gradlew bintrayUpload \
