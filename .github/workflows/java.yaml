@@ -29,9 +29,10 @@ jobs:
         fi
         if [[ $GITHUB_REF == refs/tags/v*-es* ]]; then
           ES_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
-          GRADLE_ARGS="$GRADLE_ARGS -Prelease=true -PesVersion=$ES_VERSION"
+          GRADLE_ARGS="$GRADLE_ARGS -PesVersion=$ES_VERSION"
         fi
         ./gradlew assemble $GRADLE_ARGS
+        ls -lh jmorphy2-elasticsearch/build/distributions
         # integTest task fails starting with 7.5.0
         # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
         ./gradlew check $GRADLE_ARGS -x integTest
@@ -77,5 +78,6 @@ jobs:
       run: |
         set -eux
         ES_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
+        ls -lh jmorphy2-elasticsearch/build/distributions
         ./gradlew bintrayUpload \
           $GRADLE_ARGS -Prelease=true -PesVersion=$ES_VERSION
