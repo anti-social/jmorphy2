@@ -30,15 +30,28 @@ jobs:
         # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
         ./gradlew check $GRADLE_ARGS -x integTest
 
+    - uses: actions/upload-artifact@v2
+      if: &is-es-plugin-release |
+        github.event_name == 'push' &&
+        startsWith(github.ref, 'refs/tags/v') &&
+        contains(github.ref, '-es')
+      with:
+        name: elasticsearch-plugin
+        path: jmorphy2-elasticsearch/build/distributions
+
   deploy_es_plugin:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-es')
+    if: *is-es-plugin-release
     needs:
     - build
     steps:
     - uses: actions/checkout@v2
     - *setup-jdk
     - *setup-gradle-cache
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: elasticsearch-plugin
 
     - name: Publish
       env:
