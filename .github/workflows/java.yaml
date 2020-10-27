@@ -10,13 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - &setup-jdk
-      name: Set up JDK
+    - name: Set up JDK
       uses: actions/setup-java@v1
       with:
         java-version: 13
-    - &setup-gradle-cache
-      name: Cache Gradle packages
+    - name: Cache Gradle packages
       uses: actions/cache@v2
       with:
         path: ~/.gradle/caches
@@ -31,7 +29,7 @@ jobs:
         ./gradlew check $GRADLE_ARGS -x integTest
 
     - uses: actions/upload-artifact@v2
-      if: &is-es-plugin-release |
+      if: |
         github.event_name == 'push' &&
         startsWith(github.ref, 'refs/tags/v') &&
         contains(github.ref, '-es')
@@ -41,13 +39,24 @@ jobs:
 
   deploy_es_plugin:
     runs-on: ubuntu-latest
-    if: *is-es-plugin-release
+    if: |
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      contains(github.ref, '-es')
     needs:
     - build
     steps:
     - uses: actions/checkout@v2
-    - *setup-jdk
-    - *setup-gradle-cache
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 13
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts') }}
+        restore-keys: ${{ runner.os }}-gradle
 
     - uses: actions/download-artifact@v2
       with:
