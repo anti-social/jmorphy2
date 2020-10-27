@@ -70,6 +70,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: elasticsearch-plugin
+        path: jmorphy2-elasticsearch/build/distributions
 
     - name: Publish
       env:
