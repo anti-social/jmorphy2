@@ -94,7 +94,7 @@ commands:
   build: !Command
     <<: *cmd-opts
     description: Compile, run tests and make packages
-    run: [./gradlew, build]
+    run: [./gradlew, build, -x=integTest]
 
   assemble: !Command
     <<: *cmd-opts
