@@ -25,3 +25,4 @@ pymorphy2_dicts/
 pymorphy2_dicts_*/
 
 !/gradle/wrapper/*.jar
+.idea/

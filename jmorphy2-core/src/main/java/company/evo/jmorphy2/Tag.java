@@ -2,10 +2,6 @@ package company.evo.jmorphy2;
 
 import java.util.*;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableSet;
-
 
 public class Tag {
     public static final String PART_OF_SPEECH = "POST";
@@ -20,14 +16,14 @@ public class Tag {
     public static final String MOOD = "MOod";
     public static final String VOICE = "VOic";
     public static final String INVOLVEMENT = "INvl";
-    private static final ImmutableSet<String> NON_PRODUCTIVE_GRAMMEMES =
-        ImmutableSet.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
+    private static final Set<String> NON_PRODUCTIVE_GRAMMEMES =
+        Set.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
 
     private final String originalTagString;
     private final String normalizedTagString;
     private final Storage storage;
 
-    public final ImmutableSet<Grammeme> grammemes;
+    public final Set<Grammeme> grammemes;
     public final Grammeme POS;
     public final Grammeme anymacy;
     public final Grammeme aspect;
@@ -56,7 +52,7 @@ public class Tag {
             grammemes.add(grammeme);
             normalizedGrammemeValues.add(grammeme.key);
         }
-        this.grammemes = ImmutableSet.copyOf(grammemes);
+        this.grammemes = Set.copyOf(grammemes);
 
         Collections.sort(normalizedGrammemeValues);
         this.normalizedTagString = String.join(" ", normalizedGrammemeValues);
@@ -136,7 +132,9 @@ public class Tag {
     }
 
     public boolean isProductive() {
-        return Sets.intersection(getGrammemeValues(), NON_PRODUCTIVE_GRAMMEMES).isEmpty();
+        Set<String> isProd = getGrammemeValues();
+        isProd.retainAll(NON_PRODUCTIVE_GRAMMEMES);
+        return isProd.isEmpty();
     }
 
     @Override

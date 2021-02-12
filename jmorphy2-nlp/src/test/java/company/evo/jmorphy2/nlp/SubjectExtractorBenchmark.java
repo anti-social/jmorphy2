@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.google.common.base.Joiner;
-
 
 @RunWith(JUnit4.class)
 public class SubjectExtractorBenchmark extends SubjectExtractorTest {
@@ -44,10 +42,6 @@ public class SubjectExtractorBenchmark extends SubjectExtractorTest {
             startTime = System.currentTimeMillis();
             for (String[] phrase : phrases) {
                 List<String> subj = subjExtractor.extract(phrase);
-                // System.out.println(Joiner.on(" ").join(phrase));
-                // System.out.println(subj);
-                // System.out.println();
-                // res.add(ix, morph.parse(word.word));
                 ix++;
             }
             endTime = System.currentTimeMillis();

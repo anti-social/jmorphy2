@@ -19,19 +19,18 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
-
 
 @RunWith(RandomizedRunner.class)
 public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
     private static List<Set<String>> DEFAULT_INCLUDE_TAGS =
-        ImmutableList.<Set<String>>of(ImmutableSet.of("NOUN"),
-                                      ImmutableSet.of("ADJF"),
-                                      ImmutableSet.of("ADJS"),
-                                      ImmutableSet.of("LATN"),
-                                      ImmutableSet.of("NUMB"),
-                                      ImmutableSet.of("UNKN"));
+        List.<Set<String>>of(
+            Set.of("NOUN"),
+            Set.of("ADJF"),
+            Set.of("ADJS"),
+            Set.of("LATN"),
+            Set.of("NUMB"),
+            Set.of("UNKN")
+        );
 
     @Before
     public void setUp() throws IOException {
@@ -89,7 +88,7 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
  
     @Test
     public void testIgnoreUnknown() throws IOException {
-        List<Set<String>> excludeUnknown = ImmutableList.<Set<String>>of(ImmutableSet.of("UNKN"));
+        List<Set<String>> excludeUnknown = List.<Set<String>>of(Set.of("UNKN"));
         Analyzer analyzer = getAnalyzer(null, excludeUnknown, true);
         assertAnalyzesTo(analyzer,
                          "ъь ъё",
