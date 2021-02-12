@@ -11,11 +11,6 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.Lists;
-
 
 public class Ruleset {
     private final List<Rule> rules = new ArrayList<Rule>();
@@ -25,11 +20,9 @@ public class Ruleset {
     private static final String COMMENT_START = "#";
     private static final String CONTINUE_LINE = "\\";
     private static final String PARTS_SPLITTER = "->";
-    private static final String RHS_SPLITTER = "|";
+    private static final String RHS_SPLITTER = "\\|";
     private static final String WEIGHT_START = "[";
     private static final String WEIGHT_END = "]";
-    private static final Splitter partsSplitter = Splitter.on(PARTS_SPLITTER).limit(2).trimResults();
-    private static final Splitter rhsSplitter = Splitter.on(RHS_SPLITTER).trimResults();
     private static final Pattern rhsPattern =
         Pattern.compile(String.format("^(?<rhs>.+)\\%s(?<weight>.+)\\%s$", WEIGHT_START, WEIGHT_END));
 
@@ -53,7 +46,10 @@ public class Ruleset {
                 continue;
             }
 
-            List<String> parts = Lists.newArrayList(partsSplitter.split(row));
+            List<String> parts = new ArrayList<>();
+            for (String i : row.trim().split(PARTS_SPLITTER, 2)) {
+                parts.add(i);
+            }
             if (parts.size() < 2) {
                 throw new RuntimeException("Left or right part is missing");
             }
@@ -76,7 +72,7 @@ public class Ruleset {
     }
 
     public void add(String left, String right, float weight) {
-        for (String rightPart : rhsSplitter.split(right)) {
+        for (String rightPart : right.trim().split(RHS_SPLITTER)) {
             Rule r = new Rule(left, rightPart, weight);
             rules.add(r);
             List<Rule> bySize = rulesBySize.get(r.rightSize);
@@ -120,10 +116,5 @@ public class Ruleset {
             }
         }
         return matchedRules;
-    }
-
-    @Override
-    public String toString() {
-        return Joiner.on("\n").join(rules);
     }
 }

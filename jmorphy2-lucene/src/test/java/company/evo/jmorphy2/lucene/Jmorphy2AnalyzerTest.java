@@ -19,9 +19,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
-
 
 @RunWith(RandomizedRunner.class)
 public class Jmorphy2AnalyzerTest extends BaseFilterTestCase {

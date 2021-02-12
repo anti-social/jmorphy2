@@ -1,6 +1,5 @@
 package company.evo.jmorphy2.units;
-
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 
 import company.evo.jmorphy2.Tag;
 
@@ -19,7 +18,12 @@ public class LatinUnit extends RegexUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(Lists.newArrayList("LATN", "", "ЛАТ", "латиница"));
+            tagStorage.newGrammeme(new ArrayList<String>() {{
+                add("LATN");
+                add("");
+                add("ЛАТ");
+                add("латиница");
+            }});
             tagStorage.newTag("LATN");
             return new LatinUnit(tagStorage, terminate, score);
         }

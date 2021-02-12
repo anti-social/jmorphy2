@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
 
 
 public class SubjectExtractor {
@@ -15,9 +13,6 @@ public class SubjectExtractor {
     private List<Set<String>> enableExtractionValues;
     private List<Set<String>> disableExtractionValues;
     private List<Set<String>> subjValues;
-
-    private static final Splitter partsSplitter = Splitter.on(" ").trimResults().omitEmptyStrings();
-    private static final Splitter valuesSplitter = Splitter.on(",").trimResults().omitEmptyStrings();
 
     public SubjectExtractor(Parser parser, String confStr, boolean normalize) {
         this.parser = parser;
@@ -29,7 +24,7 @@ public class SubjectExtractor {
         enableExtractionValues = new ArrayList<Set<String>>();
         disableExtractionValues = new ArrayList<Set<String>>();
         subjValues = new ArrayList<Set<String>>();
-        for (String part : partsSplitter.split(confStr)) {
+        for (String part : confStr.trim().split(" ")) {
             if (part.startsWith("+")) {
                 enableExtractionValues.add(parsePart(part.substring(1, part.length())));
             } else if (part.startsWith("-")) {
@@ -41,7 +36,11 @@ public class SubjectExtractor {
     }
 
     private Set<String> parsePart(String part) {
-        return ImmutableSet.copyOf(valuesSplitter.split(part));
+        Set<String> parts = new HashSet<String>();
+        for (String l : part.trim().split(",")) {
+            parts.add(l);
+        }
+        return parts;
     }
 
     public List<String> extract(String[] tokens) throws IOException {

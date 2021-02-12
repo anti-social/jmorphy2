@@ -1,6 +1,6 @@
 package company.evo.jmorphy2.units;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 
 import company.evo.jmorphy2.Tag;
 
@@ -23,7 +23,12 @@ public class RomanUnit extends RegexUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(Lists.newArrayList("ROMN", "", "РИМ", "римские цифры"));
+            tagStorage.newGrammeme(new ArrayList<String>() {{
+                add("ROMN");
+                add("");
+                add("РИМ");
+                add("римские цифры");
+            }});
             tagStorage.newTag("ROMN");
             return new RomanUnit(tagStorage, terminate, score);
         }
