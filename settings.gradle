@@ -1,8 +1,0 @@
-include "dawg",
-        "jmorphy2-core",
-        "jmorphy2-dicts-ru",
-        "jmorphy2-dicts-uk",
-        "jmorphy2-nlp",
-        "jmorphy2-lucene",
-        "jmorphy2-elasticsearch",
-        "jmorphy2-solr"
