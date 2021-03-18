@@ -9,6 +9,6 @@ dependencies {
     compile(project(":jmorphy2-nlp"))
     compile(project(":jmorphy2-dicts-ru"))
 
-    testCompile(files(project(":jmorphy2-core")))
+    testCompile(project(":jmorphy2-core"))
     testCompile(project(":jmorphy2-core"))
 }

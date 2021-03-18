@@ -5,7 +5,7 @@ object Versions {
     val group = "company.evo.jmorphy2"
     val sourceCompatibility = "1.8"
     val targetCompatibility = "1.8"
-    val defaultLuceneVersion = "8.6.2"
+    val defaultLuceneVersion = "8.7.0"
     val esLuceneVersions = mapOf(
             "6.6" to "7.6.0",
             "6.7" to "7.7.0",
@@ -19,7 +19,9 @@ object Versions {
             "7.6" to "7.4.0",
             "7.7" to "7.5.1",
             "7.8" to "7.5.1",
-            "7.9" to defaultLuceneVersion
+            "7.9" to "8.6.2",
+            "7.10" to "8.7.0",
+            "7.11" to defaultLuceneVersion
     )
 }
 
@@ -39,6 +41,9 @@ fun Project.getElasticsearchVersion(): String {
 fun Project.getLuceneVersion(): String {
     return Versions.esLuceneVersions.getOrDefault(
             getElasticsearchVersion(),
-            Versions.esLuceneVersions.getOrDefault(getElasticsearchVersion().substring(0, 2), Versions.defaultLuceneVersion)
+            Versions.esLuceneVersions.getOrDefault(
+                    getElasticsearchVersion().substring(0, 2),
+                    Versions.defaultLuceneVersion
+            )
     )
 }

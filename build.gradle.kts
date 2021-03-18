@@ -14,4 +14,9 @@ subprojects {
     tasks.withType<Test> {
         exclude("**/*Benchmark*")
     }
+
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+    }
 }

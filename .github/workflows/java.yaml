@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [push]
+on: [push, pull_request]
 
 env:
   GRADLE_ARGS: "--info --stacktrace --no-daemon"
@@ -35,7 +35,7 @@ jobs:
         ls -lh jmorphy2-elasticsearch/build/distributions
         # integTest task fails starting with 7.5.0
         # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
-        ./gradlew check $GRADLE_ARGS -x integTest
+        ./gradlew check $GRADLE_ARGS
 
     - uses: actions/upload-artifact@v2
       if: |
