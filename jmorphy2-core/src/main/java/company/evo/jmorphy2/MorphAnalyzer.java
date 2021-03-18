@@ -15,6 +15,8 @@ import java.text.Normalizer;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+// import com.github.benmanes.caffeine.cache.Caffeine;
+// import com.github.benmanes.caffeine.cache.Cache;
 
 import company.evo.jmorphy2.units.*;
 
@@ -110,6 +112,7 @@ public class MorphAnalyzer {
             }
             if (cacheSize > 0) {
                 cache = CacheBuilder.newBuilder().maximumSize(cacheSize).build();
+//                 cache = Caffeine.newBuilder().maximumSize(cacheSize).build();
             }
             return new MorphAnalyzer(tagStorage, units, prob, cache);
         }
