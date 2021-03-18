@@ -7,6 +7,10 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+
 import company.evo.jmorphy2.Tag;
 import company.evo.jmorphy2.Grammeme;
 import company.evo.jmorphy2.MorphAnalyzer;
@@ -36,10 +40,8 @@ public class SimpleParser extends Parser {
         super(morph, tagger);
         this.rules = rules;
         this.threshold = threshold;
-        Set<String> grammemeValues = new HashSet<>();
-        grammemeValues.addAll(getGrammemeValuesFor(Tag.NUMBER));
-        grammemeValues.addAll(getGrammemeValuesFor(Tag.CASE));
-        this.allowedGrammemeValues = grammemeValues;
+        this.allowedGrammemeValues = Sets.union(getGrammemeValuesFor(Tag.CASE),
+                                                getGrammemeValuesFor(Tag.NUMBER));
     }
 
     private Set<String> getGrammemeValuesFor(String rootValue) {
@@ -59,7 +61,7 @@ public class SimpleParser extends Parser {
     public Node.Top parse(List<Node.Top> sentences) {
         List<Node.Top> tops = parseAll(sentences);
         if (tops.isEmpty()) {
-            return new Node.Top(List.of(), 0.0f);
+            return new Node.Top(ImmutableList.of(), 0.0f);
         }
         return tops.get(0);
     }
@@ -74,7 +76,7 @@ public class SimpleParser extends Parser {
             List<Node.Top> nextSentences = new ArrayList<Node.Top>();
             for (Node.Top sent : sentences) {
                 boolean hasMatchedRules = false;
-                List<Node> nodes = sent.getChildren();
+                ImmutableList<Node> nodes = sent.getChildren();
                 int nodesSize = sent.getChildrenSize();
                 int minCount = 1;
                 for (int offset = 0; offset <= nodesSize - minCount; offset++) {
@@ -84,7 +86,7 @@ public class SimpleParser extends Parser {
                         Rule mRule = rules.match(subNodes);
                         if (mRule != null) {
                             hasMatchedRules = true;
-                            List<Node> reducedNodes = reduce(mRule, nodes, offset);
+                            ImmutableList<Node> reducedNodes = reduce(mRule, nodes, offset);
                             float topScore = Node.sumScoreFor(reducedNodes) / reducedNodes.size() / (Node.maxDepthFor(reducedNodes) + 1);
                             Node.Top top = new Node.Top(reducedNodes, topScore);
                             if (!uniqueTopHashes.contains(top.uniqueHash)) {
@@ -113,29 +115,31 @@ public class SimpleParser extends Parser {
         return results;
     }
 
-    private List<Node> reduce(Rule rule, List<Node> nodes, int offset) {
-        List<Node> newNodes = new ArrayList<Node>();
-        newNodes.addAll(nodes.subList(0, offset));
+    private ImmutableList<Node> reduce(Rule rule, ImmutableList<Node> nodes, int offset) {
+        ImmutableList.Builder<Node> newNodesBuilder = ImmutableList.builder();
+        newNodesBuilder.addAll(nodes.subList(0, offset));
 
-        List<Node> subNodes = nodes.subList(offset, offset + rule.rightSize);
-        Set<String> grammemeValues = rule.commonGrammemeValues(subNodes, allowedGrammemeValues);
+        ImmutableList<Node> subNodes = nodes.subList(offset, offset + rule.rightSize);
+        ImmutableSet<String> grammemeValues = rule.commonGrammemeValues(subNodes, allowedGrammemeValues);
         float score = Node.sumScoreFor(subNodes) + rule.weight * grammemeValues.size();
-        List<Node>  reducedNodes = new ArrayList<Node>();
+        ImmutableList.Builder<Node>  reducedNodesBuilder = ImmutableList.builder();
         int i = 0;
         for (Node rNode : subNodes) {
             Rule.NodeMatcher m = rule.right.get(i);
             if (grammemeValues.equals(rNode.grammemeValues) &&
                 (m.flags & Rule.NodeMatcher.NO_REDUCE) == 0) {
-                reducedNodes.addAll(rNode.getChildren());
+                reducedNodesBuilder.addAll(rNode.getChildren());
             } else {
-                reducedNodes.add(rNode);
+                reducedNodesBuilder.add(rNode);
             }
             i++;
         }
-        newNodes.add(new Node(grammemeValues, reducedNodes, score));
-        newNodes.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
+        ImmutableList<Node> reducedNodes = reducedNodesBuilder.build();
+        newNodesBuilder.add(new Node(grammemeValues, reducedNodes, score));
 
-        return newNodes;
+        newNodesBuilder.addAll(nodes.subList(offset + rule.rightSize, nodes.size()));
+
+        return newNodesBuilder.build();
     }
 
     protected static final Ruleset defaultRules = new Ruleset();

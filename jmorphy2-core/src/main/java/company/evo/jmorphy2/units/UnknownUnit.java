@@ -3,6 +3,8 @@ package company.evo.jmorphy2.units;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import company.evo.jmorphy2.ParsedWord;
 import company.evo.jmorphy2.Tag;
 
@@ -19,12 +21,7 @@ public class UnknownUnit extends AnalyzerUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(new ArrayList<String>() {{
-                add("UNKN");
-                add("");
-                add("НЕИЗВ");
-                add("неизвестное");
-            }});
+            tagStorage.newGrammeme(Lists.newArrayList("UNKN", "", "НЕИЗВ", "неизвестное"));
             tagStorage.newTag("UNKN");
             return new UnknownUnit(tagStorage, terminate, score);
         }

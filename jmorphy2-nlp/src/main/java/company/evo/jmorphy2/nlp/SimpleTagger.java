@@ -2,11 +2,16 @@ package company.evo.jmorphy2.nlp;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.Deque;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Collections;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 import company.evo.jmorphy2.ParsedWord;
 import company.evo.jmorphy2.MorphAnalyzer;
@@ -45,7 +50,7 @@ public class SimpleTagger extends Tagger {
         return results;
     }
 
-    private Node reduce(Rule rule, List<Node> nodes) {
+    private Node reduce(Rule rule, ImmutableList<Node> nodes) {
         List<Node> rNodes = nodes.subList(0, rule.rightSize);
         List<String> words = new ArrayList<String>();
         float score = 0.0f;
@@ -53,10 +58,10 @@ public class SimpleTagger extends Tagger {
             words.add(node.word);
             score += node.score;
         }
-        return new Node(rule.left, String.join(" ", words), score);
+        return new Node(rule.left, Joiner.on(" ").join(words), score);
     }
 
-    private void tagAll(List<Node.Top> results, Deque<Node> nodesStack, List<Node> nodes) throws IOException {
+    private void tagAll(List<Node.Top> results, Deque<Node> nodesStack, ImmutableList<Node> nodes) throws IOException {
         List<Node> reducedNodes = new ArrayList<Node>();
 
         // test rules
@@ -70,7 +75,7 @@ public class SimpleTagger extends Tagger {
             Node tNode = nodes.get(0);
             List<ParsedWord> parseds = morph.parse(tNode.word);
             for (ParsedWord p : parseds) {
-                reducedNodes.add(new Node(Set.copyOf(p.tag.getGrammemeValues()),
+                reducedNodes.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                           p,
                                           p.score));
                 if (p.tag.contains("Fixd")) {
@@ -90,13 +95,13 @@ public class SimpleTagger extends Tagger {
         for (Node node : reducedNodes) {
             nodesStack.addLast(node);
             int offset = node.hasChildren() ? node.getChildren().size() : 1;
-            List<Node> tail = nodes.subList(offset, nodes.size());
+            ImmutableList<Node> tail = nodes.subList(offset, nodes.size());
             if (tail.isEmpty()) {
                 float score = 0.0f;
                 for (Node n : nodesStack) {
                     score += n.score;
                 }
-                results.add(new Node.Top(List.copyOf(nodesStack), score));
+                results.add(new Node.Top(ImmutableList.copyOf(nodesStack), score));
             } else {
                 tagAll(results, nodesStack, tail);
             }
@@ -105,16 +110,16 @@ public class SimpleTagger extends Tagger {
     }
 
     public Node.Top tag(String[] tokens) throws IOException {
-        List<Node> tokenNodes = makeTokens(tokens);
+        ImmutableList<Node> tokenNodes = makeTokens(tokens);
 
         float score = 0.0f;
         int tokensSize = tokenNodes.size();
-        List<Node> nodes = new ArrayList<Node>();
+        ImmutableList.Builder<Node> nodesBuilder = ImmutableList.builder();
         int i = 0;
         while (i < tokensSize) {
             Rule mRule = rules.match(tokenNodes);
             if (mRule != null) {
-                nodes.add(reduce(mRule, tokenNodes));
+                nodesBuilder.add(reduce(mRule, tokenNodes));
                 score += mRule.weight;
                 i += mRule.rightSize;
             } else {
@@ -122,25 +127,25 @@ public class SimpleTagger extends Tagger {
                 List<ParsedWord> parseds = morph.parse(tNode.word);
                 if (!parseds.isEmpty()) {
                     ParsedWord p = parseds.get(0);
-                    nodes.add(new Node(Set.copyOf(p.tag.getGrammemeValues()),
+                    nodesBuilder.add(new Node(ImmutableSet.copyOf(p.tag.getGrammemeValues()),
                                               p,
                                               p.score));
                     score += p.score;
                 } else {
-                    nodes.add(tokenNodes.get(i));
+                    nodesBuilder.add(tokenNodes.get(i));
                 }
                 i++;
             }
         }
-        return new Node.Top(nodes, score);
+        return new Node.Top(nodesBuilder.build(), score);
     }
 
-    private List<Node> makeTokens(String[] words) {
-        List<Node> tokens = new ArrayList<Node>();
+    private ImmutableList<Node> makeTokens(String[] words) {
+        ImmutableList.Builder<Node> tokensBuilder = ImmutableList.builder();
         for (String w : words) {
-            tokens.add(new Node(Set.of("UNKN"), w, 1.0f));
+            tokensBuilder.add(new Node(ImmutableSet.of("UNKN"), w, 1.0f));
         }
-        return tokens;
+        return tokensBuilder.build();
     }
 
     public static final Ruleset defaultRules = new Ruleset();

@@ -15,8 +15,8 @@ import java.text.Normalizer;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-// import com.github.benmanes.caffeine.cache.Caffeine;
-// import com.github.benmanes.caffeine.cache.Cache;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import company.evo.jmorphy2.units.*;
 
@@ -168,7 +168,7 @@ public class MorphAnalyzer {
 
     public List<Tag> tag(String word) throws IOException {
         List<ParsedWord> parseds = parse(word);
-        List<Tag> tags = new ArrayList<>(parseds.size());
+        List<Tag> tags = Lists.newArrayListWithCapacity(parseds.size());
         for (ParsedWord p : parseds) {
             tags.add(p.tag);
         }
@@ -194,7 +194,7 @@ public class MorphAnalyzer {
 
     private List<ParsedWord> parseNC(String word) throws IOException {
         String wordLower = word.toLowerCase();
-        List<ParsedWord> parseds = new ArrayList<>();
+        List<ParsedWord> parseds = Lists.newArrayList();
         for (AnalyzerUnit unit : units) {
             List<ParsedWord> unitParseds = unit.parse(word, wordLower);
             if (unitParseds == null) {
