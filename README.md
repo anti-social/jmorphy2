@@ -36,7 +36,7 @@ To see all available vagga commands just type ``vagga``
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.2-es6.8.13/analysis-jmorphy2-0.2.2-es6.8.13.zip"
+${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.2-es7.11.2/analysis-jmorphy2-0.2.2-es7.11.2.zip"
 ```
 
 ### Building plugin
