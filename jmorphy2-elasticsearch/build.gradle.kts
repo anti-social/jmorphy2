@@ -22,13 +22,9 @@ configure<org.elasticsearch.gradle.plugin.PluginPropertiesExtension> {
 }
 
 
-val libVersion: String = project.getVersion().toString()
+val libVersion: String = project.getLibraryVersion()
 
 version = "${libVersion}-es${project.getElasticsearchVersion()}"
-
-ext {
-    val dependenciesDir = "${buildDir}/dependencies"
-}
 
 dependencies {
     compile(project(":jmorphy2-lucene"))

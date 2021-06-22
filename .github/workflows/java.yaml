@@ -14,6 +14,14 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 13
+
+    - name: Cache gradle wrapper
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: ${{ runner.os }}-gradle-wrapper
+
     - name: Cache Gradle packages
       uses: actions/cache@v2
       with:
@@ -33,8 +41,6 @@ jobs:
         fi
         ./gradlew assemble $GRADLE_ARGS
         ls -lh jmorphy2-elasticsearch/build/distributions
-        # integTest task fails starting with 7.5.0
-        # https://discuss.elastic.co/t/elasticsearch-6-3-0-unavailable-in-maven-repository/138782/2
         ./gradlew check $GRADLE_ARGS
 
     - uses: actions/upload-artifact@v2
@@ -44,12 +50,10 @@ jobs:
         contains(github.ref, '-es')
       with:
         name: elasticsearch-plugin
-        # .gradle directory is needed to prevent deleting stale build files
         path: |
-          .gradle
           jmorphy2-elasticsearch/build/distributions
 
-  deploy_es_plugin:
+  release_es_plugin:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'push' &&
@@ -58,18 +62,34 @@ jobs:
     needs:
     - build
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 13
-    - name: Cache Gradle packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle', '**/*.gradle.kts') }}
-        restore-keys: ${{ runner.os }}-gradle
-
     - uses: actions/download-artifact@v2
       with:
         name: elasticsearch-plugin
+
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+
+    - name: Fetch release version
+      run: |
+        set -eux
+        ls -l
+        RELEASE_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v\(.*\)/\1/')
+        echo "RELEASE_ARTIFACT_NAME=analysis-jmorphy2-$RELEASE_VERSION.zip" >> $GITHUB_ENV
+
+    - name: Upload release
+      id: upload-release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.RELEASE_ARTIFACT_NAME }}
+        asset_name: ${{ env.RELEASE_ARTIFACT_NAME }}
+        asset_content_type: application/zip

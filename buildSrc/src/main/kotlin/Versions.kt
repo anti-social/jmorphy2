@@ -55,7 +55,7 @@ object Versions {
     )
 }
 
-fun Project.getVersion(): String {
+fun Project.getLibraryVersion(): String {
     return rootProject.file("project.version").readLines().first().toUpperCase().removeSuffix("-SNAPSHOT")
 }
 
