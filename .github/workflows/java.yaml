@@ -73,14 +73,3 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: elasticsearch-plugin
-
-    - name: Publish
-      env:
-        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-        BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
-      run: |
-        set -eux
-        ES_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v.*-es\(.*\)/\1/')
-        ls -lh jmorphy2-elasticsearch/build/distributions
-        ./gradlew bintrayUpload \
-          $GRADLE_ARGS -Prelease=true -PesVersion=$ES_VERSION

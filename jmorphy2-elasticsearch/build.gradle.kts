@@ -1,8 +1,3 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.RecordingCopyTask
-import java.util.Date
-
-
 buildscript {
     repositories {
         mavenCentral()
@@ -14,9 +9,6 @@ buildscript {
     }
 }
 
-plugins {
-    id("com.jfrog.bintray") version "1.8.4"
-}
 apply(plugin="idea")
 apply(plugin="elasticsearch.esplugin")
 
@@ -45,30 +37,3 @@ dependencies {
 }
 
 tasks.findByName("validateNebulaPom")?.enabled = false
-
-bintray {
-    val user = project.properties["bintrayUser"]?.toString() ?: System.getenv("BINTRAY_USER")
-    val key = project.properties["bintrayApiKey"]?.toString() ?: System.getenv("BINTRAY_API_KEY")
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "elasticsearch"
-        name = project.name
-        userOrg = "evo"
-        setLicenses("Apache-2.0")
-        setLabels("elasticsearch-plugin", "analysis-plugin", "jmorphy2", "pymorphy2")
-        vcsUrl = "https://github.com/anti-social/jmorphy2.git"
-        version(delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = libVersion
-            released = Date().toString()
-            vcsTag = "v$libVersion"
-        })
-    })
-    filesSpec(delegateClosureOf<RecordingCopyTask> {
-        val distributionsDir = buildDir.resolve("distributions")
-        from(distributionsDir)
-        include("*-${version}.zip")
-        into(".")
-    })
-
-    val publish = true
-    val dryRun = project.hasProperty("bintrayDryRun")
-}
