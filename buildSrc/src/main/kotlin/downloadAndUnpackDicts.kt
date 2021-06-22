@@ -1,53 +1,84 @@
 import java.io.File
 import java.net.URI;
-import org.gradle.api.Project
+
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.RelativePath
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByType
 
+abstract class Pymorphy2Dicts : DefaultTask() {
+    @get:Input
+    abstract val lang: Property<String>
 
-fun Project.downloadAndUnpackDicts(packageName: String, version: String, md5: String, destPath: Unit) {
-    val fullName = "${packageName}-${version}"
-    val filename = "${fullName}.tar.gz"
-    val url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5}"
-    val baseDictsPath: String = destPath.toString()
+    @get:Input
+    abstract val version: Property<String>
 
-    val versionFile: File = File("${baseDictsPath}/version.txt")
-    if (versionFile.exists() && versionFile.readText(Charsets.UTF_8) == version) {
-        return
-    }
-    val dictsDir: File = File("${baseDictsPath}/pymorphy2_dicts")
-    if (dictsDir.exists()) {
-        dictsDir.delete()
-    }
-    val dictsFile: File = File("${baseDictsPath}/${filename}")
-    if (dictsFile.exists()) {
-        dictsFile.delete()
-    }
-    println("Downloading ${packageName} dicts...")
-    dictsDir.mkdirs()
-    dictsFile.writeText(URI(url).toURL().readText())
+    @get:Input
+    abstract val md5sum: Property<String>
 
-    println("Unpacking ${packageName} dicts...")
-    val zipRootDirName: String = packageName.replace("-", "_")
+    @OutputDirectory
+    val outputDir = project.extensions
+        .getByType<SourceSetContainer>()["main"]
+        .resources
+        .srcDirs.iterator().next()
 
-    copy {
-        from(tarTree(resources.gzip(dictsFile)))
-        into(dictsDir)
-        includeEmptyDirs = false
-        eachFile {
-            val zipRootPath: String = "${fullName}/${zipRootDirName}/data/"
-            val strip_segments: Int = zipRootPath.length - zipRootPath.replace("/", "").length
-            if (relativePath.pathString.startsWith(zipRootPath)) {
-                relativePath = RelativePath(
-                    !file.isDirectory(),
-                    relativePath.segments.slice(strip_segments..-1).toTypedArray() as String
-                )
-            } else {
-                exclude()
+    @TaskAction
+    fun apply() {
+        val packageName = "pymorphy2-dicts-${lang.get()}"
+        val fullName = "${packageName}-${version.get()}"
+        val filename = "${fullName}.tar.gz"
+        val url = "https://pypi.python.org/packages/source/p/${packageName}/${filename}?md5=${md5sum.get()}"
+
+        println("Downloading $url")
+        val dictsArchive = temporaryDir.resolve(filename)
+        if (dictsArchive.exists()) {
+            dictsArchive.delete()
+        }
+        URI(url).toURL().openStream().copyTo(dictsArchive.outputStream())
+        println("Saved dicts archive into $dictsArchive")
+
+        println("Unpacking $dictsArchive")
+        try {
+            val baseDictsDir = project.group.toString().split('.')
+                .fold(outputDir, File::resolve)
+                .resolve(lang.get())
+            val dictsDataDir = baseDictsDir.resolve("pymorphy2_dicts")
+            if (dictsDataDir.exists()) {
+                dictsDataDir.delete()
             }
+            val zipRootDirName: String = packageName.replace("-", "_")
+
+            project.run {
+                copy {
+                    from(tarTree(resources.gzip(dictsArchive)))
+                    into(dictsDataDir)
+                    includeEmptyDirs = false
+                    eachFile {
+                        val zipRootPath = "${fullName}/${zipRootDirName}/data/"
+                        val stripSegments = zipRootPath.length - zipRootPath.replace("/", "").length
+                        if (relativePath.pathString.startsWith(zipRootPath)) {
+                            relativePath = RelativePath(
+                                file.isFile,
+                                *relativePath.segments.slice(stripSegments until relativePath.segments.size)
+                                    .toTypedArray()
+                            )
+                        } else {
+                            exclude()
+                        }
+                    }
+                }
+            }
+            println("Unpacked dicts archive into $dictsDataDir")
+
+            // Store pymorhpy2 dictionary version
+            baseDictsDir.resolve("version.txt").writeText(version.get())
+        } finally {
+            dictsArchive.delete()
         }
     }
-    // Store pymorhpy2 dictionary version
-    File("${baseDictsPath}/version.txt").writeText(version)
-
-    dictsFile.delete()
 }

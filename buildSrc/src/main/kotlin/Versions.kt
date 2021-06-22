@@ -33,8 +33,6 @@ data class EsVersion(
 }
 
 object Versions {
-    val group = "company.evo.jmorphy2"
-
     val java = JavaVersion.VERSION_1_8
 
     val defaultLuceneVersion = "8.7.0"
