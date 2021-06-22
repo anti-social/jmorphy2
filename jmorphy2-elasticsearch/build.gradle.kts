@@ -44,6 +44,8 @@ dependencies {
     compile(project(":jmorphy2-dicts-uk"))
 }
 
+tasks.findByName("validateNebulaPom")?.enabled = false
+
 bintray {
     val user = project.properties["bintrayUser"]?.toString() ?: System.getenv("BINTRAY_USER")
     val key = project.properties["bintrayApiKey"]?.toString() ?: System.getenv("BINTRAY_API_KEY")
