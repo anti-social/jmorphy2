@@ -71,7 +71,7 @@ fun Project.getLuceneVersion(): String {
     val curEsVersion = EsVersion.parse(getElasticsearchVersion())
     var lastLuceneVersion: String? = null
     for ((esVersion, luceneVersion) in Versions.esLuceneVersions) {
-        if (curEsVersion <= esVersion) {
+        if (curEsVersion < esVersion) {
             break
         }
         lastLuceneVersion = luceneVersion
