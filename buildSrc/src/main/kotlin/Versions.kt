@@ -35,7 +35,6 @@ data class EsVersion(
 object Versions {
     val java = JavaVersion.VERSION_1_8
 
-    val defaultLuceneVersion = "8.7.0"
     val esLuceneVersions = mapOf(
         EsVersion(6, 6) to "7.6.0",
         EsVersion(6, 7) to "7.7.0",
@@ -51,7 +50,8 @@ object Versions {
         EsVersion(7, 8) to "7.5.1",
         EsVersion(7, 9) to "8.6.2",
         EsVersion(7, 10) to "8.7.0",
-        EsVersion(7, 11) to defaultLuceneVersion
+        EsVersion(7, 11) to "8.7.0",
+        EsVersion(7, 12) to "8.8.0"
     )
 }
 
