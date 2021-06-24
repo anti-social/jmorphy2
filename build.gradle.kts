@@ -1,5 +1,9 @@
 group = "company.evo.jmorphy2"
 
+plugins {
+    java
+}
+
 subprojects {
     apply(plugin="java-library")
 
@@ -13,8 +17,9 @@ subprojects {
         exclude("**/*Benchmark*")
     }
 
-    configure<JavaPluginConvention> {
-        sourceCompatibility = Versions.java
-        targetCompatibility = Versions.java
+    configure<JavaPluginExtension> {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(Versions.java.majorVersion))
+        }
     }
 }

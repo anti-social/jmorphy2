@@ -20,6 +20,10 @@ configure<org.elasticsearch.gradle.plugin.PluginPropertiesExtension> {
     noticeFile = project.file("NOTICE.txt")
 }
 
+java {
+    sourceCompatibility = Versions.java
+    targetCompatibility = Versions.java
+}
 
 val libVersion: String = project.getLibraryVersion()
 

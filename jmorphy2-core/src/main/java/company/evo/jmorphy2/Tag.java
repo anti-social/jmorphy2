@@ -1,6 +1,7 @@
 package company.evo.jmorphy2;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Tag {
@@ -16,9 +17,9 @@ public class Tag {
     public static final String MOOD = "MOod";
     public static final String VOICE = "VOic";
     public static final String INVOLVEMENT = "INvl";
-    private static final Set<String> NON_PRODUCTIVE_GRAMMEMES =
-        Set.of("NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro");
-
+    private static final Set<String> NON_PRODUCTIVE_GRAMMEMES = Set.of(
+        "NUMR", "NPRO", "PRED", "PREP", "CONJ", "PRCL", "INTJ", "Apro"
+    );
     private final String originalTagString;
     private final String normalizedTagString;
     private final Storage storage;
