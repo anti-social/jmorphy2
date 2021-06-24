@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
+        maven("https://plugins.gradle.org/m2/")
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
@@ -31,4 +31,7 @@ dependencies {
     implementation(project(":jmorphy2-dicts-uk"))
 }
 
+// prior 7.13
 tasks.findByName("validateNebulaPom")?.enabled = false
+// 7.13 and after
+tasks.findByName("validateElasticPom")?.enabled = false
