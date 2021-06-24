@@ -2,7 +2,6 @@ description = "Solr stemmer and tagger based on jmorphy2"
 
 repositories {
   mavenCentral()
-  maven(url = "http://maven.restlet.org")
 }
 
 dependencies {

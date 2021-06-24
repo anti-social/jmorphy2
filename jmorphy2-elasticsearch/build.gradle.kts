@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven(url="http://maven.restlet.org")
         jcenter()
     }
     dependencies {
