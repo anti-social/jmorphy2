@@ -1,14 +1,9 @@
 package company.evo.jmorphy2.lucene;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.ResourceLoader;

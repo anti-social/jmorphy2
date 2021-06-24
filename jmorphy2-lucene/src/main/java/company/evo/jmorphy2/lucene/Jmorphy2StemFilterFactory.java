@@ -1,6 +1,5 @@
 package company.evo.jmorphy2.lucene;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Set;
