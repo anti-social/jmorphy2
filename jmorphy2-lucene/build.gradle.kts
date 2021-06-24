@@ -11,5 +11,4 @@ dependencies {
     implementation(project(":jmorphy2-dicts-uk"))
 
     testImplementation(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
-    testImplementation("com.google.guava:guava:${Versions.guava}")
 }
