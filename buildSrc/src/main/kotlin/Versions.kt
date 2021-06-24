@@ -35,6 +35,13 @@ data class EsVersion(
 object Versions {
     val java = JavaVersion.VERSION_1_8
 
+    val commonsCodec = "[1.10, 1.11]"
+    val commonsIo = "2.4"
+    val noggit = "0.8"
+    val guava = "23.0"
+
+    val junit = "4.11"
+
     val esLuceneVersions = mapOf(
         EsVersion(6, 6) to "7.6.0",
         EsVersion(6, 7) to "7.7.0",

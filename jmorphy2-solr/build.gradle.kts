@@ -5,8 +5,8 @@ repositories {
 }
 
 dependencies {
-    compile("org.apache.solr:solr-core:${project.getLuceneVersion()}")
+    implementation("org.apache.solr:solr-core:${project.getLuceneVersion()}")
 
-    compile(project(":jmorphy2-lucene"))
-    testCompile(files(project(":jmorphy2-core")))
+    implementation(project(":jmorphy2-lucene"))
+    testImplementation(files(project(":jmorphy2-core")))
 }

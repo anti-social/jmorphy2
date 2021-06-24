@@ -1,13 +1,15 @@
 description = "Stemmer and tagger based on jmorphy2 for Lucene"
 
 dependencies {
-    compile("org.apache.lucene:lucene-core:${project.getLuceneVersion()}")
-    compile("org.apache.lucene:lucene-analyzers-common:${project.getLuceneVersion()}")
-    testCompile("org.apache.lucene:lucene-test-framework:${project.getLuceneVersion()}")
+    implementation("org.apache.lucene:lucene-core:${project.getLuceneVersion()}")
+    implementation("org.apache.lucene:lucene-analyzers-common:${project.getLuceneVersion()}")
+    testImplementation("org.apache.lucene:lucene-test-framework:${project.getLuceneVersion()}")
 
-    compile(project(":jmorphy2-core"))
-    compile(project(":jmorphy2-nlp"))
-    compile(project(":jmorphy2-dicts-ru"))
+    api(project(":jmorphy2-core"))
+    api(project(":jmorphy2-nlp"))
+    implementation(project(":jmorphy2-dicts-ru"))
+    implementation(project(":jmorphy2-dicts-uk"))
 
-    testCompile(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
+    testImplementation(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
+    testImplementation("com.google.guava:guava:${Versions.guava}")
 }

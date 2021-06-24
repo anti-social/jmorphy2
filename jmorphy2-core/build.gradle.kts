@@ -1,15 +1,15 @@
 description = "Java port of pymorphy2"
 
 dependencies {
-    compile("commons-io:commons-io:2.4")
-    compile("org.noggit:noggit:0.8")
-    compile("com.google.guava:guava:23.0")
+    implementation("commons-io:commons-io:${Versions.commonsIo}")
+    implementation("org.noggit:noggit:${Versions.noggit}")
+    implementation("com.google.guava:guava:${Versions.guava}")
 
-    compile(project(":dawg"))
+    implementation(project(":dawg"))
 
-    testCompile("junit:junit:4.11")
-    testCompile(project(":jmorphy2-dicts-ru"))
-    testCompile(project(":jmorphy2-dicts-uk"))
+    testImplementation("junit:junit:${Versions.junit}")
+    testImplementation(project(":jmorphy2-dicts-ru"))
+    testImplementation(project(":jmorphy2-dicts-uk"))
 }
 tasks.withType<Test> {
     exclude("**/*Benchmark*")
@@ -28,7 +28,7 @@ tasks.register<Jar>(
 }
 
 configurations.register("tests") {
-    extendsFrom(configurations.testCompile.get())
+    extendsFrom(configurations.testImplementation.get())
 }
 
 artifacts {

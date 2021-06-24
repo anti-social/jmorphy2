@@ -1,11 +1,12 @@
 description = "NLP based on pymorphy2 dictionaries"
 
 dependencies {
-    compile(project(":jmorphy2-core"))
+    api(project(":jmorphy2-core"))
+    implementation("com.google.guava:guava:${Versions.guava}")
 
-    testCompile("junit:junit:4.11")
-    testCompile(project(":jmorphy2-dicts-ru"))
-    testCompile(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
+    testImplementation("junit:junit:${Versions.junit}")
+    testImplementation(project(":jmorphy2-dicts-ru"))
+    testImplementation(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
 }
 
 tasks.withType<Test> {

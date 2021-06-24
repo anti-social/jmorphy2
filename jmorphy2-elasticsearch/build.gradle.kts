@@ -26,9 +26,9 @@ val libVersion: String = project.getLibraryVersion()
 version = "${libVersion}-es${project.getElasticsearchVersion()}"
 
 dependencies {
-    compile(project(":jmorphy2-lucene"))
-    compile(project(":jmorphy2-dicts-ru"))
-    compile(project(":jmorphy2-dicts-uk"))
+    implementation(project(":jmorphy2-lucene"))
+    implementation(project(":jmorphy2-dicts-ru"))
+    implementation(project(":jmorphy2-dicts-uk"))
 }
 
 tasks.findByName("validateNebulaPom")?.enabled = false
