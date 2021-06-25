@@ -78,6 +78,13 @@ Or just run elasticsearch inside the container
 vagga elastic
 ```
 
+Using podman or docker:
+
+```sh
+podman build -t elasticsearch-jmorphy2 -f Dockerfile.elasticsearch .github
+podman run --name elasticsearch-jmorphy2 -p 9200:9200 -e "ES_JAVA_OPTS=-Xmx1g" -e "discovery.type=single-node" elasticsearch-jmorphy2
+```
+
 ### Test elasticsearch with jmorphy2 plugin
 
 Create index with specific analyzer and test it:
