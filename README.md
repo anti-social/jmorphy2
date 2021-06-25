@@ -36,12 +36,12 @@ To see all available vagga commands just type ``vagga``
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.2-es7.11.2/analysis-jmorphy2-0.2.2-es7.11.2.zip"
+${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.2-es7.13.2/analysis-jmorphy2-0.2.2-es7.13.2.zip"
 ```
 
 ### Building plugin
 
-Default elasticsearch version against which plugin is built is 7.11.2
+Default elasticsearch version against which plugin is built is `7.13.2`
 
 To build for specific elastisearch version run build as:
 
@@ -55,7 +55,7 @@ Or:
 ./gradlew assemble -PesVersion=6.7.1
 ```
 
-Supported elasticsearch versions: `6.6.x`, `6.7.x`, `6.8.x`, `7.0.x`, `7.1.x`, `7.2.x`, `7.3.x`, `7.4.x`, `7.5.x`, `7.6.x`, `7.7.x`, `7.8.x`, `7.9.x`, `7.10.x` and `7.11.x`
+Supported elasticsearch versions: `6.6.x`, `6.7.x`, `6.8.x`, `7.0.x`, `7.1.x`, `7.2.x`, `7.3.x`, `7.4.x`, `7.5.x`, `7.6.x`, `7.7.x`, `7.8.x`, `7.9.x`, `7.10.x`, `7.11.x`, `7.12.x`, `7.13.x`
 
 For older elasticsearch version use specific branches:
 
@@ -67,7 +67,7 @@ And install assembled plugin:
 ```sh
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.2-SNAPSHOT-es7.11.2.zip
+sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.2-SNAPSHOT-es7.13.2.zip
 ```
 
 Or just run elasticsearch inside the container 
