@@ -19,24 +19,9 @@ public class NumberUnit extends AnalyzerUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(new ArrayList<>() {{
-                add("NUMB");
-                add("");
-                add("ЧИСЛО");
-                add("число");
-            }});
-            tagStorage.newGrammeme(new ArrayList<>() {{
-                add("intg");
-                add("");
-                add("цел");
-                add("целое");
-            }});
-            tagStorage.newGrammeme(new ArrayList<>() {{
-                add("real");
-                add("");
-                add("вещ");
-                add("вещественное");
-            }});
+            tagStorage.newGrammeme(List.of("NUMB", "", "ЧИСЛО", "число"));
+            tagStorage.newGrammeme(List.of("intg", "", "цел", "целое"));
+            tagStorage.newGrammeme(List.of("real", "", "вещ", "вещественное"));
             tagStorage.newTag("NUMB,intg");
             tagStorage.newTag("NUMB,real");
             return new NumberUnit(tagStorage, terminate, score);

@@ -66,12 +66,12 @@ public class SimpleParser extends Parser {
 
     public List<Node.Top> parseAll(List<Node.Top> sentences) {
         // System.out.println(sentences.size());
-        int var = 0, wave = 0;
-        List<Node.Top> results = new ArrayList<Node.Top>();
-        Set<Long> uniqueTopHashes = new HashSet<Long>();
+        // int var = 0, wave = 0;
+        List<Node.Top> results = new ArrayList<>();
+        Set<Long> uniqueTopHashes = new HashSet<>();
         
         while (!sentences.isEmpty()) {
-            List<Node.Top> nextSentences = new ArrayList<Node.Top>();
+            List<Node.Top> nextSentences = new ArrayList<>();
             for (Node.Top sent : sentences) {
                 boolean hasMatchedRules = false;
                 List<Node> nodes = sent.getChildren();
@@ -100,7 +100,7 @@ public class SimpleParser extends Parser {
                     results.add(sent);
                 }
             }
-            Collections.sort(nextSentences, Node.scoreComparator());
+            nextSentences.sort(Node.scoreComparator());
             sentences = nextSentences.subList(0, Math.min(threshold, nextSentences.size()));
             // wave++;
         }
@@ -109,18 +109,17 @@ public class SimpleParser extends Parser {
         // System.out.println(var);
         // System.out.println(uniqueTopHashes.size());
         // System.out.println(results.size());
-        Collections.sort(results, Node.scoreComparator());
+        results.sort(Node.scoreComparator());
         return results;
     }
 
     private List<Node> reduce(Rule rule, List<Node> nodes, int offset) {
-        List<Node> newNodes = new ArrayList<Node>();
-        newNodes.addAll(nodes.subList(0, offset));
+        List<Node> newNodes = new ArrayList<>(nodes.subList(0, offset));
 
         List<Node> subNodes = nodes.subList(offset, offset + rule.rightSize);
         Set<String> grammemeValues = rule.commonGrammemeValues(subNodes, allowedGrammemeValues);
         float score = Node.sumScoreFor(subNodes) + rule.weight * grammemeValues.size();
-        List<Node>  reducedNodes = new ArrayList<Node>();
+        List<Node>  reducedNodes = new ArrayList<>();
         int i = 0;
         for (Node rNode : subNodes) {
             Rule.NodeMatcher m = rule.right.get(i);
@@ -172,5 +171,5 @@ public class SimpleParser extends Parser {
         // defaultRules.add("NP", "ADJF", 1);
         defaultRules.add("VP", "INFN", 1);
         defaultRules.add("VP", "VERB", 1);
-    };
+    }
 }

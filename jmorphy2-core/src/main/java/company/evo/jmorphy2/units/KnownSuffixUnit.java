@@ -167,7 +167,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
         }
     }
 
-    class ParsedWordWithPrefixId {
+    private static class ParsedWordWithPrefixId {
         public final ParsedWord parsedWord;
         public final int prefixId;
 

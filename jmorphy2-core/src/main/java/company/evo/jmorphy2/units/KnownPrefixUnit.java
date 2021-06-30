@@ -13,12 +13,14 @@ public class KnownPrefixUnit extends PrefixedUnit {
     private final int minReminder;
     private final Set<String> prefixes;
 
-    private KnownPrefixUnit(Tag.Storage tagStorage,
-                            AnalyzerUnit unit,
-                            Set<String> prefixes,
-                            int minReminder,
-                            boolean terminate,
-                            float score) {
+    private KnownPrefixUnit(
+        Tag.Storage tagStorage,
+        AnalyzerUnit unit,
+        Set<String> prefixes,
+        int minReminder,
+        boolean terminate,
+        float score
+    ) {
         super(tagStorage, unit, terminate, score);
         this.minReminder = minReminder;
         this.prefixes = prefixes;
@@ -27,8 +29,8 @@ public class KnownPrefixUnit extends PrefixedUnit {
     public static class Builder extends AnalyzerUnit.Builder {
         private static final int DEFAULT_MIN_REMINDER = 3;
 
-        private AnalyzerUnit.Builder unit;
-        private Set<String> prefixes;
+        private final AnalyzerUnit.Builder unit;
+        private final Set<String> prefixes;
         private int minReminder = DEFAULT_MIN_REMINDER;
 
         public Builder(AnalyzerUnit.Builder unit,

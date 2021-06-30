@@ -1,7 +1,6 @@
 package company.evo.jmorphy2.units;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,8 +62,10 @@ public abstract class AnalyzerUnit {
 
         @Override
         public String toString() {
-            return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>",
-                                 word, tag, normalForm, foundWord, score, AnalyzerUnit.this.getClass());
+            return String.format(
+                "<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>",
+                word, tag, normalForm, foundWord, score, AnalyzerUnit.this.getClass()
+            );
         }
     }
 }

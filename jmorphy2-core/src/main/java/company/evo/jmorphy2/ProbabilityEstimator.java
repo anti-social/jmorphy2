@@ -11,7 +11,7 @@ public class ProbabilityEstimator {
     public static final String KEY_FORMAT = "%s:%s";
     public static final float MULTIPLIER = 1000000f;
 
-    private IntegerDAWG dict;
+    private final IntegerDAWG dict;
 
     public ProbabilityEstimator(FileLoader loader) throws IOException {
         InputStream stream = loader.newStream(PROBABILITY_FILENAME);

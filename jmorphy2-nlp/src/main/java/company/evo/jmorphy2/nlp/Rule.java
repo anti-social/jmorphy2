@@ -1,5 +1,6 @@
 package company.evo.jmorphy2.nlp;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.List;
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class Rule {
     }
 
     protected List<NodeMatcher> parseRight(String right) {
-        List<NodeMatcher> listBuilder = new ArrayList<NodeMatcher>();
+        List<NodeMatcher> listBuilder = new ArrayList<>();
         for (String part : right.trim().split(" ")) {
             int flags = 0;
             if (part.startsWith("@")) {
@@ -63,15 +64,14 @@ public class Rule {
     }
 
     public Set<String> commonGrammemeValues(List<Node> nodes, Set<String> allowedValues) {
-        Set<String> values = null;
+        Set<String> values = new HashSet<>();
         int i = 0;
         for (Node node : nodes) {
             if ((right.get(i).flags & NodeMatcher.NO_COMMONS) != 0) {
                 i++;
                 continue;
             }
-            if (values == null) {
-                values = new HashSet<String>();
+            if (values.isEmpty()) {
                 values.addAll(node.grammemeValues);
             } else {
                 values.retainAll(node.grammemeValues);
@@ -80,7 +80,7 @@ public class Rule {
         }
         values.retainAll(allowedValues);
         values.addAll(left);
-        return Set.copyOf(values);
+        return values;
     }
 
     @Override
@@ -109,11 +109,9 @@ public class Rule {
                 }
             }
             if (word != null) {
-                if (!word.equals(node.word.toLowerCase())) {
-                    return false;
-                }
+                return word.equals(node.word.toLowerCase());
             }
             return true;
         }
-    };
+    }
 }

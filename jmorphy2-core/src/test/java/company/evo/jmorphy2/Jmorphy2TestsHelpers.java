@@ -12,7 +12,7 @@ public class Jmorphy2TestsHelpers {
         throws IOException
     {
         String dictResourcePath = String.format("/company/evo/jmorphy2/%s/pymorphy2_dicts", lang);
-        return new MorphAnalyzer.Builder()
+        return new MorphAnalyzer.Builder<>()
             .fileLoader(new ResourceFileLoader(dictResourcePath))
             .charSubstitutes(replaceChars)
             .build();

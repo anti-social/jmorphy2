@@ -7,7 +7,6 @@ import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.List;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.Jmorphy2TestsHelpers;
@@ -15,7 +14,6 @@ import company.evo.jmorphy2.Jmorphy2TestsHelpers;
 
 @RunWith(JUnit4.class)
 public class SimpleParserTest {
-    private MorphAnalyzer morph;
     private Parser parser;
     private boolean initialized = false;
 
@@ -27,12 +25,16 @@ public class SimpleParserTest {
         if (initialized) {
             return;
         }
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
-        parser = new SimpleParser(morph,
-                                  new SimpleTagger(morph,
-                                                   new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE))),
-                                  new Ruleset(getClass().getResourceAsStream(PARSER_RULES_RESOURCE)),
-                                  100);
+        MorphAnalyzer morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
+        parser = new SimpleParser(
+            morph,
+            new SimpleTagger(
+                morph,
+                new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE))
+            ),
+            new Ruleset(getClass().getResourceAsStream(PARSER_RULES_RESOURCE)),
+            100
+        );
         initialized = true;
     }
 

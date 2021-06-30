@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +15,7 @@ import java.util.regex.Matcher;
 
 
 public class Ruleset {
-    private final List<Rule> rules = new ArrayList<Rule>();
-    private final Map<Integer,List<Rule>> rulesBySize = new HashMap<Integer,List<Rule>>();
+    private final Map<Integer,List<Rule>> rulesBySize = new HashMap<>();
     private int maxRightSize;
 
     private static final String COMMENT_START = "#";
@@ -29,8 +30,9 @@ public class Ruleset {
     public Ruleset() {}
 
     public Ruleset(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-        String line, row = "";
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        String line;
+        StringBuilder row = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) {
@@ -40,16 +42,13 @@ public class Ruleset {
                 continue;
             }
 
-            row += line;
-            if (row.endsWith(CONTINUE_LINE)) {
-                row = row.substring(0, row.length() - 1);
+            row.append(line);
+            if (row.toString().endsWith(CONTINUE_LINE)) {
+                row = new StringBuilder(row.substring(0, row.length() - 1));
                 continue;
             }
 
-            List<String> parts = new ArrayList<>();
-            for (String i : row.trim().split(PARTS_SPLITTER, 2)) {
-                parts.add(i);
-            }
+            List<String> parts = Arrays.asList(row.toString().trim().split(PARTS_SPLITTER, 2));
             if (parts.size() < 2) {
                 throw new RuntimeException("Left or right part is missing");
             }
@@ -63,7 +62,7 @@ public class Ruleset {
                 add(leftPart, rightPart);
             }
 
-            row = "";
+            row = new StringBuilder();
         }
     }
 
@@ -74,12 +73,7 @@ public class Ruleset {
     public void add(String left, String right, float weight) {
         for (String rightPart : right.trim().split(RHS_SPLITTER)) {
             Rule r = new Rule(left, rightPart, weight);
-            rules.add(r);
-            List<Rule> bySize = rulesBySize.get(r.rightSize);
-            if (bySize == null) {
-                bySize = new ArrayList<Rule>();
-                rulesBySize.put(r.rightSize, bySize);
-            }
+            List<Rule> bySize = rulesBySize.computeIfAbsent(r.rightSize, k -> new ArrayList<>());
             bySize.add(r);
             if (r.rightSize > maxRightSize) {
                 maxRightSize = r.rightSize;
@@ -105,7 +99,7 @@ public class Ruleset {
     }
 
     public List<Rule> matchAll(List<Node> nodes) {
-        List<Rule> matchedRules = new ArrayList<Rule>();
+        List<Rule> matchedRules = new ArrayList<>();
         List<Rule> testRules = rulesBySize.get(nodes.size());
         if (testRules == null) {
             return matchedRules;

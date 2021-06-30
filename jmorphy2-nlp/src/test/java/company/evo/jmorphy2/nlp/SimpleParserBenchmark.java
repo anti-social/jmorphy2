@@ -13,12 +13,11 @@ import company.evo.jmorphy2.Jmorphy2TestsHelpers;
 
 @RunWith(JUnit4.class)
 public class SimpleParserBenchmark {
-    private MorphAnalyzer morph;
     private Parser parser;
 
     @Before
     public void setUp() throws IOException {
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
+        MorphAnalyzer morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         parser = new SimpleParser(morph, new SimpleTagger(morph));
     }
 
@@ -39,8 +38,10 @@ public class SimpleParserBenchmark {
             parser.parse(words);
         }
         endTime = System.currentTimeMillis();
-        System.out.println(String.format("SimpleParser.parse(tokens): %.1f sents/sec",
-                                         ((float) N) / (endTime - startTime) * 1000));
+        System.out.printf(
+            "SimpleParser.parse(tokens): %.1f sents/sec%n",
+            ((float) N) / (endTime - startTime) * 1000
+        );
         System.out.println("=======================");
     }
 }

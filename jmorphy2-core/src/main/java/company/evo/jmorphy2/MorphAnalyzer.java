@@ -230,7 +230,7 @@ public class MorphAnalyzer {
 
     private List<ParsedWord> filterDups(List<ParsedWord> parseds) {
         Set<ParsedWord.Unique> seenParseds = new HashSet<>();
-        List<ParsedWord> filteredParseds = new ArrayList<ParsedWord>();
+        List<ParsedWord> filteredParseds = new ArrayList<>();
         for (ParsedWord p : parseds) {
             ParsedWord.Unique u = p.toUnique();
             if (!seenParseds.contains(u)) {

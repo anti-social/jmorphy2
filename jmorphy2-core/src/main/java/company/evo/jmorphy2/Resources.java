@@ -72,8 +72,7 @@ public class Resources {
     private static String parseString(String s) {
         int readPos = 0;
         int len = s.length();
-        int writePos = 0;
-        String out = "";
+        StringBuilder out = new StringBuilder();
         while (readPos < len) {
             char c = s.charAt(readPos++);
             if (c == '\\') {
@@ -107,8 +106,8 @@ public class Resources {
                         break;
                 }
             }
-            out += c;
+            out.append(c);
         }
-        return out;
+        return out.toString();
     }
 }

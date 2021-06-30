@@ -7,15 +7,12 @@ import org.junit.runner.RunWith;
 import com.carrotsearch.randomizedtesting.RandomizedRunner;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.Set;
 import java.util.List;
-import java.util.Arrays;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesTo;
 

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public abstract class ParsedWord implements Comparable {
+public abstract class ParsedWord implements Comparable<ParsedWord> {
     public static final float EPS = 1e-6f;
 
     public final String word;
@@ -33,7 +33,7 @@ public abstract class ParsedWord implements Comparable {
 
     public List<ParsedWord> inflect(Collection<Grammeme> requiredGrammemes,
             Collection<Grammeme> excludeGrammemes) {
-        List<ParsedWord> paradigm = new ArrayList<ParsedWord>();
+        List<ParsedWord> paradigm = new ArrayList<>();
         for (ParsedWord p : getLexeme()) {
             if (p.tag.containsAll(requiredGrammemes) && !p.tag.containsAny(excludeGrammemes)) {
                 paradigm.add(p);
@@ -49,11 +49,8 @@ public abstract class ParsedWord implements Comparable {
     }
 
     @Override
-    public int compareTo(Object obj) {
-        ParsedWord other = (ParsedWord) obj;
-        if (score > other.score) return 1;
-        if (score < other.score) return -1;
-        return 0;
+    public int compareTo(ParsedWord other) {
+        return Float.compare(score, other.score);
     }
 
     public Unique toUnique() {

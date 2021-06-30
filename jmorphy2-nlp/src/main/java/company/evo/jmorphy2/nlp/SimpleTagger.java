@@ -1,6 +1,5 @@
 package company.evo.jmorphy2.nlp;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.Deque;
@@ -36,18 +35,18 @@ public class SimpleTagger extends Tagger {
         this.threshold = threshold;
     }
 
-    public List<Node.Top> tagAll(String[] tokens) throws IOException {
-        List<Node.Top> results = new ArrayList<Node.Top>();
+    public List<Node.Top> tagAll(String[] tokens) {
+        List<Node.Top> results = new ArrayList<>();
         if (tokens.length != 0) {
-            tagAll(results, new LinkedList<Node>(), makeTokens(tokens));
-            Collections.sort(results, Collections.reverseOrder(Node.scoreComparator()));
+            tagAll(results, new LinkedList<>(), makeTokens(tokens));
+            results.sort(Collections.reverseOrder(Node.scoreComparator()));
         }
         return results;
     }
 
     private Node reduce(Rule rule, List<Node> nodes) {
         List<Node> rNodes = nodes.subList(0, rule.rightSize);
-        List<String> words = new ArrayList<String>();
+        List<String> words = new ArrayList<>();
         float score = 0.0f;
         for (Node node : rNodes) {
             words.add(node.word);
@@ -56,8 +55,8 @@ public class SimpleTagger extends Tagger {
         return new Node(rule.left, String.join(" ", words), score);
     }
 
-    private void tagAll(List<Node.Top> results, Deque<Node> nodesStack, List<Node> nodes) throws IOException {
-        List<Node> reducedNodes = new ArrayList<Node>();
+    private void tagAll(List<Node.Top> results, Deque<Node> nodesStack, List<Node> nodes) {
+        List<Node> reducedNodes = new ArrayList<>();
 
         // test rules
         for (int count = 1; count <= rules.getMaxRightSize(); count++) {
@@ -104,12 +103,12 @@ public class SimpleTagger extends Tagger {
         }
     }
 
-    public Node.Top tag(String[] tokens) throws IOException {
+    public Node.Top tag(String[] tokens) {
         List<Node> tokenNodes = makeTokens(tokens);
 
         float score = 0.0f;
         int tokensSize = tokenNodes.size();
-        List<Node> nodes = new ArrayList<Node>();
+        List<Node> nodes = new ArrayList<>();
         int i = 0;
         while (i < tokensSize) {
             Rule mRule = rules.match(tokenNodes);
@@ -136,7 +135,7 @@ public class SimpleTagger extends Tagger {
     }
 
     private List<Node> makeTokens(String[] words) {
-        List<Node> tokens = new ArrayList<Node>();
+        List<Node> tokens = new ArrayList<>();
         for (String w : words) {
             tokens.add(new Node(Set.of("UNKN"), w, 1.0f));
         }

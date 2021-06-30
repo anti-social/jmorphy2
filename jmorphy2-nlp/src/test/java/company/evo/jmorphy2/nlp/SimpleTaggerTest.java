@@ -16,7 +16,6 @@ import company.evo.jmorphy2.Jmorphy2TestsHelpers;
 
 @RunWith(JUnit4.class)
 public class SimpleTaggerTest {
-    private MorphAnalyzer morph;
     private SimpleTagger tagger;
     private boolean initialized = false;
 
@@ -27,38 +26,39 @@ public class SimpleTaggerTest {
         if (initialized) {
             return;
         }
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
+        MorphAnalyzer morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         tagger = new SimpleTagger(morph,
                                   new Ruleset(getClass().getResourceAsStream(TAGGER_RULES_RESOURCE)));
         initialized = true;
     }
 
     @Test
-    public void testTagger() throws IOException {
+    public void testTagger() {
         assertSents(
-            new ArrayList<String>() {{
-                add("(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги))");
-                add("(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги))");
-                add("(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги))");
-                add("(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги))");
-            }},
+            List.of(
+                "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
+                "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги))",
+                "(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги))",
+                "(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги))"
+            ),
             tagger.tagAll(new String[]{"женские", "сапоги"})
         );
         assertSents(
-            new ArrayList<String>() {{
-                add("(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))");
-                add("(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))");
-                add("(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))");
-                add("(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))");
-            }},
+            List.of(
+                "(TOP (ADJF,accs,inan,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                "(TOP (ADJF,accs,inan,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                "(TOP (ADJF,nomn,plur женские) (NOUN,inan,masc,nomn,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))",
+                "(TOP (ADJF,nomn,plur женские) (NOUN,accs,inan,masc,plur сапоги) (PREP на) (NOUN,accs,femn,inan,sing зиму))"
+            ),
             tagger.tagAll(new String[]{"женские", "сапоги", "на", "зиму"})
         );
         assertSents(
-            new ArrayList<String>() {{
-                add("(TOP (NOUN,inan,masc,nomn,sing чехол) (PREP для) (LATN iphone) (LATN 4s))");
-                add("(TOP (NOUN,accs,inan,masc,sing чехол) (PREP для) (LATN iphone) (LATN 4s))");
-            }},
-            tagger.tagAll(new String[]{"чехол", "для", "iphone", "4s"}));
+            List.of(
+                "(TOP (NOUN,inan,masc,nomn,sing чехол) (PREP для) (LATN iphone) (LATN 4s))",
+                "(TOP (NOUN,accs,inan,masc,sing чехол) (PREP для) (LATN iphone) (LATN 4s))"
+            ),
+            tagger.tagAll(new String[]{"чехол", "для", "iphone", "4s"})
+        );
 //         FIXME
 //         assertSents(
 //             new ArrayList<String>() {{
@@ -69,7 +69,7 @@ public class SimpleTaggerTest {
     }
 
     private void assertSents(List<String> expected, List<Node.Top> sents) {
-        List<String> stringSents = new ArrayList<String>();
+        List<String> stringSents = new ArrayList<>();
         for (Node sent : sents) {
             stringSents.add(sent.toString());
         }

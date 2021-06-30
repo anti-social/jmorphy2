@@ -37,10 +37,8 @@ public class Node {
             throw new RuntimeException("grammemeValues must not be null");
         }
         this.grammemeValues = grammemeValues;
-        List<String> listGrammemeValues = new ArrayList<String>(grammemeValues.size());
-        for (String gramm : grammemeValues) {
-            listGrammemeValues.add(gramm);
-        }
+        List<String> listGrammemeValues = new ArrayList<>(grammemeValues.size());
+        listGrammemeValues.addAll(grammemeValues);
         Collections.sort(listGrammemeValues);
         this.grammemeValuesStr = String.join(",", listGrammemeValues);
         this.children = children;
@@ -94,12 +92,7 @@ public class Node {
     }
 
     public static Comparator<Node> scoreComparator() {
-        return new Comparator<Node>() {
-            @Override
-            public int compare(Node n1, Node n2) {
-                return Float.compare(n2.score, n1.score);
-            }
-        };
+        return (n1, n2) -> Float.compare(n2.score, n1.score);
     }
 
     private long calcUniqueHash() {
@@ -117,7 +110,7 @@ public class Node {
 
     @Override
     public String toString() {
-        List<String> childrenList = new ArrayList<String>();
+        List<String> childrenList = new ArrayList<>();
         if (children != null) {
             for (Node child : children) {
                 childrenList.add(child.prettyToString(false, 1));
@@ -141,7 +134,7 @@ public class Node {
 
     protected String prettyToString(boolean withScore, int level) {
         String pad = level == 0 ? "" : String.format("\n%s", " ".repeat(level * 4));
-        List<String> childrenStrings = new ArrayList<String>();
+        List<String> childrenStrings = new ArrayList<>();
         for (Node child : getChildren()) {
             childrenStrings.add(child.prettyToString(withScore, level + 1));
         }
@@ -161,5 +154,5 @@ public class Node {
         public Top(List<Node> children, float score) {
             super(Set.of("TOP"), children, score);
         }
-    };
+    }
 }

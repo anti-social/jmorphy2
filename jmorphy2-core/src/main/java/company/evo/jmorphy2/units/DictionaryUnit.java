@@ -26,7 +26,7 @@ public class DictionaryUnit extends AnalyzerUnit {
     }
 
     public static class Builder extends AnalyzerUnit.Builder {
-        private Dictionary.Builder dictBuilder;
+        private final Dictionary.Builder dictBuilder;
         private Map<Character,String> charSubstitutes;
 
         public Builder(Dictionary.Builder dictBuilder,

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 
 @RunWith(JUnit4.class)
-public class MorphAnalyzerTest {
+public class MorphAnalyzerRUTest {
     private MorphAnalyzer morph;
     private boolean initialized = false;
 
@@ -23,6 +23,7 @@ public class MorphAnalyzerTest {
     public void setUp() throws IOException {
         if (!initialized) {
             morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
+            initialized = true;
         }
     }
 
