@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import company.evo.jmorphy2.ParsedWord;
 import company.evo.jmorphy2.Tag;
@@ -60,7 +58,7 @@ public class KnownPrefixUnit extends PrefixedUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
+    public List<ParsedWord> parse(String word, String wordLower) {
         List<ParsedWord> parseds = new ArrayList<>();
         int wordLen = word.length();
         for (int i = 1; wordLen - i >= minReminder; i++) {

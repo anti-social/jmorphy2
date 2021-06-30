@@ -1,4 +1,5 @@
 package company.evo.jmorphy2.units;
+
 import java.util.ArrayList;
 
 import company.evo.jmorphy2.Tag;

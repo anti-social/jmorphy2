@@ -19,7 +19,7 @@ public class ProbabilityEstimator {
         stream.close();
     }
 
-    public float getProbability(String word, Tag tag) throws IOException {
+    public float getProbability(String word, Tag tag) {
         String key = String.format(KEY_FORMAT, word, tag);
         return dict.get(key, 0) / MULTIPLIER;
     }

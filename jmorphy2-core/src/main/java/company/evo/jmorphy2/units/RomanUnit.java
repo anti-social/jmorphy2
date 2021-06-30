@@ -23,7 +23,7 @@ public class RomanUnit extends RegexUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(new ArrayList<String>() {{
+            tagStorage.newGrammeme(new ArrayList<>() {{
                 add("ROMN");
                 add("");
                 add("РИМ");

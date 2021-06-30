@@ -22,15 +22,14 @@ import static org.apache.lucene.analysis.BaseTokenStreamTestCase.assertAnalyzesT
 
 @RunWith(RandomizedRunner.class)
 public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
-    private static List<Set<String>> DEFAULT_INCLUDE_TAGS =
-        List.<Set<String>>of(
-            Set.of("NOUN"),
-            Set.of("ADJF"),
-            Set.of("ADJS"),
-            Set.of("LATN"),
-            Set.of("NUMB"),
-            Set.of("UNKN")
-        );
+    private static final List<Set<String>> DEFAULT_INCLUDE_TAGS = List.of(
+        Set.of("NOUN"),
+        Set.of("ADJF"),
+        Set.of("ADJS"),
+        Set.of("LATN"),
+        Set.of("NUMB"),
+        Set.of("UNKN")
+    );
 
     @Before
     public void setUp() throws IOException {
@@ -88,7 +87,7 @@ public class Jmorphy2StemFilterTest extends BaseFilterTestCase {
  
     @Test
     public void testIgnoreUnknown() throws IOException {
-        List<Set<String>> excludeUnknown = List.<Set<String>>of(Set.of("UNKN"));
+        List<Set<String>> excludeUnknown = List.of(Set.of("UNKN"));
         Analyzer analyzer = getAnalyzer(null, excludeUnknown, true);
         assertAnalyzesTo(analyzer,
                          "ъь ъё",

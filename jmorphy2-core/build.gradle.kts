@@ -3,7 +3,6 @@ description = "Java port of pymorphy2"
 dependencies {
     implementation("commons-io:commons-io:${Versions.commonsIo}")
     implementation("org.noggit:noggit:${Versions.noggit}")
-    implementation("com.google.guava:guava:${Versions.guava}")
 
     implementation(project(":dawg"))
 

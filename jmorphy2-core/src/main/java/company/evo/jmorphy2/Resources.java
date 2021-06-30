@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.ArrayList;
 
 
 public class Resources {
-    public static Map<Character,String> getCharSubstitutes(MorphAnalyzer.Lang lang) throws IOException {
+    public static Map<Character,String> getCharSubstitutes(String langCode) throws IOException {
         Map<Character,String> substitutes = new HashMap<>();
-        for (String line : readLines(lang, "char_substitutes.txt")) {
+        for (String line : readLines(langCode, "char_substitutes.txt")) {
             String[] parts = line.split("=>", 2);
             if (parts.length != 2) {
                 continue;
@@ -30,22 +31,27 @@ public class Resources {
         return substitutes;
     }
 
-    public static Set<String> getKnownPrefixes(MorphAnalyzer.Lang lang) throws IOException {
+    public static Set<String> getKnownPrefixes(String langCode) throws IOException {
         Set<String> prefixes = new HashSet<>();
-        for (String line: readLines(lang, "known_prefixes.txt")) {
+        for (String line: readLines(langCode, "known_prefixes.txt")) {
             prefixes.add(line.toLowerCase());
         }
         return prefixes;
     }
 
-    private static List<String> readLines(MorphAnalyzer.Lang lang, String filename)
+    private static List<String> readLines(String langCode, String filename)
         throws IOException
     {
-        String path = String.format("/lang/%s/%s", lang.name().toLowerCase(), filename);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(
-            Resources.class.getResourceAsStream(path), StandardCharsets.UTF_8));
+        String path = String.format("/lang/%s/%s", langCode.toLowerCase(), filename);
+        var inputStream = Resources.class.getResourceAsStream(path);
+        if (inputStream == null) {
+            return Collections.emptyList();
+        }
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        );
         List<String> lines = new ArrayList<>();
-        String line = null;
+        String line;
         while ((line = reader.readLine()) != null) {
             String processedLine = processLine(parseString(line));
             if (!processedLine.equals("")) {
@@ -60,8 +66,7 @@ public class Resources {
         if (parts.length == 0) {
             return "";
         }
-        String processedLine = parts[0].trim();
-        return processedLine;
+        return parts[0].trim();
     }
 
     private static String parseString(String s) {

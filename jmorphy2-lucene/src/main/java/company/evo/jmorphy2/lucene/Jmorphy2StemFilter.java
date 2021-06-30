@@ -120,14 +120,14 @@ public class Jmorphy2StemFilter extends TokenFilter {
         return true;
     }
 
-    private List<String> getNormalForms(CharTermAttribute termAtt) throws IOException {
-        List<String> normalForms = new ArrayList<String>();
-        Set<String> uniqueNormalForms = new HashSet<String>();
+    private List<String> getNormalForms(CharTermAttribute termAtt) {
+        List<String> normalForms = new ArrayList<>();
+        Set<String> uniqueNormalForms = new HashSet<>();
 
         char[] termBuffer = termAtt.buffer();
         int termLength = termAtt.length();
         String token = new String(termBuffer, 0, termLength);
-        
+
         List<ParsedWord> parseds = morph.parse(token);
 
         for (ParsedWord p : parseds) {

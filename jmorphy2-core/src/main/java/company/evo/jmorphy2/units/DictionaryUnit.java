@@ -54,7 +54,7 @@ public class DictionaryUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
+    public List<ParsedWord> parse(String word, String wordLower) {
         List<ParsedWord> parseds = new ArrayList<>();
         for (WordsDAWG.WordForm wf : dict.getWords().similarWords(wordLower, charSubstitutes)) {
             String normalForm = dict.buildNormalForm(wf.paradigmId, wf.idx, wf.word);

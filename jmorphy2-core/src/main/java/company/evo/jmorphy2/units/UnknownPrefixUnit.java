@@ -27,7 +27,7 @@ public class UnknownPrefixUnit extends PrefixedUnit {
         private static final int DEFAULT_MAX_PREFIX_LENGTH = 5;
         private static final int DEFAULT_MIN_REMINDER = 3;
 
-        private AnalyzerUnit.Builder unit;
+        private final AnalyzerUnit.Builder unit;
         private int minReminder = DEFAULT_MIN_REMINDER;
         private int maxPrefixLength = DEFAULT_MAX_PREFIX_LENGTH;
 
@@ -62,8 +62,8 @@ public class UnknownPrefixUnit extends PrefixedUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
-        List<ParsedWord> parseds = new ArrayList<ParsedWord>();
+    public List<ParsedWord> parse(String word, String wordLower) {
+        List<ParsedWord> parseds = new ArrayList<>();
         int wordLen = word.length();
         for (int i = 1; i <= maxPrefixLength && wordLen - i >= minReminder; i++) {
             String prefix = wordLower.substring(0, i);

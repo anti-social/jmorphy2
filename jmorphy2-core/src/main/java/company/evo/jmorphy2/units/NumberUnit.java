@@ -19,19 +19,19 @@ public class NumberUnit extends AnalyzerUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(new ArrayList<String>() {{
+            tagStorage.newGrammeme(new ArrayList<>() {{
                 add("NUMB");
                 add("");
                 add("ЧИСЛО");
                 add("число");
             }});
-            tagStorage.newGrammeme(new ArrayList<String>() {{
+            tagStorage.newGrammeme(new ArrayList<>() {{
                 add("intg");
                 add("");
                 add("цел");
                 add("целое");
             }});
-            tagStorage.newGrammeme(new ArrayList<String>() {{
+            tagStorage.newGrammeme(new ArrayList<>() {{
                 add("real");
                 add("");
                 add("вещ");
@@ -47,13 +47,15 @@ public class NumberUnit extends AnalyzerUnit {
     public List<ParsedWord> parse(String word, String wordLower) {
         Tag tag = null;
         try {
-           float number = Integer.parseInt(word);
-           tag = tagStorage.getTag("NUMB,intg");
+            // First try to parse as an integer
+            float number = Integer.parseInt(word);
+            tag = tagStorage.getTag("NUMB,intg");
         } catch (NumberFormatException erInt) {
             try {
-               float number = Float.parseFloat(word);
-               tag = tagStorage.getTag("NUMB,real");
-            } catch (NumberFormatException erFloat) {}
+                // then as a float
+                float number = Float.parseFloat(word);
+                tag = tagStorage.getTag("NUMB,real");
+            } catch (NumberFormatException ignored) {}
         }
 
         if (tag != null) {

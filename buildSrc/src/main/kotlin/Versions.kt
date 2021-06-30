@@ -38,7 +38,7 @@ object Versions {
     val commonsCodec = "[1.10, 1.11]"
     val commonsIo = "2.4"
     val noggit = "0.8"
-    val guava = "23.0"
+    val caffeine = "3.0.2"
 
     val junit = "4.11"
 
