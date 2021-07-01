@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Deque;
 import java.util.ArrayList;
@@ -17,19 +18,19 @@ import org.noggit.JSONParser;
 public class JSONUtils {
     @SuppressWarnings("unchecked")
     public static Object parseJSON(InputStream stream) throws IOException {
-        JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream, "UTF-8")));
-        Deque<Object> stack = new LinkedList<Object>();
-        Object obj = null, prevObj = null, container = null;
+        JSONParser parser = new JSONParser(new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)));
+        Deque<Object> stack = new LinkedList<>();
+        Object obj = null, prevObj = null, container;
         int event;
 
         while ((event = parser.nextEvent()) != JSONParser.EOF) {
             switch (event) {
             case JSONParser.ARRAY_START:
-                obj = new ArrayList<Object>();
+                obj = new ArrayList<>();
                 stack.addFirst(obj);
                 continue;
             case JSONParser.OBJECT_START:
-                obj = new HashMap<Object,Object>();
+                obj = new HashMap<>();
                 stack.addFirst(obj);
                 continue;
             case JSONParser.STRING:

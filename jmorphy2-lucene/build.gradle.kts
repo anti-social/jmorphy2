@@ -1,5 +1,7 @@
 description = "Stemmer and tagger based on jmorphy2 for Lucene"
 
+version = getLibraryVersion()
+
 dependencies {
     implementation("org.apache.lucene:lucene-core:${project.getLuceneVersion()}")
     implementation("org.apache.lucene:lucene-analyzers-common:${project.getLuceneVersion()}")
@@ -11,5 +13,4 @@ dependencies {
     implementation(project(":jmorphy2-dicts-uk"))
 
     testImplementation(project(":jmorphy2-core").dependencyProject.sourceSets["test"].output)
-    testImplementation("com.google.guava:guava:${Versions.guava}")
 }

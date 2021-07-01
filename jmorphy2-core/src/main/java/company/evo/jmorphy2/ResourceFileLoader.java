@@ -1,6 +1,5 @@
 package company.evo.jmorphy2;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 
@@ -12,7 +11,7 @@ public class ResourceFileLoader extends FileLoader {
     }
 
     @Override
-    public InputStream newStream(String filename) throws IOException {
+    public InputStream newStream(String filename) {
         return getClass().getResourceAsStream(basePath + "/" + filename);
     }
 }

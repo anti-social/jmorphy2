@@ -1,5 +1,7 @@
 description = "Solr stemmer and tagger based on jmorphy2"
 
+version = getLibraryVersion()
+
 repositories {
   mavenCentral()
 }

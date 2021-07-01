@@ -15,10 +15,10 @@ import company.evo.jmorphy2.MorphAnalyzer;
 
 
 public final class Jmorphy2Analyzer extends Analyzer {
-    private static List<Set<String>> DEFAULT_EXCLUDE_TAGS = new ArrayList<Set<String>>();
+    private static List<Set<String>> DEFAULT_EXCLUDE_TAGS = new ArrayList<>();
     static {
         for (final String pos : new String[]{"NPRO", "PREP", "CONJ", "PRCL", "INTJ"}) {
-            DEFAULT_EXCLUDE_TAGS.add(new HashSet<String>() {
+            DEFAULT_EXCLUDE_TAGS.add(new HashSet<>() {
                     { add(pos); }
                 });
         }

@@ -23,6 +23,7 @@ public class MorphAnalyzerUkTest {
     public void setUp() throws IOException {
         if (!initialized) {
             morph = Jmorphy2TestsHelpers.newMorphAnalyzer("uk");
+            initialized = true;
         }
     }
 

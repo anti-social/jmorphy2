@@ -7,7 +7,7 @@ import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
 import company.evo.jmorphy2.MorphAnalyzer;
 import company.evo.jmorphy2.Jmorphy2TestsHelpers;
@@ -15,7 +15,6 @@ import company.evo.jmorphy2.Jmorphy2TestsHelpers;
 
 @RunWith(JUnit4.class)
 public class SubjectExtractorTest {
-    private MorphAnalyzer morph;
     protected SubjectExtractor subjExtractor;
     private boolean initialized = false;
 
@@ -24,7 +23,7 @@ public class SubjectExtractorTest {
         if (initialized) {
             return;
         }
-        morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
+        MorphAnalyzer morph = Jmorphy2TestsHelpers.newMorphAnalyzer("ru");
         Parser parser = new SimpleParser(morph, new SimpleTagger(morph), 100);
         subjExtractor =
             new SubjectExtractor(parser,
@@ -35,28 +34,28 @@ public class SubjectExtractorTest {
 
     @Test
     public void testExtractSubject() throws IOException {
-        assertEquals(Arrays.asList("игрушка", "Lava", "кукла", "майя"),
+        assertEquals(List.of("игрушка", "Lava", "кукла", "майя"),
                      subjExtractor.extract("мягкая муз игрушка Lava кукла майя в красном платье".split(" ")));
 
-        assertEquals(Arrays.asList(new String[]{"сапог"}),
+        assertEquals(List.of("сапог"),
                      subjExtractor.extract(new String[]{"женские", "сапоги"}));
 
-        assertEquals(Arrays.asList(new String[]{"сапог"}),
+        assertEquals(List.of("сапог"),
                      subjExtractor.extract(new String[]{"женские", "сапоги", "днепропетровск"}));
 
-        assertEquals(Arrays.asList(new String[]{"чехол", "ozaki"}),
+        assertEquals(List.of("чехол", "ozaki"),
                      subjExtractor.extract(new String[]{"чехол", "ozaki", "для", "iphone", "5"}));
 
-        assertEquals(Arrays.asList(new String[]{"магнит"}),
+        assertEquals(List.of("магнит"),
                      subjExtractor.extract(new String[]{"магнит", "на", "холодильник"}));
 
-        assertEquals(Arrays.asList(new String[]{"GLOBAL", "устройство"}),
+        assertEquals(List.of("GLOBAL", "устройство"),
                      subjExtractor.extract(new String[]{"GLOBAL", "Зарядное", "устройство"}));
 
-        assertEquals(Arrays.asList(new String[]{"перчатка", "HEAD"}),
+        assertEquals(List.of("перчатка", "HEAD"),
                      subjExtractor.extract(new String[]{"Лыжные", "зимние", "теплые", "перчатки", "HEAD"}));
 
-        assertEquals(Arrays.asList(new String[]{"палатка", "цвет", "sand"}),
+        assertEquals(List.of("палатка", "цвет", "sand"),
                      subjExtractor.extract(new String[]{"Купить", "туристическую", "палатку", "в", "Украине", "VAUDE", "Opera", "4P", "2013", "цвет", "sand"}));
     }
 }

@@ -1,12 +1,11 @@
 package company.evo.jmorphy2.nlp;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
+import java.util.HashSet;
 
 
 public class SubjectExtractor {
@@ -16,9 +15,6 @@ public class SubjectExtractor {
     private List<Set<String>> disableExtractionValues;
     private List<Set<String>> subjValues;
 
-    private static final Splitter partsSplitter = Splitter.on(" ").trimResults().omitEmptyStrings();
-    private static final Splitter valuesSplitter = Splitter.on(",").trimResults().omitEmptyStrings();
-
     public SubjectExtractor(Parser parser, String confStr, boolean normalize) {
         this.parser = parser;
         this.normalize = normalize;
@@ -26,14 +22,14 @@ public class SubjectExtractor {
     }
 
     private void loadConfigString(String confStr) {
-        enableExtractionValues = new ArrayList<Set<String>>();
-        disableExtractionValues = new ArrayList<Set<String>>();
-        subjValues = new ArrayList<Set<String>>();
-        for (String part : partsSplitter.split(confStr)) {
+        enableExtractionValues = new ArrayList<>();
+        disableExtractionValues = new ArrayList<>();
+        subjValues = new ArrayList<>();
+        for (String part : confStr.trim().split(" ")) {
             if (part.startsWith("+")) {
-                enableExtractionValues.add(parsePart(part.substring(1, part.length())));
+                enableExtractionValues.add(parsePart(part.substring(1)));
             } else if (part.startsWith("-")) {
-                disableExtractionValues.add(parsePart(part.substring(1, part.length())));
+                disableExtractionValues.add(parsePart(part.substring(1)));
             } else {
                 subjValues.add(parsePart(part));
             }
@@ -41,7 +37,9 @@ public class SubjectExtractor {
     }
 
     private Set<String> parsePart(String part) {
-        return ImmutableSet.copyOf(valuesSplitter.split(part));
+        Set<String> parts = new HashSet<>();
+        Collections.addAll(parts, part.trim().split(","));
+        return parts;
     }
 
     public List<String> extract(String[] tokens) throws IOException {
@@ -49,7 +47,7 @@ public class SubjectExtractor {
     }
 
     public List<String> extract(Node.Top sent) {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         for (Token token : extractTokens(sent)) {
             results.add(token.word);
         }
@@ -61,7 +59,7 @@ public class SubjectExtractor {
     }
 
     public List<Token> extractTokens(Node.Top sent) {
-        List<Token> results = new ArrayList<Token>();
+        List<Token> results = new ArrayList<>();
         fetchTokens(results, sent, 0, false, false);
         return results;
     }
@@ -114,5 +112,5 @@ public class SubjectExtractor {
         public String toString() {
             return String.format("%s_%s", word, index);
         }
-    };
+    }
 }

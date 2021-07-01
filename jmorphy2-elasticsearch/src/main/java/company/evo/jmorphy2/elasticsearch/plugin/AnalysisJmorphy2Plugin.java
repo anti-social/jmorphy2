@@ -16,7 +16,6 @@
 
 package company.evo.jmorphy2.elasticsearch.plugin;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +35,7 @@ import company.evo.jmorphy2.elasticsearch.indices.Jmorphy2Service;
 public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
     private final Jmorphy2Service jmorphy2Service;
 
-    public AnalysisJmorphy2Plugin(Settings settings, Path configPath) throws IOException {
+    public AnalysisJmorphy2Plugin(Settings settings, Path configPath) {
         super();
         Environment env = new Environment(settings, configPath);
         jmorphy2Service = new Jmorphy2Service(settings, env);
@@ -44,17 +43,16 @@ public class AnalysisJmorphy2Plugin extends Plugin implements AnalysisPlugin {
 
     @Override
     public Map<String, AnalysisProvider<TokenFilterFactory>> getTokenFilters() {
-
         Map<String, AnalysisProvider<TokenFilterFactory>> tokenFilters = new HashMap<>();
         tokenFilters.put("jmorphy2_stemmer",
-                (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
-                        new Jmorphy2StemTokenFilterFactory
-                                (indexSettings, environment, name, settings, jmorphy2Service)
+            (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
+                new Jmorphy2StemTokenFilterFactory
+                    (indexSettings, environment, name, settings, jmorphy2Service)
         );
         tokenFilters.put("jmorphy2_subject",
-                (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
-                        new Jmorphy2SubjectTokenFilterFactory
-                                (indexSettings, environment, name, settings, jmorphy2Service)
+            (Jmorphy2AnalysisProvider) (indexSettings, environment, name, settings) ->
+                new Jmorphy2SubjectTokenFilterFactory
+                    (indexSettings, environment, name, settings, jmorphy2Service)
         );
         return tokenFilters;
     }

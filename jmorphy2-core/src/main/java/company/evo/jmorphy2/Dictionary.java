@@ -5,20 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Collection;
 
 import org.apache.commons.io.input.SwappedDataInputStream;
 
-import company.evo.dawg.PayloadsDAWG;
-
-
 public final class Dictionary {
-    private final Tag.Storage tagStorage;
     private final Meta meta;
     private final String[] paradigmPrefixes;
     private final WordsDAWG words;
@@ -27,14 +18,12 @@ public final class Dictionary {
     private final String[] suffixes;
     private final Tag[] gramtab;
 
-    private Dictionary(Tag.Storage tagStorage,
-                       Meta meta,
+    private Dictionary(Meta meta,
                        WordsDAWG words,
                        SuffixesDAWG[] predictionSuffixes,
                        Paradigm[] paradigms,
                        String[] suffixes,
                        Tag[] gramtab) {
-        this.tagStorage = tagStorage;
         this.meta = meta;
         this.paradigmPrefixes = meta.compileOptions.paradigmPrefixes;
         this.words = words;
@@ -45,7 +34,7 @@ public final class Dictionary {
     }
 
     public static class Builder {
-        private FileLoader loader;
+        private final FileLoader loader;
         private Dictionary cachedDict;
 
         public static final String META_FILENAME = "meta.json";
@@ -129,15 +118,17 @@ public final class Dictionary {
                 InputStream paradigmsStream = loader.newStream(PARADIGMS_FILENAME);
                 InputStream suffixesStream = loader.newStream(SUFFIXES_FILENAME);
                 InputStream gramtabStream = loader.newStream(GRAMTAB_OPENCORPORA_FILENAME);
-                cachedDict = new Dictionary(tagStorage,
-                                            meta,
-                                            new WordsDAWG(wordsStream),
-                                            parsePredictionSuffixes(loader,
-                                                                    PREDICTION_SUFFIXES_FILENAME_TEMPLATE,
-                                                                    meta.compileOptions.paradigmPrefixes.length),
-                                            parseParadigms(paradigmsStream),
-                                            parseSuffixes(suffixesStream),
-                                            parseGramtab(tagStorage, gramtabStream));
+                cachedDict = new Dictionary(
+                    meta,
+                    new WordsDAWG(wordsStream),
+                    parsePredictionSuffixes(loader,
+                        PREDICTION_SUFFIXES_FILENAME_TEMPLATE,
+                        meta.compileOptions.paradigmPrefixes.length
+                    ),
+                    parseParadigms(paradigmsStream),
+                    parseSuffixes(suffixesStream),
+                    parseGramtab(tagStorage, gramtabStream)
+                );
                 wordsStream.close();
                 paradigmsStream.close();
                 suffixesStream.close();
@@ -260,11 +251,11 @@ public final class Dictionary {
             compileOptions = new CompileOptions((Map<String,Object>) meta.get("compile_options"));
             predictionSuffixesDawgLengths = ((List<Long>) meta.get("prediction_suffixes_dawg_lengths"))
                 .toArray(new Long[0]);
-            ptw = (boolean) (meta.containsKey("P(t|w)") ? meta.get("P(t|w)") : false);
-            ptwUniqueWords = (long) (meta.containsKey("P(t|w)_unique_words") ? meta.get("P(t|w)_unique_words") : -1L);
-            ptwOutcomes = (long) (meta.containsKey("P(t|w)_outcomes") ? meta.get("P(t|w)_outcomes") : -1L);
-            ptwMinWordFreq = (long) (meta.containsKey("P(t|w)_min_word_freq") ? meta.get("P(t|w)_min_word_freq") : -1L);
-            corpusRevision = (String) (meta.containsKey("corpus_revision") ? meta.get("corpus_revision") : "");
+            ptw = (boolean) (meta.getOrDefault("P(t|w)", false));
+            ptwUniqueWords = (long) (meta.getOrDefault("P(t|w)_unique_words", -1L));
+            ptwOutcomes = (long) (meta.getOrDefault("P(t|w)_outcomes", -1L));
+            ptwMinWordFreq = (long) (meta.getOrDefault("P(t|w)_min_word_freq", -1L));
+            corpusRevision = (String) (meta.getOrDefault("corpus_revision", ""));
         }
     }
 
@@ -306,17 +297,5 @@ public final class Dictionary {
         public int size() {
             return length;
         }
-    };
-
-    public class ParadigmInfo {
-        public final String prefix;
-        public final String suffix;
-        public final Tag tag;
-
-        public ParadigmInfo(String prefix, String suffix, Tag tag) {
-            this.prefix = prefix;
-            this.suffix = suffix;
-            this.tag = tag;
-        }
-    };
+    }
 }

@@ -1,6 +1,6 @@
 package company.evo.jmorphy2.units;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import company.evo.jmorphy2.Tag;
 
@@ -19,7 +19,7 @@ public class PunctuationUnit extends RegexUnit {
 
         @Override
         protected AnalyzerUnit newAnalyzerUnit(Tag.Storage tagStorage) {
-            tagStorage.newGrammeme(Lists.newArrayList("PNCT", "", "ЗПР", "пунктуация"));
+            tagStorage.newGrammeme(List.of("PNCT", "", "ЗПР", "пунктуация"));
             tagStorage.newTag("PNCT");
             return new PunctuationUnit(tagStorage, terminate, score);
         }

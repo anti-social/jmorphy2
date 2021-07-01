@@ -26,7 +26,7 @@ public class DictionaryUnit extends AnalyzerUnit {
     }
 
     public static class Builder extends AnalyzerUnit.Builder {
-        private Dictionary.Builder dictBuilder;
+        private final Dictionary.Builder dictBuilder;
         private Map<Character,String> charSubstitutes;
 
         public Builder(Dictionary.Builder dictBuilder,
@@ -54,7 +54,7 @@ public class DictionaryUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
+    public List<ParsedWord> parse(String word, String wordLower) {
         List<ParsedWord> parseds = new ArrayList<>();
         for (WordsDAWG.WordForm wf : dict.getWords().similarWords(wordLower, charSubstitutes)) {
             String normalForm = dict.buildNormalForm(wf.paradigmId, wf.idx, wf.word);

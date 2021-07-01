@@ -9,10 +9,9 @@ import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.ArrayList;
-
-import com.google.common.base.Joiner;
 
 
 @RunWith(JUnit4.class)
@@ -29,42 +28,37 @@ public class SubjectExtractorBenchmark extends SubjectExtractorTest {
 
     @Test
     public void benchmark() throws IOException {
-        int repeats = DEFAULT_REPEATS;
-
         System.out.println("Benchmarking SubjectExtractor:");
-        benchExtract(repeats);
+        benchExtract(DEFAULT_REPEATS);
     }
 
     public void benchExtract(int repeats) throws IOException {
         long startTime = 0L, endTime = 0L;
         // List<List<Parsed>> res = new ArrayList<List<Parsed>>(words.size());
 
+        int ix = 0;
         for (int i = 0; i < repeats; i++) {
-            int ix = 0;
             startTime = System.currentTimeMillis();
             for (String[] phrase : phrases) {
                 List<String> subj = subjExtractor.extract(phrase);
-                // System.out.println(Joiner.on(" ").join(phrase));
-                // System.out.println(subj);
-                // System.out.println();
-                // res.add(ix, morph.parse(word.word));
-                ix++;
+                ix += subj.size();
             }
             endTime = System.currentTimeMillis();
         }
 
+        System.out.printf("%s", ix);
         printResults("SubjectExtractor.extract(w)", endTime - startTime, phrases.size());
     }
 
     private void printResults(String name, long timeMillis, int count) {
         Float wps = ((float) count) / timeMillis * 1000;
-        System.out.println(String.format("    %-50s %.1f phrases/sec", name, wps));
+        System.out.printf("    %-50s %.1f phrases/sec%n", name, wps);
     }
 
     public void loadPhrases(String resource) throws IOException {
-        phrases = new ArrayList<String[]>();
+        phrases = new ArrayList<>();
         InputStream stream = getClass().getResourceAsStream(resource);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         String rawPhrase;
         while ((rawPhrase = reader.readLine()) != null) {
             List<String> words = new ArrayList<String>();
@@ -75,6 +69,6 @@ public class SubjectExtractorBenchmark extends SubjectExtractorTest {
             }
             phrases.add(words.toArray(new String[0]));
         }
-        System.out.println(String.format("Loaded %d phrases", phrases.size()));
+        System.out.printf("Loaded %d phrases%n", phrases.size());
     }
 }

@@ -1,10 +1,8 @@
 package company.evo.jmorphy2;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,17 +15,15 @@ public class SuffixesDAWG extends PayloadsDAWG {
         super(stream);
     }
 
-    protected SuffixForm decodePayload(Payload payload) throws IOException {
-        DataInput stream = new DataInputStream(new ByteArrayInputStream(payload.value));
-        short count = stream.readShort();
-        short paradigmId = stream.readShort();
-        short idx = stream.readShort();
+    protected SuffixForm decodePayload(Payload payload) {
+        ByteBuffer data = ByteBuffer.wrap(payload.value);
+        short count = data.getShort();
+        short paradigmId = data.getShort();
+        short idx = data.getShort();
         return new SuffixForm(payload.key, count, paradigmId, idx);
     }
 
-    public List<SuffixForm> similarSuffixes(String word, Map<Character,String> replaceChars)
-        throws IOException
-    {
+    public List<SuffixForm> similarSuffixes(String word, Map<Character,String> replaceChars) {
         List<SuffixForm> foundSuffixes = new ArrayList<>();
         for (Payload payload : similarItems(word, replaceChars)) {
             foundSuffixes.add(decodePayload(payload));

@@ -1,10 +1,8 @@
 package company.evo.jmorphy2;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,16 +15,14 @@ public class WordsDAWG extends PayloadsDAWG {
         super(stream);
     }
 
-    protected WordForm decodePayload(Payload payload) throws IOException {
-        DataInput stream = new DataInputStream(new ByteArrayInputStream(payload.value));
-        short paradigmId = stream.readShort();
-        short idx = stream.readShort();
+    protected WordForm decodePayload(Payload payload) {
+        ByteBuffer data = ByteBuffer.wrap(payload.value);
+        short paradigmId = data.getShort();
+        short idx = data.getShort();
         return new WordForm(payload.key, paradigmId, idx);
     }
 
-    public List<WordForm> similarWords(String word, Map<Character,String> replaceChars)
-        throws IOException
-    {
+    public List<WordForm> similarWords(String word, Map<Character,String> replaceChars) {
         List<WordForm> foundWords = new ArrayList<>();
         for (Payload payload : similarItems(word, replaceChars)) {
             foundWords.add(decodePayload(payload));

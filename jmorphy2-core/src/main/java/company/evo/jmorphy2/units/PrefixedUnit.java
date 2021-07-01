@@ -1,6 +1,5 @@
 package company.evo.jmorphy2.units;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +15,8 @@ abstract class PrefixedUnit extends AnalyzerUnit {
         this.unit = unit;
     }
 
-    protected List<ParsedWord> parseWithPrefix(String word, String wordLower, String prefix)
-        throws IOException
-    {
-        List<ParsedWord> parseds = new ArrayList<ParsedWord>();
+    protected List<ParsedWord> parseWithPrefix(String word, String wordLower, String prefix) {
+        List<ParsedWord> parseds = new ArrayList<>();
         int prefixLen = prefix.length();
         for (ParsedWord p : unit.parse(word.substring(prefixLen), wordLower.substring(prefixLen))) {
             if (!p.tag.isProductive()) {

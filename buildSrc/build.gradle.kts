@@ -5,10 +5,9 @@ plugins {
 
 repositories {
     mavenLocal()
-    jcenter()
     repositories {
-    maven("https://plugins.gradle.org/m2/")
-  }
+        maven("https://plugins.gradle.org/m2/")
+    }
 }
 
 idea {

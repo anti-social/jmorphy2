@@ -1,22 +1,18 @@
 package company.evo.jmorphy2.nlp;
 
 import java.util.List;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.Comparator;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableList;
+import java.util.Collections;
 
 import company.evo.jmorphy2.ParsedWord;
 
 
 public class Node {
-    public final ImmutableSet<String> grammemeValues;
+    public final Set<String> grammemeValues;
     public final String grammemeValuesStr;
-    public final ImmutableList<Node> children;
+    public final List<Node> children;
     public final ParsedWord parsed;
     public final String word;
     public final float score;
@@ -24,24 +20,27 @@ public class Node {
 
     public final long uniqueHash;
 
-    public Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, float score) {
+    public Node(Set<String> grammemeValues, List<Node> children, float score) {
         this(grammemeValues, children, null, null, score);
     }
 
-    public Node(ImmutableSet<String> grammemeValues, String word, float score) {
+    public Node(Set<String> grammemeValues, String word, float score) {
         this(grammemeValues, null, null, word, score);
     }
 
-    public Node(ImmutableSet<String> grammemeValues, ParsedWord parsed, float score) {
+    public Node(Set<String> grammemeValues, ParsedWord parsed, float score) {
         this(grammemeValues, null, parsed, parsed.word, score);
     }
 
-    protected Node(ImmutableSet<String> grammemeValues, ImmutableList<Node> children, ParsedWord parsed, String word, float score) {
+    protected Node(Set<String> grammemeValues, List<Node> children, ParsedWord parsed, String word, float score) {
         if (grammemeValues == null) {
             throw new RuntimeException("grammemeValues must not be null");
         }
         this.grammemeValues = grammemeValues;
-        this.grammemeValuesStr = Joiner.on(",").join(Ordering.natural().sortedCopy(grammemeValues));
+        List<String> listGrammemeValues = new ArrayList<>(grammemeValues.size());
+        listGrammemeValues.addAll(grammemeValues);
+        Collections.sort(listGrammemeValues);
+        this.grammemeValuesStr = String.join(",", listGrammemeValues);
         this.children = children;
         this.parsed = parsed;
         this.word = word;
@@ -59,11 +58,11 @@ public class Node {
         return children == null;
     }
 
-    public ImmutableList<Node> getChildren() {
+    public List<Node> getChildren() {
         if (hasChildren()) {
             return children;
         }
-        return ImmutableList.of();
+        return List.of();
     }
 
     public int getChildrenSize() {
@@ -93,12 +92,7 @@ public class Node {
     }
 
     public static Comparator<Node> scoreComparator() {
-        return new Comparator<Node>() {
-            @Override
-            public int compare(Node n1, Node n2) {
-                return Float.compare(n2.score, n1.score);
-            }
-        };
+        return (n1, n2) -> Float.compare(n2.score, n1.score);
     }
 
     private long calcUniqueHash() {
@@ -116,9 +110,18 @@ public class Node {
 
     @Override
     public String toString() {
-        return String.format("(%s %s)",
-                             grammemeValuesStr,
-                             hasChildren() ? Joiner.on(" ").join(children) : word);
+        List<String> childrenList = new ArrayList<>();
+        if (children != null) {
+            for (Node child : children) {
+                childrenList.add(child.prettyToString(false, 1));
+            }
+        }
+        return String.format(
+            "(%s %s)",
+            grammemeValuesStr,
+            hasChildren() ? String.join(" ", childrenList) : word
+         ).replaceAll("\\n", "").replaceAll("( )+", " ").trim();
+
     }
 
     public String prettyToString() {
@@ -130,8 +133,8 @@ public class Node {
     }
 
     protected String prettyToString(boolean withScore, int level) {
-        String pad = level == 0 ? "" : String.format("\n%s", Strings.repeat(" ", level * 4));
-        List<String> childrenStrings = new ArrayList<String>();
+        String pad = level == 0 ? "" : String.format("\n%s", " ".repeat(level * 4));
+        List<String> childrenStrings = new ArrayList<>();
         for (Node child : getChildren()) {
             childrenStrings.add(child.prettyToString(withScore, level + 1));
         }
@@ -143,13 +146,13 @@ public class Node {
         return String.format("%s(%s %s)%s",
                              pad,
                              grammemeValuesStr,
-                             hasChildren() ? Joiner.on(" ").join(childrenStrings): word,
+                             hasChildren() ? String.join(" ", childrenStrings): word,
                              addInfo);
     }
 
     public static class Top extends Node {
-        public Top(ImmutableList<Node> children, float score) {
-            super(ImmutableSet.of("TOP"), children, score);
+        public Top(List<Node> children, float score) {
+            super(Set.of("TOP"), children, score);
         }
-    };
+    }
 }

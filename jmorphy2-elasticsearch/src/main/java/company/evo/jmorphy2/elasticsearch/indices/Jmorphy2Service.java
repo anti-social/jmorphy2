@@ -32,11 +32,11 @@ import org.elasticsearch.env.Environment;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -80,8 +80,9 @@ public class Jmorphy2Service {
             return loadMorphAnalyzerFromFilesystem(key)
                 .orElse(loadMorphAnalyzerFromResources(key).orElse(null));
         } catch (IOException e) {
-            throw new IllegalStateException
-                (String.format(Locale.ROOT, "Error when loading jmorphy2 dictionary: [%s]", key.lang), e);
+            throw new IllegalStateException(
+                String.format(Locale.ROOT, "Error when loading jmorphy2 dictionary: [%s]", key.lang), e
+            );
         }
     }
 
@@ -90,13 +91,14 @@ public class Jmorphy2Service {
     {
         Path dictsPath = jmorphy2Dir.resolve(key.lang).resolve("pymorphy2_dicts");
         if (Files.isDirectory(dictsPath) && Files.isRegularFile(dictsPath.resolve("meta.json"))) {
-            MorphAnalyzer.Builder morphBuilder = new MorphAnalyzer.Builder()
-                .dictPath(dictsPath.toString())
-                .cacheSize(key.cacheSize);
+            var morphBuilder = new CachingMorphAnalyzer.Builder()
+                .cacheSize(key.cacheSize)
+                .dictPath(dictsPath.toString());
             if (key.substitutesPath != null) {
                 Path substitutesPath = env.configFile().resolve(key.substitutesPath);
                 morphBuilder.charSubstitutes(parseSubstitutes(substitutesPath));
             }
+
             return Optional.of(morphBuilder.build());
         }
         return Optional.empty();
@@ -113,13 +115,14 @@ public class Jmorphy2Service {
                 return Optional.empty();
             }
         }
-        MorphAnalyzer.Builder morphBuilder = new MorphAnalyzer.Builder()
-            .fileLoader(loader)
-            .cacheSize(key.cacheSize);
+        var morphBuilder = new CachingMorphAnalyzer.Builder()
+            .cacheSize(key.cacheSize)
+            .fileLoader(loader);
         if (key.substitutesPath != null) {
             Path substitutesPath = env.configFile().resolve(key.substitutesPath);
             morphBuilder.charSubstitutes(parseSubstitutes(substitutesPath));
         }
+
         return Optional.of(morphBuilder.build());
     }
 
@@ -127,7 +130,7 @@ public class Jmorphy2Service {
     {
         // TODO: make builder api for subject extractor
         try {
-            MorphAnalyzer morph = getMorphAnalyzer(key.lang, key.substitutesPath, key.analyzerCacheSize);
+            var morph = getMorphAnalyzer(key.lang, key.substitutesPath, key.analyzerCacheSize);
             Tagger tagger;
             if (key.taggerRulesPath != null) {
                 try (InputStream rulesStream =
@@ -153,9 +156,7 @@ public class Jmorphy2Service {
             }
             String extractorRules;
             if (key.extractorRulesPath != null) {
-                extractorRules = new String
-                    (Files.readAllBytes(env.configFile().resolve(key.extractorRulesPath)),
-                     StandardCharsets.UTF_8);
+                extractorRules = Files.readString(env.configFile().resolve(key.extractorRulesPath));
             } else {
                 extractorRules = "+NP,nomn +NP,accs -PP -Geox NOUN,nomn NOUN,accs LATN NUMB";
             }
@@ -212,9 +213,7 @@ public class Jmorphy2Service {
             }
             MorphAnalyzerCacheKey other = (MorphAnalyzerCacheKey) obj;
             return lang.equals(other.lang)
-                && (substitutesPath == null ?
-                    other.substitutesPath == null :
-                    substitutesPath.equals(other.substitutesPath))
+                && (Objects.equals(substitutesPath, other.substitutesPath))
                 && cacheSize == other.cacheSize;
         }
     }
@@ -273,19 +272,11 @@ public class Jmorphy2Service {
             }
             SubjectExtractorCacheKey other = (SubjectExtractorCacheKey) obj;
             return lang.equals(other.lang)
-                && (substitutesPath == null ?
-                    other.substitutesPath == null :
-                    substitutesPath.equals(other.substitutesPath))
+                && (Objects.equals(substitutesPath, other.substitutesPath))
                 && analyzerCacheSize == other.analyzerCacheSize
-                && (taggerRulesPath == null ?
-                    other.taggerRulesPath == null :
-                    taggerRulesPath.equals(other.taggerRulesPath))
-                && (parserRulesPath == null ?
-                    other.parserRulesPath == null :
-                    parserRulesPath.equals(other.parserRulesPath))
-                && (extractorRulesPath == null ?
-                    other.extractorRulesPath == null :
-                    extractorRulesPath.equals(other.extractorRulesPath))
+                && (Objects.equals(taggerRulesPath, other.taggerRulesPath))
+                && (Objects.equals(parserRulesPath, other.parserRulesPath))
+                && (Objects.equals(extractorRulesPath, other.extractorRulesPath))
                 && taggerThreshold == other.taggerThreshold
                 && parserThreshold == other.parserThreshold;
         }

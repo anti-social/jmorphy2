@@ -16,7 +16,7 @@ import company.evo.jmorphy2.SuffixesDAWG;
 
 public class KnownSuffixUnit extends AnalyzerUnit {
     private final Dictionary dict;
-    private Map<Character,String> charSubstitutes;
+    private final Map<Character,String> charSubstitutes;
     private final int minWordLength;
     private final int maxSuffixLength;
 
@@ -38,7 +38,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
         private static final int DEFAULT_MAX_SUFFIX_LENGTH = 5;
         private static final int DEFAULT_MIN_WORD_LENGTH = 4;
 
-        private Dictionary.Builder dictBuilder;
+        private final Dictionary.Builder dictBuilder;
         private Map<Character,String> charSubstitutes;
         private int minWordLength = DEFAULT_MIN_WORD_LENGTH;
         private int maxSuffixLength = DEFAULT_MAX_SUFFIX_LENGTH;
@@ -81,7 +81,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
     }
 
     @Override
-    public List<ParsedWord> parse(String word, String wordLower) throws IOException {
+    public List<ParsedWord> parse(String word, String wordLower) {
         int wordLen = wordLower.length();
         if (wordLen < minWordLength) {
             return null;
@@ -167,7 +167,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
         }
     }
 
-    class ParsedWordWithPrefixId {
+    private static class ParsedWordWithPrefixId {
         public final ParsedWord parsedWord;
         public final int prefixId;
 

@@ -1,7 +1,7 @@
 package company.evo.jmorphy2.units;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import company.evo.jmorphy2.ParsedWord;
@@ -43,7 +43,7 @@ public abstract class AnalyzerUnit {
         return terminate;
     }
 
-    public abstract List<ParsedWord> parse(String word, String wordLower) throws IOException;
+    public abstract List<ParsedWord> parse(String word, String wordLower);
 
     class AnalyzerParsedWord extends ParsedWord {
         public AnalyzerParsedWord(String word, Tag tag, String normalForm, String foundWord, float score) {
@@ -57,13 +57,15 @@ public abstract class AnalyzerUnit {
 
         @Override
         public List<ParsedWord> getLexeme() {
-            return Arrays.asList((ParsedWord) this);
+            return Collections.singletonList(this);
         }
 
         @Override
         public String toString() {
-            return String.format("<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>",
-                                 word, tag, normalForm, foundWord, score, AnalyzerUnit.this.getClass());
+            return String.format(
+                "<ParsedWord: \"%s\", \"%s\", \"%s\", \"%s\", %.6f, %s>",
+                word, tag, normalForm, foundWord, score, AnalyzerUnit.this.getClass()
+            );
         }
     }
 }
