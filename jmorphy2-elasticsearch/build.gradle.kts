@@ -55,7 +55,7 @@ dependencies {
 tasks.register<Copy>("generateShadowClasses") {
     configurations.named("shadow").get()
         .forEach { artifact ->
-            val depName = artifact.nameWithoutExtension
+            val depName = artifact.nameWithoutExtension.substringBeforeLast('-')
             from(zipTree(artifact)) {
                 exclude("module-info.class")
                 this.eachFile {
