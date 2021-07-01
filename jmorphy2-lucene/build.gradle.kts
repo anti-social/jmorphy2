@@ -1,5 +1,7 @@
 description = "Stemmer and tagger based on jmorphy2 for Lucene"
 
+version = getLibraryVersion()
+
 dependencies {
     implementation("org.apache.lucene:lucene-core:${project.getLuceneVersion()}")
     implementation("org.apache.lucene:lucene-analyzers-common:${project.getLuceneVersion()}")

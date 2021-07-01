@@ -1,5 +1,7 @@
 description = "NLP based on pymorphy2 dictionaries"
 
+version = getLibraryVersion()
+
 dependencies {
     api(project(":jmorphy2-core"))
 

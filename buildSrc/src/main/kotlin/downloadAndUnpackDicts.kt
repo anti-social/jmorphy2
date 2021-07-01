@@ -74,9 +74,6 @@ abstract class Pymorphy2Dicts : DefaultTask() {
                 }
             }
             println("Unpacked dicts archive into $dictsDataDir")
-
-            // Store pymorhpy2 dictionary version
-            baseDictsDir.resolve("version.txt").writeText(version.get())
         } finally {
             dictsArchive.delete()
         }

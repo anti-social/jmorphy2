@@ -1,5 +1,7 @@
 description = "Java port of pymorphy2"
 
+version = getLibraryVersion()
+
 dependencies {
     implementation("commons-io:commons-io:${Versions.commonsIo}")
     implementation("org.noggit:noggit:${Versions.noggit}")
@@ -10,6 +12,7 @@ dependencies {
     testImplementation(project(":jmorphy2-dicts-ru"))
     testImplementation(project(":jmorphy2-dicts-uk"))
 }
+
 tasks.withType<Test> {
     exclude("**/*Benchmark*")
     outputs.upToDateWhen { false }
