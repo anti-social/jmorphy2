@@ -42,6 +42,8 @@ object Versions {
 
     val junit = "4.11"
 
+    val jmhGradlePlugin = "0.6.5"
+
     val esLuceneVersions = mapOf(
         EsVersion(6, 6) to "7.6.0",
         EsVersion(6, 7) to "7.7.0",
