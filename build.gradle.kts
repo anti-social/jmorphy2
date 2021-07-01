@@ -1,9 +1,5 @@
 group = "company.evo.jmorphy2"
 
-plugins {
-    java
-}
-
 subprojects {
     apply(plugin="java-library")
 
