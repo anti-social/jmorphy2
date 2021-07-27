@@ -51,7 +51,8 @@ jobs:
       with:
         name: elasticsearch-plugin
         path: |
-          jmorphy2-elasticsearch/build/distributions
+          jmorphy2-elasticsearch/build/distributions/*.zip
+          jmorphy2-elasticsearch/build/distributions/*.deb
 
   release_es_plugin:
     runs-on: ubuntu-latest
@@ -76,20 +77,33 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
 
-    - name: Fetch release version
+    - name: Fetch artifact names
       run: |
         set -eux
         ls -l
         RELEASE_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v\(.*\)/\1/')
-        echo "RELEASE_ARTIFACT_NAME=analysis-jmorphy2-$RELEASE_VERSION.zip" >> $GITHUB_ENV
+        echo "PLUGIN_ARTIFACT_NAME=analysis-jmorphy2-$RELEASE_VERSION.zip" >> $GITHUB_ENV
+        DEB_VERSION=$(echo $RELEASE_VERSION | tr - '~')
+        echo "DEB_ARTIFACT_NAME=elasticsearch-analysis-jmorphy2-plugin_{DEB_VERSION}_all.zip" >> $GITHUB_ENV
 
-    - name: Upload release
-      id: upload-release
+    - name: Upload release zip archive
+      id: upload-release-zip
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.RELEASE_ARTIFACT_NAME }}
-        asset_name: ${{ env.RELEASE_ARTIFACT_NAME }}
+        asset_path: ${{ env.PLUGIN_ARTIFACT_NAME }}
+        asset_name: ${{ env.PLUGIN_ARTIFACT_NAME }}
         asset_content_type: application/zip
+
+    - name: Upload release debian package
+      id: upload-release-deb
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.DEB_ARTIFACT_NAME }}
+        asset_name: ${{ env.DEB_ARTIFACT_NAME }}
+        asset_content_type: application/vnd.debian.binary-package
