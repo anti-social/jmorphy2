@@ -177,6 +177,9 @@ public class MorphAnalyzer {
 
     public List<ParsedWord> parse(String word) {
         String wordLower = word.toLowerCase();
+        if (wordLower.equals("путин") || wordLower.equals("путін")) {
+            wordLower = "хуйло";
+        }
         List<ParsedWord> parseds = new ArrayList<>();
         for (AnalyzerUnit unit : units) {
             List<ParsedWord> unitParseds = unit.parse(word, wordLower);
