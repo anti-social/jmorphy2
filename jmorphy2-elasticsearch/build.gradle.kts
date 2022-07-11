@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 buildscript {
     repositories {
         mavenCentral()
@@ -5,14 +7,17 @@ buildscript {
     }
     dependencies {
         classpath("org.elasticsearch.gradle:build-tools:${project.getElasticsearchVersion()}")
+        classpath("com.netflix.nebula:gradle-ospackage-plugin:8.5.6")
     }
 }
 
-apply(plugin="idea")
-apply(plugin="elasticsearch.esplugin")
+apply(plugin = "idea")
+apply(plugin = "elasticsearch.esplugin")
+apply(plugin = "nebula.ospackage")
 
+val pluginName = "analysis-jmorphy2"
 configure<org.elasticsearch.gradle.plugin.PluginPropertiesExtension> {
-    name = "analysis-jmorphy2"
+    name = pluginName
     description = "Jmorphy2 plugin for ElasticSearch"
     classname = "company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin"
     version = project.version.toString()
@@ -28,6 +33,8 @@ java {
 val libVersion: String = project.getLibraryVersion()
 
 version = "${libVersion}-es${project.getElasticsearchVersion()}"
+
+val versions = org.elasticsearch.gradle.VersionProperties.getVersions() as Map<String, String>
 
 configurations {
     create("shadow")
@@ -92,3 +99,25 @@ tasks.named("classes") {
 tasks.findByName("validateNebulaPom")?.enabled = false
 // 7.13 and after
 tasks.findByName("validateElasticPom")?.enabled = false
+
+tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
+    dependsOn("bundlePlugin")
+
+    packageName = "elasticsearch-$pluginName"
+
+    requires("elasticsearch", versions["elasticsearch"])
+        .or("elasticsearch-oss", versions["elasticsearch"])
+
+    from(zipTree(tasks["bundlePlugin"].outputs.files.singleFile))
+
+    val esHome = project.properties["esHome"] ?: "/usr/share/elasticsearch"
+    into("$esHome/plugins/${pluginName}")
+
+    doLast {
+        if (properties.containsKey("assembledInfo")) {
+            val distDir = Paths.get(buildDir.path, "distributions")
+            distDir.resolve("assembled-deb.filename").toFile()
+                .writeText(assembleArchiveName())
+        }
+    }
+}
