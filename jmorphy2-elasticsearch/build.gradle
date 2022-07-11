@@ -10,15 +10,18 @@ buildscript {
     dependencies {
         classpath "org.elasticsearch.gradle:build-tools:${elasticsearchVersion}"
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:8.5.6'
     }
 }
 
 apply plugin: 'idea'
 apply plugin: 'elasticsearch.esplugin'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'nebula.ospackage'
 
+def pluginName = 'analysis-jmorphy2'
 esplugin {
-    name = 'analysis-jmorphy2'
+    name = pluginName
     description 'Jmorphy2 plugin for ElasticSearch'
     classname = 'company.evo.jmorphy2.elasticsearch.plugin.AnalysisJmorphy2Plugin'
     licenseFile project.file('LICENSE.txt')
@@ -56,6 +59,29 @@ thirdPartyAudit.enabled = false
 
 // TODO: write integration tests
 integTest.enabled = false
+
+tasks.register("deb", Deb) {
+    dependsOn("bundlePlugin")
+
+    packageName = "elasticsearch-$pluginName"
+
+    requires("elasticsearch", versions["elasticsearch"])
+        .or("elasticsearch-oss", versions["elasticsearch"])
+
+    from(zipTree(tasks["bundlePlugin"].outputs.files.singleFile))
+
+    def esHome = project.properties.getOrDefault("esHome", "/usr/share/elasticsearch")
+    into("$esHome/plugins/${pluginName}")
+
+    doLast {
+        if (properties.containsKey("assembledInfo")) {
+            val distDir = Paths.get(buildDir.path, "distributions")
+            distDir.resolve("assembled-deb.filename").toFile()
+                .writeText(assembleArchiveName())
+        }
+    }
+}
+
 
 bintray {
     user = project.hasProperty("bintrayUser") ?
