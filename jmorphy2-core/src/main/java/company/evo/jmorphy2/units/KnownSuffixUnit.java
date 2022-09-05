@@ -84,7 +84,7 @@ public class KnownSuffixUnit extends AnalyzerUnit {
     public List<ParsedWord> parse(String word, String wordLower) {
         int wordLen = wordLower.length();
         if (wordLen < minWordLength) {
-            return null;
+            return List.of();
         }
 
         List<ParsedWordWithPrefixId> parseds = new ArrayList<>();

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 
 @RunWith(JUnit4.class)
@@ -143,9 +144,9 @@ public class MorphAnalyzerRUTest {
 
     @Test
     public void test_normalForms() throws IOException {
-        assertEquals(Arrays.asList("красивый"), morph.normalForms("красивого"));
-        assertEquals(Arrays.asList("для", "длить"), morph.normalForms("для"));
-        assertEquals(Arrays.asList("лошарик", "лошарика"), morph.normalForms("лошарикам"));
+        assertEquals(Set.of("красивый"), morph.normalForms("красивого"));
+        assertEquals(Set.of("для", "длить"), morph.normalForms("для"));
+        assertEquals(Set.of("лошарик", "лошарика"), morph.normalForms("лошарикам"));
     }
 
     @Test
@@ -277,7 +278,7 @@ public class MorphAnalyzerRUTest {
         }
     }
 
-    class ParsedWordMock extends ParsedWord {
+    static class ParsedWordMock extends ParsedWord {
         public ParsedWordMock(String word, Tag tag, String normalForm, String foundWord, float score) {
             super(word, tag, normalForm, foundWord, score);
         }

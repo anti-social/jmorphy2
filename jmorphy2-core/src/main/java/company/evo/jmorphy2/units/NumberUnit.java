@@ -48,6 +48,6 @@ public class NumberUnit extends AnalyzerUnit {
             parseds.add(new AnalyzerParsedWord(word, tag, word, word, score));
             return parseds;
         }
-        return null;
+        return List.of();
     }
 }

@@ -25,6 +25,6 @@ public class RegexUnit extends AnalyzerUnit {
             parseds.add(new AnalyzerParsedWord(word, tagStorage.getTag(tagString), word, word, score));
             return parseds;
         }
-        return null;
+        return List.of();
     }
 }

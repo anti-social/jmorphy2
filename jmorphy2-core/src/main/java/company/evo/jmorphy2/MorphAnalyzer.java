@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import company.evo.jmorphy2.units.*;
 
@@ -140,19 +141,23 @@ public class MorphAnalyzer {
         return tagStorage.getAllTags();
     }
 
-    public List<String> normalForms(char[] buffer, int offset, int count) {
+    public Set<String> normalForms(char[] buffer, int offset, int count) {
         return normalForms(new String(buffer, offset, count));
     }
 
-    public List<String> normalForms(String word) {
-        List<ParsedWord> parseds = parse(word);
-        List<String> normalForms = new ArrayList<>();
-        Set<String> uniqueNormalForms = new HashSet<>();
+    public Set<String> normalForms(String word) {
+        Set<String> normalForms = new HashSet<>();
 
-        for (ParsedWord p : parseds) {
-            if (!uniqueNormalForms.contains(p.normalForm)) {
-                normalForms.add(p.normalForm);
-                uniqueNormalForms.add(p.normalForm);
+        var preparedWord = preprocessWord(word);
+        for (AnalyzerUnit unit : units) {
+            normalForms.addAll(
+                unit.parse(word, preparedWord).stream()
+                    .map(w -> w.normalForm)
+                    .collect(Collectors.toList())
+            );
+
+            if (unit.isTerminated() && !normalForms.isEmpty()) {
+                break;
             }
         }
         return normalForms;
@@ -176,18 +181,12 @@ public class MorphAnalyzer {
     }
 
     public List<ParsedWord> parse(String word) {
-        String wordLower = word.toLowerCase();
-        if (wordLower.equals("путин") || wordLower.equals("путін")) {
-            wordLower = "хуйло";
-        }
+        var preparedWord = preprocessWord(word);
         List<ParsedWord> parseds = new ArrayList<>();
         for (AnalyzerUnit unit : units) {
-            List<ParsedWord> unitParseds = unit.parse(word, wordLower);
-            if (unitParseds == null) {
-                continue;
-            }
-
+            List<ParsedWord> unitParseds = unit.parse(word, preparedWord);
             parseds.addAll(unitParseds);
+
             if (unit.isTerminated() && !parseds.isEmpty()) {
                 break;
             }
@@ -197,6 +196,14 @@ public class MorphAnalyzer {
         parseds = estimate(parseds);
         parseds.sort(Collections.reverseOrder());
         return parseds;
+    }
+
+    private String preprocessWord(String word) {
+        String wordLower = word.toLowerCase();
+        if (wordLower.equals("путин") || wordLower.equals("путін")) {
+            wordLower = "хуйло";
+        }
+        return wordLower;
     }
 
     private List<ParsedWord> estimate(List<ParsedWord> parseds) {
