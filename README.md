@@ -14,48 +14,39 @@ cd jmorphy2
 
 Compile project, build jars and run tests:
 
-Build with [vagga](http://vagga.readthedocs.io/en/latest/installation.html#ubuntu)
-(no java and gradle needed):
-
-```sh
-vagga build
-```
-
-
 ```
 ./gradlew build
 ```
-
-To see all available vagga commands just type ``vagga``
-
 
 ## Elasticsearch plugin
 
 ### Plugin installation
 
-```sh
+- From a debian package:
+
+```shell
+curl -SLO https://github.com/anti-social/jmorphy2/releases/download/v0.2.3-es7.14.2/elasticsearch-analysis-jmorphy2-plugin_0.2.3-es7.14.2_all.deb
+dpkg -i elasticsearch-analysis-jmorphy2-plugin_0.2.3-es7.14.2_all.deb
+```
+
+- Using `elasticsearch-plugin` command:
+```shell
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
-${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.2-es7.13.2/analysis-jmorphy2-0.2.2-es7.13.2.zip"
+${es_home}/bin/elasticsearch-plugin install "https://github.com/anti-social/jmorphy2/releases/download/v0.2.3-es7.14.2/analysis-jmorphy2-0.2.3-es7.14.2.zip"
 ```
 
 ### Building plugin
 
-Default elasticsearch version against which plugin is built is `7.13.2`
+Default elasticsearch version against which plugin is built is `7.14.2`
 
 To build for specific elastisearch version run build as:
 
-```sh
-vagga assemble -PesVersion=6.7.1
+```shell
+./gradlew assemble -PesVersion=7.13.4
 ```
 
-Or:
-
-```sh
-./gradlew assemble -PesVersion=6.7.1
-```
-
-Supported elasticsearch versions: `6.6.x`, `6.7.x`, `6.8.x`, `7.0.x`, `7.1.x`, `7.2.x`, `7.3.x`, `7.4.x`, `7.5.x`, `7.6.x`, `7.7.x`, `7.8.x`, `7.9.x`, `7.10.x`, `7.11.x`, `7.12.x`, `7.13.x`
+Supported elasticsearch versions: `6.6.x`, `6.7.x`, `6.8.x`, `7.0.x`, `7.1.x`, `7.2.x`, `7.3.x`, `7.4.x`, `7.5.x`, `7.6.x`, `7.7.x`, `7.8.x`, `7.9.x`, `7.10.x`, `7.11.x`, `7.12.x`, `7.13.x`, `7.14.x`
 
 For older elasticsearch version use specific branches:
 
@@ -64,7 +55,7 @@ For older elasticsearch version use specific branches:
 
 And install assembled plugin:
 
-```sh
+```shell
 # Specify correct path of your Elasticsearch installation
 export es_home=/usr/share/elasticsearch
 sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/build/distributions/analysis-jmorphy2-0.2.2-SNAPSHOT-es7.13.2.zip
@@ -73,14 +64,14 @@ sudo ${es_home}/bin/elasticsearch-plugin install file:jmorphy2-elasticsearch/bui
 Or just run elasticsearch inside the container 
 (only works for plugin built for default Elasticsearch version):
 
-```sh
+```shell
 # build container and run elasticsearch with jmorphy2 plugin
 vagga elastic
 ```
 
 Using podman or docker:
 
-```sh
+```shell
 podman build -t elasticsearch-jmorphy2 -f Dockerfile.elasticsearch .github
 podman run --name elasticsearch-jmorphy2 -p 9200:9200 -e "ES_JAVA_OPTS=-Xmx1g" -e "discovery.type=single-node" elasticsearch-jmorphy2
 ```
@@ -90,7 +81,7 @@ podman run --name elasticsearch-jmorphy2 -p 9200:9200 -e "ES_JAVA_OPTS=-Xmx1g" -
 Create index with specific analyzer and test it:
 
 
-```sh
+```shell
 curl -X PUT -H 'Content-Type: application/yaml' 'localhost:9200/test_index' -d '---
 settings:
   index:
@@ -128,6 +119,10 @@ text: Привет, лошарики!
 curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
 analyzer: text_ru
 text: ёж еж ежики
+'
+curl -X GET -H 'Content-Type: application/yaml' 'localhost:9200/test_index/_analyze' -d '---
+analyzer: text_ru
+text: путин
 '
 
 # Test ukrainian analyzer

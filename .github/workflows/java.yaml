@@ -84,7 +84,8 @@ jobs:
         RELEASE_VERSION=$(echo $GITHUB_REF | sed 's/refs\/tags\/v\(.*\)/\1/')
         echo "RELEASE_ARTIFACT_NAME=analysis-jmorphy2-${RELEASE_VERSION}.zip" >> $GITHUB_ENV
         DEB_VERSION=$(echo $RELEASE_VERSION | tr - '~')
-        echo "DEB_ARTIFACT_NAME=elasticsearch-analysis-jmorphy2-plugin_${DEB_VERSION}_all.deb" >> $GITHUB_ENV
+        mv elasticsearch-analysis-jmorphy2-plugin_${DEB_VERSION}_all.deb elasticsearch-analysis-jmorphy2-plugin_${RELEASE_VERSION}_all.deb 
+        echo "DEB_ARTIFACT_NAME=elasticsearch-analysis-jmorphy2-plugin_${RELEASE_VERSION}_all.deb" >> $GITHUB_ENV
 
     - name: Upload release
       id: upload-release
