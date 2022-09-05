@@ -20,15 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
-import org.elasticsearch.common.io.PathUtils;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 
 class Utils {
     static void copyFilesFromResources(Settings settings, String lang) throws IOException {
-        Path confPath = PathUtils.get(settings.get(Environment.PATH_HOME_SETTING.getKey())).resolve("config");
+        Path confPath = Paths.get(settings.get(Environment.PATH_HOME_SETTING.getKey())).resolve("config");
         Path jmorphy2Path = confPath.resolve("jmorphy2").resolve(lang);
         Path pymorphy2DictsPath = jmorphy2Path.resolve("pymorphy2_dicts");
         Files.createDirectories(pymorphy2DictsPath);

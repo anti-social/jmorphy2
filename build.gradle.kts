@@ -14,8 +14,7 @@ subprojects {
     }
 
     configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(Versions.java.majorVersion))
-        }
+        sourceCompatibility = Versions.java
+        targetCompatibility = Versions.java
     }
 }

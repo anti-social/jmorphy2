@@ -61,7 +61,8 @@ object Versions {
         EsVersion(7, 10) to "8.7.0",
         EsVersion(7, 11) to "8.7.0",
         EsVersion(7, 12) to "8.8.0",
-        EsVersion(7, 13) to "8.8.2"
+        EsVersion(7, 13) to "8.8.2",
+        EsVersion(7, 14) to "8.9.0",
     )
 }
 

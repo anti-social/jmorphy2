@@ -53,6 +53,8 @@ dependencies {
     implementation(project(":jmorphy2-dicts-ru"))
     implementation(project(":jmorphy2-dicts-uk"))
 
+    testImplementation("org.apache.logging.log4j:log4j-core:${versions["log4j"]}")
+
     add("shadow", "com.github.ben-manes.caffeine:caffeine:${Versions.caffeine}")
     add("shadowClasses", files(shadowClassesDir) {
         builtBy("generateShadowClasses")
