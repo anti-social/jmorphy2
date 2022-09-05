@@ -35,7 +35,7 @@ import static company.evo.jmorphy2.lucene.Jmorphy2StemFilterFactory.parseTags;
 
 
 public class Jmorphy2StemTokenFilterFactory extends AbstractTokenFilterFactory {
-    public static final int DEFAULT_CACHE_SIZE = 10000;
+    public static final int DEFAULT_CACHE_SIZE = 0;
 
     private final MorphAnalyzer morph;
 

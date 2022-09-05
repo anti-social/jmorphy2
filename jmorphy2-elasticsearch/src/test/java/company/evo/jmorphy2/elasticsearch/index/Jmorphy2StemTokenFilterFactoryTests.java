@@ -81,4 +81,33 @@ public class Jmorphy2StemTokenFilterFactoryTests extends ESTestCase {
                          new String[]{"любим", "любимый", "любить", "украина"},
                          new int[]{2, 0, 0, 1, 0});
     }
+
+    public void testJmorphy2StemTokenFilterWithCache() throws IOException {
+        Path home = createTempDir();
+        Settings settings = Settings.builder()
+            .put(Environment.PATH_HOME_SETTING.getKey(), home.toString())
+            .put("index.analysis.filter.jmorphy2.type", "jmorphy2_stemmer")
+            .put("index.analysis.filter.jmorphy2.name", "ru")
+            .put("index.analysis.filter.jmorphy2.exclude_tags", "NPRO PREP CONJ PRCL INTJ")
+            .put("index.analysis.filter.jmorphy2.cache_size", "10000")
+            .put("index.analysis.analyzer.text.tokenizer", "standard")
+            .put("index.analysis.analyzer.text.filter", "jmorphy2")
+            .build();
+
+        AnalysisJmorphy2Plugin plugin = new AnalysisJmorphy2Plugin(settings, home.resolve("config"));
+        TestAnalysis analysis = createTestAnalysis
+            (new Index("test", "_na_"), settings, plugin);
+        assertThat(analysis.tokenFilter.get("jmorphy2"),
+            instanceOf(Jmorphy2StemTokenFilterFactory.class));
+
+        Analyzer analyzer = analysis.indexAnalyzers.get("text").analyzer();
+        assertAnalyzesTo(analyzer,
+            "",
+            new String[0],
+            new int[0]);
+        assertAnalyzesTo(analyzer,
+            "тест стеммера",
+            new String[]{"тест", "тесто", "стеммера", "стеммер"},
+            new int[]{1, 0, 1, 0});
+    }
 }
