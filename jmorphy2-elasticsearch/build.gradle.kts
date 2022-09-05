@@ -123,3 +123,4 @@ tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
         }
     }
 }
+tasks.getByName("assemble").dependsOn("deb")
