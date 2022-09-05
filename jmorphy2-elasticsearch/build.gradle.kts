@@ -103,7 +103,7 @@ tasks.findByName("validateElasticPom")?.enabled = false
 tasks.register("deb", com.netflix.gradle.plugins.deb.Deb::class) {
     dependsOn("bundlePlugin")
 
-    packageName = "elasticsearch-$pluginName"
+    packageName = "elasticsearch-$pluginName-plugin"
 
     requires("elasticsearch", versions["elasticsearch"])
         .or("elasticsearch-oss", versions["elasticsearch"])
